@@ -1,0 +1,287 @@
+/* 메인 컨테이너 */
+.app-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #0D1B2A;
+  min-height: 100vh;
+}
+
+/* 헤더 영역 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: #1B3A4B;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #E8F4FD;
+}
+
+.logo-icon {
+  width: 28px;
+  height: 28px;
+  color: #5BA3B5;
+}
+
+.tab-menu {
+  display: flex;
+  gap: 10px;
+}
+
+.tab-button {
+  padding: 10px 25px;
+  border: none;
+  border-radius: 6px;
+  background-color: #1B3A4B;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #A0C4D8;
+  transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+  background-color: #2E5A6B;
+  color: #E8F4FD;
+}
+
+.tab-button.active {
+  background-color: #3D7A8C;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+/* 설정 바 영역 */
+.settings-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 40px;
+}
+
+.name-input {
+  padding: 10px 15px;
+  border: 2px solid #3D7A8C;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  width: 140px;
+  outline: none;
+  background-color: #1B3A4B;
+  color: #E8F4FD;
+  transition: border-color 0.2s ease;
+}
+
+.name-input::placeholder {
+  color: #6B9AAD;
+}
+
+.name-input:focus {
+  border-color: #5BA3B5;
+  background-color: #2E5A6B;
+}
+
+.select-button {
+  padding: 10px 20px;
+  border: 2px solid #3D7A8C;
+  border-radius: 20px;
+  background-color: #1B3A4B;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #E8F4FD;
+  transition: all 0.2s ease;
+}
+
+.select-button:hover {
+  background-color: #2E5A6B;
+  border-color: #5BA3B5;
+}
+
+.radio-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.radio-group-label {
+  font-weight: 600;
+  margin-right: 5px;
+  color: #A0C4D8;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.radio-option input[type="radio"] {
+  accent-color: #5BA3B5;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.radio-option label {
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #E8F4FD;
+}
+
+/* 문제 영역 */
+.quiz-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 0;
+}
+
+.question-word {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin-bottom: 35px;
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: #5BA3B5;
+  text-underline-offset: 10px;
+}
+
+/* 입력 영역 */
+.answer-input-container {
+  width: 100%;
+  max-width: 550px;
+  margin-bottom: 25px;
+}
+
+.answer-input {
+  width: 100%;
+  padding: 18px 25px;
+  border: 2px solid #3D7A8C;
+  border-radius: 30px;
+  font-size: 1.3rem;
+  text-align: center;
+  outline: none;
+  background-color: #1B3A4B;
+  color: #E8F4FD;
+  transition: all 0.2s ease;
+}
+
+.answer-input::placeholder {
+  color: #6B9AAD;
+}
+
+.answer-input:focus {
+  border-color: #5BA3B5;
+  background-color: #2E5A6B;
+}
+
+.answer-input.correct {
+  border-color: #4ADE80;
+  background-color: #134E3A;
+  color: #A7F3D0;
+}
+
+.answer-input.incorrect {
+  border-color: #F87171;
+  background-color: #4C1D1D;
+  color: #FCA5A5;
+}
+
+/* 하단 버튼 영역 */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.action-button {
+  padding: 12px 25px;
+  border: 2px solid #3D7A8C;
+  border-radius: 25px;
+  background-color: #1B3A4B;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #E8F4FD;
+  transition: all 0.2s ease;
+}
+
+.action-button:hover {
+  background-color: #2E5A6B;
+  border-color: #5BA3B5;
+}
+
+.action-button.primary {
+  background-color: #3D7A8C;
+  border-color: #5BA3B5;
+}
+
+.action-button.primary:hover {
+  background-color: #4D8A9C;
+}
+
+/* 피드백 메시지 */
+.feedback {
+  text-align: center;
+  padding: 12px 20px;
+  margin-top: 15px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.feedback.correct {
+  color: #A7F3D0;
+  background-color: #134E3A;
+  border: 1px solid #4ADE80;
+}
+
+.feedback.incorrect {
+  color: #FCA5A5;
+  background-color: #4C1D1D;
+  border: 1px solid #F87171;
+}
+
+/* 진행 상황 표시 */
+.progress-info {
+  text-align: center;
+  margin-top: 20px;
+  color: #6B9AAD;
+  font-size: 0.95rem;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .settings-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .radio-group {
+    flex-wrap: wrap;
+  }
+
+  .question-word {
+    font-size: 1.8rem;
+  }
+
+  .answer-input {
+    font-size: 1.1rem;
+    padding: 15px 20px;
+  }
+}
