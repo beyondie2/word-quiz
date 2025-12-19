@@ -248,7 +248,6 @@ function App() {
               <input
                 type="text"
                 className={`answer-input ${feedback?.type || ''}`}
-                placeholder={getPlaceholder()}
                 value={userAnswer}
                 onChange={(e) => setUserAnswer(e.target.value)}
                 onKeyPress={handleKeyPress}
