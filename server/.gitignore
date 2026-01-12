@@ -1,0 +1,40 @@
+# 환경 변수 (민감 정보 포함)
+.env
+.env.local
+.env.*.local
+
+# 의존성 패키지
+node_modules/
+
+# 로그 파일
+logs/
+*.log
+npm-debug.log*
+
+# 런타임 데이터
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# 캐시
+.npm
+.eslintcache
+
+# 빌드 결과물
+dist/
+build/
+
+# 테스트 커버리지
+coverage/
+
+# IDE 및 에디터 설정
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS 생성 파일
+.DS_Store
+Thumbs.db

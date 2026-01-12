@@ -3,10 +3,10 @@
 ### 1.1 프로젝트명
 영단어 외우기 앱
 ### 1.2 프로젝트 목적
-사용자가 주어진 영단어를 보고, 그 의미를 맞추게 하고, 관리자가 학습 과정을 관리할 수 있는 간단한 풀스택 웹 앱
+사용자가 주어진 단어를 보고, 그 의미를 맞추게 하고, 관리자가 학습 과정을 관리할 수 있는 간단한 풀스택 웹 앱
 ### 1.3 개발 범위
 - 단어 맞추기 화면(회원 확인 기능, 책 선택 기능, 장 선택 기능, 단어 맞추기 기능)
-- 수행 확인 화면(틀린 단어 확인)
+- 수행 확인 화면(틀린 답, 책, 단원, 오답, 학습모드, 한국어대답방법, 라운드, 단원전체 재학습 회차, 일시 등을 확인)
 - 데이터를 생성/조회/수정/삭제할 수 있는 기능
 ## 2. 기술 스택
 - 프런트엔드: HTML, CSS, 리액트, 자바스크립트
@@ -29,8 +29,8 @@
 | 영역 | 구성 요소 | 설명 |
 |------|----------|------|
 | 헤더 | 로고, 탭 메뉴 | 앱 타이틀과 화면 전환 탭 |
-| 설정 바 | 사용자 인증, 설정 버튼 및 옵션 | 사용자 확인 및 학습 조건 설정 |
-| 문제 영역 | 출제 단어 | 맞춰야 할 단어 표시 |
+| 설정 바 | 사용자 인증, 설정 버튼 및 옵션, 단원 선택 | 사용자 확인 및 학습 조건 설정 |
+| 문제 영역 | 출제 단어, 한국어 힌트 | 맞춰야 할 단어 표시 |
 | 입력 영역 | 텍스트 입력 필드 | 정답 입력 |
 | 하단 버튼 | 액션 버튼 | 학습 진행 제어 |
 
@@ -69,7 +69,7 @@
 
 | 요소 | 타입 | 설명 |
 |------|------|------|
-| 출제 단어 | 텍스트 | 화면 중앙에 크게 표시, 맞춰야 할 단어 |
+| 출제 단어 | 텍스트 | 화면 중앙에 크게 표시, 맞춰야 할 단어, 한국어 또는 영어로 표시 |
 
 **표시 규칙:**
 - 연습방법이 `영어`인 경우: 영어 단어 표시
@@ -150,7 +150,7 @@
 | 영역 | 구성 요소 | 설명 |
 |------|----------|------|
 | 헤더 | 로고, 탭 메뉴 | 앱 타이틀과 화면 전환 탭 |
-| 필터 영역 | 사용자 선택, 날짜 선택 | 조회 조건 설정 |
+| 필터 영역 | 사용자 선택, 일시 선택 | 조회 조건 설정 |
 | 콘텐츠 영역 | 수행 내용 목록 | 학습 수행 결과 표시 |
 
 #### 4.2.2 헤더 영역
@@ -159,7 +159,7 @@
 |------|------|------|
 | WORD TEST | 텍스트(로고) | 앱 타이틀, 좌측 배치 |
 | 단어 맞추기 | 탭 버튼 | 단어 맞추기 화면으로 이동 |
-| 수행 확인 | 탭 버튼 | 현재 화면 (활성 상태 시 초록색 테두리) |
+| 수행 확인 | 탭 버튼 | 수행내용과 정도를 확인하는 화면으로 이동 (활성 상태 시 초록색 테두리) |
 
 #### 4.2.3 필터 영역
 
@@ -231,3 +231,282 @@
 - 수행 내용 박스: 둥근 모서리, 테두리 스타일
 - 모바일 반응형 지원
 
+---
+
+## 5. 백엔드 명세
+
+### 5.1 데이터 모델
+
+#### 5.1.1 Users 테이블
+
+| 필드명 | 타입 | 설명 | 제약조건 |
+|--------|------|------|----------|
+| id | SERIAL | 고유 식별자 | PRIMARY KEY |
+| username | VARCHAR(100) | 사용자 이름 | NOT NULL, UNIQUE |
+| created_at | TIMESTAMP | 생성 일시 | DEFAULT NOW() |
+
+#### 5.1.2 Books 테이블
+
+| 필드명 | 타입 | 설명 | 제약조건 |
+|--------|------|------|----------|
+| id | SERIAL | 고유 식별자 | PRIMARY KEY |
+| book_name | VARCHAR(200) | 책 이름 | NOT NULL |
+| unit | VARCHAR(100) | 단원 | NOT NULL |
+| english | VARCHAR(500) | 영어 단어/표현 | NOT NULL |
+| korean | VARCHAR(500) | 한국어 뜻 | NOT NULL |
+| example | TEXT | 예문 | NULL 허용 |
+| created_at | TIMESTAMP | 생성 일시 | DEFAULT NOW() |
+
+#### 5.1.3 UserProgress 테이블 (사용자별 학습 기록)
+
+| 필드명 | 타입 | 설명 | 제약조건 |
+|--------|------|------|----------|
+| id | SERIAL | 고유 식별자 | PRIMARY KEY |
+| user_id | INTEGER | 사용자 ID | FOREIGN KEY → Users(id) |
+| book_name | VARCHAR(200) | 책 이름 | NOT NULL |
+| unit | VARCHAR(100) | 단원 | NOT NULL |
+| english | VARCHAR(500) | 영어 단어/표현 | NOT NULL |
+| korean | VARCHAR(500) | 한국어 뜻 | NOT NULL |
+| wrong_answer | VARCHAR(500) | 사용자가 입력한 오답 | NULL 허용 |
+| practice_mode | VARCHAR(20) | 학습 모드 ('korean' 또는 'english') | NOT NULL |
+| korean_answer_type | VARCHAR(20) | 한국어 대답 방법 ('one' 또는 'all') | NOT NULL |
+| round | INTEGER | 라운드 횟수 | DEFAULT 1 |
+| unit_review_count | INTEGER | 단원 재학습 횟수 | DEFAULT 0 |
+| is_correct | BOOLEAN | 정답 여부 | NOT NULL |
+| created_at | TIMESTAMP | 학습 일시 | DEFAULT NOW() |
+
+### 5.2 데이터 스키마를 위한 사용자 흐름
+
+```
+① 사용자가 자기 이름을 입력하면
+   → 책 선택 select가 활성화됨
+   → username input은 보이지 않게 됨
+   ↓
+② 사용자는 "단어장선택" select에서 단어장을 선택함
+   ↓
+③ 사용자는 연습방법 radio group에서 선택
+   - 한국어를 보고 영어로 답할지
+   - 영어를 보고 한국어로 답할지
+   ↓
+④ 사용자는 한국어답 radio group에서 선택
+   - 한국어 단어 하나만 써서 답할지
+   - 여러 표현 전부를 써서 답할지
+   ↓
+⑤ 사용자는 부분단원 select에서 단원을 선택
+   → 앱은 한국어 또는 영어로 된 단어를 보여줌
+   ↓
+⑥ 사용자는 주어진 단어를 보고 입력상자에 정답을 입력함
+   ↓
+⑦ 정답 확인
+   - 맞으면: 다음 단어로 넘어감
+   - 틀리면: modal로 정답을 보여줌
+   ↓
+⑧ 정해진 개수의 단어를 다 했으면
+   → "틀린 것만 다시하기" 버튼을 보여줌
+   ↓
+⑨ 사용자가 "틀린 것만 다시하기" 버튼을 클릭하면
+   → 틀린 단어의 목록 중 첫번째 것을 보여줌 (반복)
+   ↓
+⑩ "틀린 것만 다시하기"를 누를 때마다
+   → round 횟수를 증가시켜 round 횟수를 알려줌
+   ↓
+⑪ 틀린 것이 없으면
+   → 성공 메시지를 보여주고 return 함
+```
+
+### 5.3 API 설계
+
+#### 5.3.1 사용자 인증 API
+
+**POST /api/users/verify**
+
+사용자 이름을 확인하고 책 목록을 반환합니다.
+
+| 항목 | 내용 |
+|------|------|
+| 요청 본문 | `{ "username": "사용자이름" }` |
+| 성공 응답 | `{ "success": true, "userId": 1, "books": ["책1", "책2", ...] }` |
+| 실패 응답 | `{ "success": false, "message": "등록되지 않은 사용자입니다" }` |
+
+**동작:**
+- 데이터베이스 Users 테이블에서 이름 목록과 대조
+- 이름이 있으면 Books 테이블의 고유한 book_name 목록을 반환
+
+---
+
+#### 5.3.2 단원 목록 API
+
+**GET /api/books/:bookName/units**
+
+선택한 책의 단원 목록을 반환합니다.
+
+| 항목 | 내용 |
+|------|------|
+| URL 파라미터 | `bookName` - 책 이름 |
+| 성공 응답 | `{ "units": ["Unit 1", "Unit 2", ...] }` |
+
+**동작:**
+- Books 테이블에서 해당 책의 고유한 unit 값들을 반환
+
+---
+
+#### 5.3.3 단어 목록 API
+
+**GET /api/books/:bookName/units/:unit/words**
+
+선택한 책과 단원의 단어 목록을 반환합니다.
+
+| 항목 | 내용 |
+|------|------|
+| URL 파라미터 | `bookName` - 책 이름, `unit` - 단원 |
+| 성공 응답 | `{ "words": [{ "id": 1, "english": "apple", "korean": "사과", "example": "I eat an apple" }, ...] }` |
+
+**동작:**
+- Books 테이블에서 해당 책, 단원의 모든 단어를 반환
+- 첫 번째 단어부터 순서대로 학습 시작
+
+---
+
+#### 5.3.4 정답 확인 API
+
+**POST /api/quiz/check**
+
+사용자의 답을 확인하고 결과를 반환합니다.
+
+| 항목 | 내용 |
+|------|------|
+| 요청 본문 | `{ "userId": 1, "wordId": 1, "userAnswer": "사과", "practiceMode": "english", "koreanAnswerType": "one", "bookName": "책이름", "unit": "Unit 1", "round": 1, "unitReviewCount": 0 }` |
+| 정답 응답 | `{ "correct": true, "nextWord": { ... } }` |
+| 오답 응답 | `{ "correct": false, "correctAnswer": "사과, 능금", "nextWord": { ... } }` |
+
+**동작:**
+- practiceMode가 'english'면 사용자가 한국어를 입력함 → korean 필드와 비교
+- practiceMode가 'korean'면 사용자가 영어를 입력함 → english 필드와 비교
+- koreanAnswerType이 'one'면 쉼표로 구분된 한국어 중 하나만 맞아도 정답
+- koreanAnswerType이 'all'면 모든 한국어 표현을 입력해야 정답
+- UserProgress 테이블에 학습 기록 저장 (맞음/틀림 모두 기록)
+
+---
+
+#### 5.3.5 학습 기록 저장 API
+
+**POST /api/progress**
+
+사용자의 학습 수행 정보를 기록합니다.
+
+| 항목 | 내용 |
+|------|------|
+| 요청 본문 | `{ "userId": 1, "bookName": "책이름", "unit": "Unit 1", "english": "apple", "korean": "사과", "wrongAnswer": "오렌지", "practiceMode": "english", "koreanAnswerType": "one", "round": 1, "unitReviewCount": 0, "isCorrect": false }` |
+| 성공 응답 | `{ "success": true, "progressId": 1 }` |
+
+**동작:**
+- UserProgress 테이블에 모든 학습 정보 저장
+
+---
+
+#### 5.3.6 틀린 단어 목록 API
+
+**GET /api/progress/:userId/wrong-words**
+
+사용자의 틀린 단어 목록을 반환합니다.
+
+| 항목 | 내용 |
+|------|------|
+| URL 파라미터 | `userId` - 사용자 ID |
+| 쿼리 파라미터 | `bookName` - 책 이름, `unit` - 단원, `round` - 현재 라운드 |
+| 성공 응답 | `{ "wrongWords": [{ "id": 1, "english": "apple", "korean": "사과", "wrongAnswer": "오렌지" }, ...] }` |
+| 빈 목록 응답 | `{ "wrongWords": [], "message": "모든 단어를 맞추셨습니다!" }` |
+
+**동작:**
+- "틀린 것만 다시하기" 버튼 클릭 시 호출
+- 해당 사용자의 현재 라운드에서 틀린 단어 목록 반환
+- 틀린 단어가 없으면 성공 메시지와 함께 빈 배열 반환
+
+---
+
+#### 5.3.7 라운드 증가 API
+
+**POST /api/progress/:userId/next-round**
+
+"틀린 것만 다시하기" 클릭 시 라운드를 증가시킵니다.
+
+| 항목 | 내용 |
+|------|------|
+| URL 파라미터 | `userId` - 사용자 ID |
+| 요청 본문 | `{ "bookName": "책이름", "unit": "Unit 1" }` |
+| 성공 응답 | `{ "success": true, "newRound": 2 }` |
+
+**동작:**
+- 현재 라운드 번호를 1 증가시킴
+- 새로운 라운드 번호 반환
+
+---
+
+#### 5.3.8 수행 기록 조회 API
+
+**GET /api/progress**
+
+수행 확인 화면에서 사용하는 학습 기록 조회 API입니다.
+
+| 항목 | 내용 |
+|------|------|
+| 쿼리 파라미터 | `userId` - 사용자 ID (선택), `date` - 날짜 (선택, YYYY-MM-DD 형식) |
+| 성공 응답 | `{ "records": [{ "id": 1, "bookName": "책이름", "unit": "Unit 1", "totalWords": 20, "correctCount": 15, "wrongCount": 5, "accuracy": 75, "wrongWords": [...], "createdAt": "2026-01-12T10:30:00Z" }, ...] }` |
+
+**동작:**
+- 필터 조건에 맞는 학습 기록 반환
+- 정답률, 총 문제 수, 정답/오답 수 계산
+
+---
+
+#### 5.3.9 사용자 목록 API
+
+**GET /api/users**
+
+수행 확인 화면의 사용자 필터용 목록을 반환합니다.
+
+| 항목 | 내용 |
+|------|------|
+| 성공 응답 | `{ "users": [{ "id": 1, "username": "홍길동" }, ...] }` |
+
+### 5.4 API 흐름 요약
+
+```
+[사용자 이름 입력 + Enter]
+    ↓
+POST /api/users/verify
+    → 성공: 책 목록 반환, 책 select 활성화
+    → 실패: 에러 메시지 표시
+    ↓
+[단어장 선택]
+    ↓
+GET /api/books/:bookName/units
+    → 단원 목록 반환
+    ↓
+[연습방법 선택] - 클라이언트에서 처리
+    ↓
+[한국어답 선택] - 클라이언트에서 처리
+    ↓
+[단원 선택]
+    ↓
+GET /api/books/:bookName/units/:unit/words
+    → 단어 목록 반환, 첫 단어 표시
+    ↓
+[정답 입력]
+    ↓
+POST /api/quiz/check
+    → 정답: 다음 단어 표시
+    → 오답: modal로 정답 표시, 다음 단어 표시
+    ↓
+[단어 학습 완료]
+    → "틀린 것만 다시하기" 버튼 표시
+    ↓
+[틀린 것만 다시하기 클릭]
+    ↓
+POST /api/progress/:userId/next-round
+    → 라운드 증가
+    ↓
+GET /api/progress/:userId/wrong-words
+    → 틀린 단어 있음: 첫 번째 틀린 단어 표시
+    → 틀린 단어 없음: 성공 메시지 표시, 앱 종료
+```
