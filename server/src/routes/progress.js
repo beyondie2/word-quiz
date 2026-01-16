@@ -5,9 +5,21 @@ const router = express.Router();
 
 // GET /api/progress - 수행 기록 조회
 router.get('/', async (req, res) => {
-  const { userId, date } = req.query;
+  const { userId, date, requesterId } = req.query;
 
   try {
+    // 요청자의 관리자 여부 확인
+    let isAdmin = false;
+    if (requesterId) {
+      const adminCheck = await pool.query(
+        'SELECT is_admin FROM users WHERE id = $1',
+        [requesterId]
+      );
+      if (adminCheck.rows.length > 0) {
+        isAdmin = adminCheck.rows[0].is_admin || false;
+      }
+    }
+
     let query = `
       SELECT 
         up.id,
@@ -29,7 +41,12 @@ router.get('/', async (req, res) => {
     `;
     const params = [];
 
-    if (userId) {
+    // 관리자가 아닌 경우 본인 기록만 조회 가능
+    if (!isAdmin && requesterId) {
+      params.push(requesterId);
+      query += ` AND up.user_id = $${params.length}`;
+    } else if (userId) {
+      // 관리자인 경우 특정 사용자 필터링 가능
       params.push(userId);
       query += ` AND up.user_id = $${params.length}`;
     }

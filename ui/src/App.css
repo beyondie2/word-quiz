@@ -409,6 +409,15 @@
   outline: none;
 }
 
+.current-user-label,
+.user-filter-label {
+  padding: 10px 15px;
+  background-color: #0D2535;
+  border-radius: 8px;
+  color: #5BA3B5;
+  font-weight: 600;
+}
+
 .filter-select:focus,
 .filter-date:focus {
   background-color: #153045;

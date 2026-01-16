@@ -8,11 +8,16 @@
     "dev": "nodemon src/index.js",
     "start": "node src/index.js"
   },
-  "keywords": ["express", "word-quiz", "api"],
+  "keywords": [
+    "express",
+    "word-quiz",
+    "api"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "pg": "^8.13.0"

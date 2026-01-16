@@ -27,7 +27,7 @@ router.post('/verify', async (req, res) => {
   try {
     // 사용자 확인
     const userResult = await pool.query(
-      'SELECT id, username FROM users WHERE username = $1',
+      'SELECT id, username, is_admin FROM users WHERE username = $1',
       [username]
     );
 
@@ -48,6 +48,7 @@ router.post('/verify', async (req, res) => {
       success: true,
       userId: user.id,
       username: user.username,
+      isAdmin: user.is_admin || false,
       books
     });
   } catch (error) {

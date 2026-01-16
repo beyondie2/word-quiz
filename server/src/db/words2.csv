@@ -1,0 +1,2001 @@
+book_name,unit,english,korean,example
+워드마스터,chapter1,inform,"알리다, 통지하다",inform
+워드마스터,chapter1,advise,충고하다,advise
+워드마스터,chapter1,service,"봉사, 공공 업무, 서비스",service
+워드마스터,chapter1,provide,"공급하다, 준비하다",provide
+워드마스터,chapter1,relationship,관계,relationship
+워드마스터,chapter1,behave,(예의 바르게) 행동하다,behave
+워드마스터,chapter1,improve,"향상시키다, 향상하다",improve
+워드마스터,chapter1,individual,"개인, 개인의, 개인적인",individual
+워드마스터,chapter1,require,"필요로 하다, 요구하다",require
+워드마스터,chapter1,develop,"개발하다, 발달하다",develop
+워드마스터,chapter1,social,"사회의, 사교적인",social
+워드마스터,chapter1,amount,"총계, 양, 총계가~이 되다",amount
+워드마스터,chapter1,employ,"고용하다, 쓰다",employ
+워드마스터,chapter1,terrible,"무서운, 끔찍한",terrible
+워드마스터,chapter1,attitude,"태도, 입장",attitude
+워드마스터,chapter1,research,"연구, 연구하다, 조사하다",research
+워드마스터,chapter1,audience,"청중, 관객",audience
+워드마스터,chapter1,volunteer,"자원봉사, 자발적으로 ~하다",volunteer
+워드마스터,chapter1,influence,"영향, 영향을 끼치다",influence
+워드마스터,chapter1,international,"국제의, 국제적인",international
+워드마스터,chapter1,opportunity,기회,opportunity
+워드마스터,chapter1,ability,능력,ability
+워드마스터,chapter1,expense,"비용, 지출",expense
+워드마스터,chapter1,involve,"포함하다, 관련되다",involve
+워드마스터,chapter1,stress,"강조, 스트레스, 강조하다, 압력을 주다",stress
+워드마스터,chapter1,therefore,"그러므로, 그 결과",therefore
+워드마스터,chapter1,average,"평균, 평균의, 평균이 ~가 되다",average
+워드마스터,chapter1,ride,"(탈 것을) 타다, 태움",ride
+워드마스터,chapter1,local,"지방의, 지역의, 장소의",local
+워드마스터,chapter1,encourage,"촉구하다, 격려하다",encourage
+워드마스터,chapter2,determine,"결심하다, 결정하다",determine
+워드마스터,chapter2,comfort,"편안하게 하다, 위로하다, 편안, 위로",comfort
+워드마스터,chapter2,consume,소비하다,consume
+워드마스터,chapter2,object,"물체, 목표, 반대하다",object
+워드마스터,chapter2,impress,~에게 깊은 인상을 주다,impress
+워드마스터,chapter2,available,"이용 가능한, 쓸모 있는",available
+워드마스터,chapter2,contain,"함유하다, 포함하다, 억제하다",contain
+워드마스터,chapter2,recognize,"인지하다, 인정하다",recognize
+워드마스터,chapter2,material,"재료, 물질, 물질의",material
+워드마스터,chapter2,positive,"긍정적인, 확신하는",positive
+워드마스터,chapter2,emotion,감정,emotion
+워드마스터,chapter2,amaze,놀라게 하다,amaze
+워드마스터,chapter2,reduce,"줄이다, 낮추다",reduce
+워드마스터,chapter2,discover,발견하다,discover
+워드마스터,chapter2,essence,"(사물의) 본질, 정수",essence
+워드마스터,chapter2,benefit,"이익, 이익이 되다",benefit
+워드마스터,chapter2,affect,"~에 영향을 미치다, ~인 체 하다",affect
+워드마스터,chapter2,level,"수준, 수평, 수평의, 평탄하게 만들다",level
+워드마스터,chapter2,chemistry,"화학, 교감",chemistry
+워드마스터,chapter2,immediate,"직접의, 즉각적인",immediate
+워드마스터,chapter2,thus,"그러므로, 따라서",thus
+워드마스터,chapter2,proper,"적절한, 알맞은",proper
+워드마스터,chapter2,profession,"직업, 직종",profession
+워드마스터,chapter2,economic,"경제의, 경제학의",economic
+워드마스터,chapter2,cell,"세포, 작은 방, 독방",cell
+워드마스터,chapter2,focus,"초점, 집중하다",focus
+워드마스터,chapter2,issue,"논란거리, 발행, 발행물, 발행하다",issue
+워드마스터,chapter2,decide,"결심하다, 결정하다",decide
+워드마스터,chapter2,demand,"요구하다, 수요",demand
+워드마스터,chapter2,occur,"(사건이)일어나다, 발생하다",occur
+워드마스터,chapter3,complex,"복잡한, 복합체",complex
+워드마스터,chapter3,define,"정의하다, 한계 짓다, 한정하다",define
+워드마스터,chapter3,proud,"자랑스러워하는, 자만하는",proud
+워드마스터,chapter3,aware,"인지하는, 알고 있는",aware
+워드마스터,chapter3,contact,"접촉, 접촉하다",contact
+워드마스터,chapter3,performance,"공연, 성적, 성과",performance
+워드마스터,chapter3,detail,"세부, 상술하다",detail
+워드마스터,chapter3,approach,"접근하다, 접근",approach
+워드마스터,chapter3,participate,"참여하다, 참가하다",participate
+워드마스터,chapter3,fashion,"유행, 방식, 만들어 내다",fashion
+워드마스터,chapter3,package,"꾸러미, 포장, 포장하다",package
+워드마스터,chapter3,disappear,사라지다,disappear
+워드마스터,chapter3,career,"직업, 경력",career
+워드마스터,chapter3,secure,"안전한, 안전하게 하다, 확보하다",secure
+워드마스터,chapter3,novel,"(장편)소설, 참신한",novel
+워드마스터,chapter3,despite,~에도 불구하고,despite
+워드마스터,chapter3,background,"배경, 배경지식, 이유",background
+워드마스터,chapter3,solution,"해결, 해결책, 용액",solution
+워드마스터,chapter3,generate,"일으키다, 발생시키다",generate
+워드마스터,chapter3,eventually,결국,eventually
+워드마스터,chapter3,decrease,"감소, 감소하다",decrease
+워드마스터,chapter3,recycle,재활용하다,recycle
+워드마스터,chapter3,desire,"욕망, 욕구, 바라다",desire
+워드마스터,chapter3,balance,"균형, 은행 잔고, 균형을 이루다",balance
+워드마스터,chapter3,publish,"발표하다, 출판하다",publish
+워드마스터,chapter3,congratulate,축하하다,congratulate
+워드마스터,chapter3,compose,"구성하다, 작문하다, 작곡하다",compose
+워드마스터,chapter3,follow,"따라가다, (규칙을) 따르다",follow
+워드마스터,chapter3,negative,부정적인,negative
+워드마스터,chapter3,occasion,"경우, 특별한 일",occasion
+워드마스터,chapter4,replace,대체하다,replace
+워드마스터,chapter4,expert,전문가,expert
+워드마스터,chapter4,term,"기간, 학기, 용어",term
+워드마스터,chapter4,relieve,"경감하다, 안도시키다",relieve
+워드마스터,chapter4,describe,"묘사하다, 표현하다",describe
+워드마스터,chapter4,biology,생물학,biology
+워드마스터,chapter4,due,"만기의, ~하기로 되어 있는",due
+워드마스터,chapter4,equipment,"장치, 장비",equipment
+워드마스터,chapter4,account,"은행 계좌, 이야기, 설명하다",account
+워드마스터,chapter4,birth,탄생,birth
+워드마스터,chapter4,constant,"일정한, 불변의, 상수",constant
+워드마스터,chapter4,genius,"천재, 천재성",genius
+워드마스터,chapter4,reflect,"반영하다, 반사하다, 숙고하다",reflect
+워드마스터,chapter4,cause,"~의 원인이 되다, 원인",cause
+워드마스터,chapter4,frequent,"빈번한, 종종 방문하다",frequent
+워드마스터,chapter4,steady,"안정된, 한결같은, 꾸준한",steady
+워드마스터,chapter4,extreme,"극단의, 극단",extreme
+워드마스터,chapter4,tend,"~하는 경향이 있다(to), 돌보다",tend
+워드마스터,chapter4,insist,주장하다,insist
+워드마스터,chapter4,extend,"연장하다, 넓히다",extend
+워드마스터,chapter4,politics,"정치, 정치학",politics
+워드마스터,chapter4,lonely,외로운,lonely
+워드마스터,chapter4,habitat,"서식지, 주거지",habitat
+워드마스터,chapter4,mental,정신의,mental
+워드마스터,chapter4,factor,"요인, 요소",factor
+워드마스터,chapter4,exchange,교환하다,exchange
+워드마스터,chapter4,active,"활동적인, 적극적인",active
+워드마스터,chapter4,species,(생물 분류상의) 종,species
+워드마스터,chapter4,athletic,"운동의, 운동 경기의",athletic
+워드마스터,chapter4,dental,치아의,dental
+워드마스터,chapter5,delight,"기쁨, 기쁘게 하다",delight
+워드마스터,chapter5,confident,자신 있는,confident
+워드마스터,chapter5,gradually,"점차, 차츰",gradually
+워드마스터,chapter5,electricity,전기,electricity
+워드마스터,chapter5,shadow,"그림자, 그늘지게 하다",shadow
+워드마스터,chapter5,access,"접근, 이용, (인터넷을) 이용하다",access
+워드마스터,chapter5,announce,"발표하다, 알리다",announce
+워드마스터,chapter5,allow,"허락하다, 인정하다",allow
+워드마스터,chapter5,firm,"확고한, 단단한, 회사",firm
+워드마스터,chapter5,vary,"바꾸다, 변하다, 다르다",vary
+워드마스터,chapter5,injure,~에게 상처를 입히다,injure
+워드마스터,chapter5,permit,허락하다,permit
+워드마스터,chapter5,threat,"위협, 협박",threat
+워드마스터,chapter5,flood,"홍수, 범람시키다",flood
+워드마스터,chapter5,disabled,"무능력의, 장애의",disabled
+워드마스터,chapter5,lack,"부족, ~가 부족하다",lack
+워드마스터,chapter5,signify,"의미하다, 중요하다",signify
+워드마스터,chapter5,concentrate,집중하다,concentrate
+워드마스터,chapter5,emphasize,강조하다,emphasize
+워드마스터,chapter5,astronomy,천문학,astronomy
+워드마스터,chapter5,commerce,"상업, 교역",commerce
+워드마스터,chapter5,capable,"능력 있는, ~을 할 수 있는",capable
+워드마스터,chapter5,fuel,"연료, 연료를 가하다",fuel
+워드마스터,chapter5,manufacture,"제조, 제품, 제조하다",manufacture
+워드마스터,chapter5,movement,"움직임, 운동",movement
+워드마스터,chapter5,combine,"결합시키다, 겸하다",combine
+워드마스터,chapter5,gene,유전자,gene
+워드마스터,chapter5,response,"응답, 반응",response
+워드마스터,chapter5,victim,"희생, 희생자",victim
+워드마스터,chapter5,pressure,"압력, 압박, 압력을 가하다",pressure
+워드마스터,chapter6,accompany,동반하다,accompany
+워드마스터,chapter6,frustrate,좌절시키다,frustrate
+워드마스터,chapter6,construct,건설하다,construct
+워드마스터,chapter6,dwindle,"점점 줄어들다, 저하되다",dwindle
+워드마스터,chapter6,increase,"(수량이) 늘다, 증가, 이자",increase
+워드마스터,chapter6,entertain,즐겁게 하다,entertain
+워드마스터,chapter6,predict,"예언하다, 예측하다",predict
+워드마스터,chapter6,apologize,사과하다,apologize
+워드마스터,chapter6,sight,"시야, 광경, 시력",sight
+워드마스터,chapter6,quantity,양,quantity
+워드마스터,chapter6,conclude,"결론짓다, 끝내다",conclude
+워드마스터,chapter6,donate,기부하다,donate
+워드마스터,chapter6,personality,"개성, 성격, 특색",personality
+워드마스터,chapter6,struggle,"싸우다, 노력하다, 노력, 투쟁",struggle
+워드마스터,chapter6,electronic,전자의,electronic
+워드마스터,chapter6,absorb,"흡수하다, (사람·마음을)열중시키다",absorb
+워드마스터,chapter6,advantage,"이익, 유리한 점",advantage
+워드마스터,chapter6,incredible,(믿기 어려울 만큼) 굉장한,incredible
+워드마스터,chapter6,enable,가능하게 하다,enable
+워드마스터,chapter6,instruction,"지시, 제품 사용 설명서, 가르침",instruction
+워드마스터,chapter6,assume,"추정하다, (태도 등을) 취하다",assume
+워드마스터,chapter6,attempt,"시도하다, 시도",attempt
+워드마스터,chapter6,variety,"다양성, 다양",variety
+워드마스터,chapter6,confuse,"혼동하다, 혼란 시키다",confuse
+워드마스터,chapter6,indicate,"지적하다, 나타내다",indicate
+워드마스터,chapter6,analyze,분석하다,analyze
+워드마스터,chapter6,labor,"노동, 산고, 노동하다",labor
+워드마스터,chapter6,remark,"의견, 주목, 의견을 말하다",remark
+워드마스터,chapter6,moral,도덕적인,moral
+워드마스터,chapter6,embarrass,당황한,embarrass
+워드마스터,chapter7,claim,"요구, 주장, 주장하다",claim
+워드마스터,chapter7,stock,"재고품, 저장, 가축, 저장하다",stock
+워드마스터,chapter7,resident,거주자,resident
+워드마스터,chapter7,reasonable,"논리적인, 분별력이 있는",reasonable
+워드마스터,chapter7,interrupt,"방해하다, 중단하다",interrupt
+워드마스터,chapter7,discount,"할인, 할인하다",discount
+워드마스터,chapter7,creature,"생물, 피조물",creature
+워드마스터,chapter7,heal,"치료하다, 낫게 하다",heal
+워드마스터,chapter7,stranger,"낯선 사람, 문외한",stranger
+워드마스터,chapter7,revolution,"혁명, 갑작스런 변화",revolution
+워드마스터,chapter7,criticize,비난하다,criticize
+워드마스터,chapter7,convince,"확신시키다, 납득시키다",convince
+워드마스터,chapter7,feature,"특징, ~를 특징으로 하다",feature
+워드마스터,chapter7,tide,"조수, 흐름",tide
+워드마스터,chapter7,establish,"설립하다, 재정하다",establish
+워드마스터,chapter7,obtain,"획득하다, 통용되다",obtain
+워드마스터,chapter7,assist,도움을 주다,assist
+워드마스터,chapter7,disaster,"재해, 재앙, 재난",disaster
+워드마스터,chapter7,efficient,"효율적인, 유능한",efficient
+워드마스터,chapter7,terrific,"굉장한, 훌륭한",terrific
+워드마스터,chapter7,react,"반응하다, 반작용하다",react
+워드마스터,chapter7,independent,독립적인,independent
+워드마스터,chapter7,theory,이론,theory
+워드마스터,chapter7,qualify,자격을 얻다,qualify
+워드마스터,chapter7,clue,"실마리, 단서",clue
+워드마스터,chapter7,recall,"상기, 상기하다, 철회하다",recall
+워드마스터,chapter7,risk,"위험, 위험을 감수하다",risk
+워드마스터,chapter7,cancer,"암, 악성 종양",cancer
+워드마스터,chapter7,treatment,"취급, 대우, 치료법, 치료",treatment
+워드마스터,chapter7,specific,"구체적인, 특정한",specific
+워드마스터,chapter8,engage,"관여하다, 약속하다, 약혼하다",engage
+워드마스터,chapter8,motivate,동기를 부여하다,motivate
+워드마스터,chapter8,import,"수입하다, 수입, 뜻하다",import
+워드마스터,chapter8,elder,"나이가 위인, 연장자",elder
+워드마스터,chapter8,depress,"우울하게 하다, 낙담시키다",depress
+워드마스터,chapter8,fascinate,"매혹하다, 마음을 빼앗다",fascinate
+워드마스터,chapter8,violent,"난폭한, 폭력적인",violent
+워드마스터,chapter8,alarm,"놀람, 경보",alarm
+워드마스터,chapter8,edge,"가장자리, 유리함",edge
+워드마스터,chapter8,deserve,"~받을 가치가 있다, ~할 만 하다",deserve
+워드마스터,chapter8,route,"길, 항로, 통로",route
+워드마스터,chapter8,psychology,"심리, 심리학",psychology
+워드마스터,chapter8,passion,열정,passion
+워드마스터,chapter8,weed,"잡초, 잡초를 제거하다",weed
+워드마스터,chapter8,conscience,양심,conscience
+워드마스터,chapter8,consider,"숙고하다, 고려하다",consider
+워드마스터,chapter8,salary,"급료, 봉급",salary
+워드마스터,chapter8,pose,"자세, 자세를 취하다, ~인 체 하다",pose
+워드마스터,chapter8,purchase,"구매, 구매하다",purchase
+워드마스터,chapter8,length,길이,length
+워드마스터,chapter8,occupy,"(시간, 장소를) 차지하다",occupy
+워드마스터,chapter8,acquire,습득하다,acquire
+워드마스터,chapter8,interact,상호작용 하다,interact
+워드마스터,chapter8,poetry,"시, 운문",poetry
+워드마스터,chapter8,lifetime,"평생, 평생의",lifetime
+워드마스터,chapter8,decade,"10년, 10년간",decade
+워드마스터,chapter8,grain,"곡물, 낟알",grain
+워드마스터,chapter8,meaningful,"의미심장한, 의미 있는",meaningful
+워드마스터,chapter8,brief,"간단한, 간단히 알리다",brief
+워드마스터,chapter8,severe,"심한, 엄한",severe
+워드마스터,chapter9,survival,생존,survival
+워드마스터,chapter9,comment,"논평, 주석, 논평하다",comment
+워드마스터,chapter9,leap,"뛰다, 도약하다, 도약",leap
+워드마스터,chapter9,survey,"설문 조사, 조사하다",survey
+워드마스터,chapter9,mechanic,기계공,mechanic
+워드마스터,chapter9,mood,"기분, 분위기",mood
+워드마스터,chapter9,mere,단지 ~에 불과한,mere
+워드마스터,chapter9,typical,"전형적인, 대표적인",typical
+워드마스터,chapter9,approve,"찬성하다, 승인하다",approve
+워드마스터,chapter9,rural,시골의,rural
+워드마스터,chapter9,finance,"재정, 재무, 자금을 조달하다",finance
+워드마스터,chapter9,operation,"작업, 운영, 수술",operation
+워드마스터,chapter9,crime,범죄,crime
+워드마스터,chapter9,awful,"끔찍한, 지독한",awful
+워드마스터,chapter9,series,"연속, 시리즈물",series
+워드마스터,chapter9,exhausted,"고갈된, 기운이 다 빠진",exhausted
+워드마스터,chapter9,flu,"유행성 감기, 유행성 감기의",flu
+워드마스터,chapter9,surround,둘러싸다,surround
+워드마스터,chapter9,display,"전시, 전시하다, 나타내다",display
+워드마스터,chapter9,policy,"정책, 수단, 방법",policy
+워드마스터,chapter9,mass,"덩어리, 집단, 대중",mass
+워드마스터,chapter9,committee,위원회,committee
+워드마스터,chapter9,accurate,정확한,accurate
+워드마스터,chapter9,arrange,"정리하다, 준비하다",arrange
+워드마스터,chapter9,consult,"상담하다, 참고하다",consult
+워드마스터,chapter9,refer,"언급하다, 위탁하다",refer
+워드마스터,chapter9,recover,"회복하다, 되찾다",recover
+워드마스터,chapter9,facility,"시설, 편의, 재능",facility
+워드마스터,chapter9,downtown,"도심, 도심의, 도심지에",downtown
+워드마스터,chapter9,attach,"붙이다, 첨부하다",attach
+워드마스터,chapter10,monster,"괴물, 도깨비",monster
+워드마스터,chapter10,enormous,"엄청난, 거대한",enormous
+워드마스터,chapter10,domestic,"국내의, 가정의, 내부의",domestic
+워드마스터,chapter10,wealth,"부, 재산",wealth
+워드마스터,chapter10,elementary,"초보의, 기초적인",elementary
+워드마스터,chapter10,reward,"보수, 보답하다",reward
+워드마스터,chapter10,gap,"격차, 틈",gap
+워드마스터,chapter10,except,"~을 제외하고, 제외하다",except
+워드마스터,chapter10,journey,여행,journey
+워드마스터,chapter10,plain,"명백한, 평범한",plain
+워드마스터,chapter10,previous,"앞의, 이전의",previous
+워드마스터,chapter10,muscle,"근육, 힘, 강제",muscle
+워드마스터,chapter10,leisure,"여가, 자유 시간, 한가한",leisure
+워드마스터,chapter10,produce,"생산하다, 제조하다",produce
+워드마스터,chapter10,remain,"여전히 ~이다, 남다, 남은 것",remain
+워드마스터,chapter10,break,"깨다, 고장내다",break
+워드마스터,chapter10,breed,"낳다, 양육하다",breed
+워드마스터,chapter10,slight,"약간의, 경미한",slight
+워드마스터,chapter10,delay,"연기하다, 미루다, 지연",delay
+워드마스터,chapter10,file,"서류철, 파일, 제출하다",file
+워드마스터,chapter10,ethic,윤리,ethic
+워드마스터,chapter10,instant,"즉각의, 즉석의",instant
+워드마스터,chapter10,reveal,"드러내다, 폭로하다",reveal
+워드마스터,chapter10,include,포함하다,include
+워드마스터,chapter10,urban,도시의,urban
+워드마스터,chapter10,witness,"증인, 증거, 목격하다",witness
+워드마스터,chapter10,admit,"인정하다, 입장(입학)을 허락하다",admit
+워드마스터,chapter10,device,"장치, 고안, 방책",device
+워드마스터,chapter10,suppose,"가정하다, 추측하다",suppose
+워드마스터,chapter10,owe,빚지고 있다,owe
+워드마스터,chapter11,intend,"~할 작정이다, 의도하다",intend
+워드마스터,chapter11,award,"수여하다, 상",award
+워드마스터,chapter11,preserve,"보존하다, 보호하다",preserve
+워드마스터,chapter11,underground,"지하의, 비밀의, 지하",underground
+워드마스터,chapter11,consequence,"결과, 중요성",consequence
+워드마스터,chapter11,aspect,"관점, 양성, 면",aspect
+워드마스터,chapter11,target,"목표, 목표의, 목표로 삼다",target
+워드마스터,chapter11,headache,"두통, 골칫거리",headache
+워드마스터,chapter11,unless,"~이 아닌 한, 만약",unless
+워드마스터,chapter11,horizon,"수평선, 지평선",horizon
+워드마스터,chapter11,accomplish,"이루다, 성취하다",accomplish
+워드마스터,chapter11,surf,"파도, 파도타기를 하다",surf
+워드마스터,chapter11,adopt,"채택하다, 입양하다",adopt
+워드마스터,chapter11,potential,"잠재적인, 잠재력",potential
+워드마스터,chapter11,slip,"미끄러지다, 실수하다",slip
+워드마스터,chapter11,civilization,문명,civilization
+워드마스터,chapter11,row,"열, 줄, 말다툼, 배를 젓다",row
+워드마스터,chapter11,atmosphere,"대기, 분위기",atmosphere
+워드마스터,chapter11,label,"꼬리표, ~를...라고 부르다",label
+워드마스터,chapter11,decorate,"장식하다, ~에게 훈장을 주다",decorate
+워드마스터,chapter11,identify,"~임을 확인하다, 동일시하다",identify
+워드마스터,chapter11,secretary,"비서, 서기관, 장관",secretary
+워드마스터,chapter11,scale,"규모, 저울, 비늘",scale
+워드마스터,chapter11,addict,"중독시키다, 중독자",addict
+워드마스터,chapter11,evident,명백한,evident
+워드마스터,chapter11,seldom,좀처럼~않는,seldom
+워드마스터,chapter11,standard,"기준, 표준, 기준의",standard
+워드마스터,chapter11,basis,"기초, 원리",basis
+워드마스터,chapter11,automatic,"자동적인, 기계적인",automatic
+워드마스터,chapter11,region,지역,region
+워드마스터,chapter12,rise,"오르다, 일어나다, 오름, 상승",rise
+워드마스터,chapter12,artificial,"인공적인, 인조의",artificial
+워드마스터,chapter12,possess,"소유하다, ~의 마음을 사로잡다",possess
+워드마스터,chapter12,substance,"물질, 본질, 실체",substance
+워드마스터,chapter12,realistic,"현실적인, 현실주의의",realistic
+워드마스터,chapter12,disappoint,실망시키다,disappoint
+워드마스터,chapter12,encounter,"(우연히) 만나다, 마주침",encounter
+워드마스터,chapter12,differ,"다르다, 의견을 달리하다",differ
+워드마스터,chapter12,principle,"원칙, 원리",principle
+워드마스터,chapter12,memorize,기억하다,memorize
+워드마스터,chapter12,physics,물리학,physics
+워드마스터,chapter12,evaluate,평가하다,evaluate
+워드마스터,chapter12,fulfill,"달성하다, 이행하다",fulfill
+워드마스터,chapter12,stink,"역겹다, 악취가 나다",stink
+워드마스터,chapter12,tremendous,"굉장한, 무시무시한",tremendous
+워드마스터,chapter12,application,"적용, 신청",application
+워드마스터,chapter12,vote,"투표, 투표하다",vote
+워드마스터,chapter12,railroad,"철도, 선로",railroad
+워드마스터,chapter12,cooperate,협력하다,cooperate
+워드마스터,chapter12,emit,"(빛, 열 등을) 방출하다",emit
+워드마스터,chapter12,request,"요청, 요청하다",request
+워드마스터,chapter12,guarantee,"보증하다, 보증",guarantee
+워드마스터,chapter12,resist,저항하다,resist
+워드마스터,chapter12,grant,"승인하다, 수여하다",grant
+워드마스터,chapter12,permanent,"영원한, 영구적인",permanent
+워드마스터,chapter12,emergency,비상사태,emergency
+워드마스터,chapter12,rid,제거하다,rid
+워드마스터,chapter12,impact,"충격, 영향, 충격을 주다",impact
+워드마스터,chapter12,theme,"주제, 화제, 논제",theme
+워드마스터,chapter12,rely,의지하다,rely
+워드마스터,chapter13,hesitate,"주저하다, 망설이다",hesitate
+워드마스터,chapter13,location,"장소, 위치",location
+워드마스터,chapter13,organism,"유기체, 생물, 생명체",organism
+워드마스터,chapter13,resolve,"결심하다, 결심시키다",resolve
+워드마스터,chapter13,curve,"곡선, 곡선길 속임수, 사기",curve
+워드마스터,chapter13,suitable,"적절한, 적합한",suitable
+워드마스터,chapter13,distribute,"분배하다, 분포시키다",distribute
+워드마스터,chapter13,restrict,"제한하다, 한정하다",restrict
+워드마스터,chapter13,rainforest,(열대) 우림,rainforest
+워드마스터,chapter13,circumstance,"상황, 환경",circumstance
+워드마스터,chapter13,interpret,"통역하다, 해석하다",interpret
+워드마스터,chapter13,recite,암송하다,recite
+워드마스터,chapter13,annoy,"괴롭히다, 귀찮게 하다",annoy
+워드마스터,chapter13,frighten,겁먹게 하다,frighten
+워드마스터,chapter13,estimate,"견적, 평가, 평가하다",estimate
+워드마스터,chapter13,refuse,거절하다,refuse
+워드마스터,chapter13,adventure,"모험, 위험에 빠뜨리다",adventure
+워드마스터,chapter13,entrance,"입장, 입구, 입학",entrance
+워드마스터,chapter13,persuade,설득하다,persuade
+워드마스터,chapter13,cabin,"오두막집, 객실, 선실",cabin
+워드마스터,chapter13,gear,"장비, 조정하다",gear
+워드마스터,chapter13,ray,광선,ray
+워드마스터,chapter13,release,"놓아주다, 방출하다",release
+워드마스터,chapter13,slave,노예,slave
+워드마스터,chapter13,perceive,"인지하다, 인식하다",perceive
+워드마스터,chapter13,rank,"등급, (등급을) 매기다",rank
+워드마스터,chapter13,offer,"제공하다, 제안하다",offer
+워드마스터,chapter13,symphony,"교향곡, 조화음",symphony
+워드마스터,chapter13,envy,"부러워하다, 부러움",envy
+워드마스터,chapter13,gather,모으다,gather
+워드마스터,chapter14,corporate,"회사의, 법인의",corporate
+워드마스터,chapter14,autograph,"서명, 서명하다",autograph
+워드마스터,chapter14,retire,은퇴하다,retire
+워드마스터,chapter14,appeal,"간청하다, 호소하다",appeal
+워드마스터,chapter14,identical,"동일한, 일란성의",identical
+워드마스터,chapter14,innocence,"순결, 청정, 결백, 무죄",innocence
+워드마스터,chapter14,investment,투자,investment
+워드마스터,chapter14,authority,"권위, 당국",authority
+워드마스터,chapter14,harm,"해치다, 손해, 손상",harm
+워드마스터,chapter14,alternative,"대안, 대안의",alternative
+워드마스터,chapter14,infant,"유아, 유아의, 미발달의",infant
+워드마스터,chapter14,calculate,계산하다,calculate
+워드마스터,chapter14,charity,"자비, 자선단체, 구호물자",charity
+워드마스터,chapter14,receive,받다,receive
+워드마스터,chapter14,whereas,~인 반면에,whereas
+워드마스터,chapter14,broad,"넓은, 광범위한",broad
+워드마스터,chapter14,ignorant,"무식한, 모르는",ignorant
+워드마스터,chapter14,depend,의지하다,depend
+워드마스터,chapter14,pure,순수한,pure
+워드마스터,chapter14,extinct,"멸종된, 꺼진",extinct
+워드마스터,chapter14,household,"가족, 가정, 가족의, 가정의",household
+워드마스터,chapter14,chapter,"(책, 논문의) 장",chapter
+워드마스터,chapter14,refund,"반환, 환불, 환불하다",refund
+워드마스터,chapter14,institute,"연구소, 협회 설립하다",institute
+워드마스터,chapter14,lately,최근에,lately
+워드마스터,chapter14,accept,"받아들이다, 인정하다",accept
+워드마스터,chapter14,ashamed,부끄러워하는,ashamed
+워드마스터,chapter14,dense,"조밀한, 조잡한",dense
+워드마스터,chapter14,rescue,"구조, 구조하다, 구조의",rescue
+워드마스터,chapter14,continue,계속하다,continue
+워드마스터,chapter15,destination,목적지,destination
+워드마스터,chapter15,expand,확장하다,expand
+워드마스터,chapter15,evolution,진화,evolution
+워드마스터,chapter15,hire,고용하다,hire
+워드마스터,chapter15,isolate,고립시키다,isolate
+워드마스터,chapter15,gravity,중력,gravity
+워드마스터,chapter15,genuine,"진짜의, 성실한",genuine
+워드마스터,chapter15,status,"상태, 지위, 현상",status
+워드마스터,chapter15,compete,경쟁하다,compete
+워드마스터,chapter15,military,"군대, 군대의",military
+워드마스터,chapter15,logic,"논리, 논리학",logic
+워드마스터,chapter15,commit,"(죄를) 저지르다, 약속하다",commit
+워드마스터,chapter15,sensible,"분별 있는, 현명한",sensible
+워드마스터,chapter15,sum,"총합, 합계",sum
+워드마스터,chapter15,conserve,보존하다,conserve
+워드마스터,chapter15,swing,"흔들리다, 진동하다",swing
+워드마스터,chapter15,marriage,"결혼, 혼인",marriage
+워드마스터,chapter15,reproduce,"재생하다, 복제하다, 번식하다",reproduce
+워드마스터,chapter15,tone,"어조, 말투, 음, 색조",tone
+워드마스터,chapter15,concept,개념,concept
+워드마스터,chapter15,invitation,"초대, 초대장",invitation
+워드마스터,chapter15,precise,정확한,precise
+워드마스터,chapter15,formal,"공식적인, 정식의",formal
+워드마스터,chapter15,particle,"입자, 미량, 극소량",particle
+워드마스터,chapter15,cancel,취소하다,cancel
+워드마스터,chapter15,return,"돌아오다, 돌려주다, 수익",return
+워드마스터,chapter15,departure,출발,departure
+워드마스터,chapter15,apparent,"분명한, 명백한",apparent
+워드마스터,chapter15,visual,시각의,visual
+워드마스터,chapter15,agriculture,농업,agriculture
+워드마스터,chapter16,rite,"(종교적) 의식, 의례",rite
+워드마스터,chapter16,poverty,"빈곤, 가난",poverty
+워드마스터,chapter16,sculpture,"조각하다, 조각",sculpture
+워드마스터,chapter16,descend,"내려오다, 물려주다",descend
+워드마스터,chapter16,leak,"새는 구멍, 새다, 누설하다",leak
+워드마스터,chapter16,portion,"일부, 부분, 분할하다",portion
+워드마스터,chapter16,companion,"동료, 동반자",companion
+워드마스터,chapter16,diligent,근면한,diligent
+워드마스터,chapter16,distinct,"별개의, 뚜렷한",distinct
+워드마스터,chapter16,component,"구성 요소, 구성하고 있는",component
+워드마스터,chapter16,current,"해류, 흐름, 현재의",current
+워드마스터,chapter16,universal,"보편적인, 우주의",universal
+워드마스터,chapter16,trap,"함정, 덫을 놓다, 막다",trap
+워드마스터,chapter16,eager,갈망하는,eager
+워드마스터,chapter16,legal,"법률의, 합법의",legal
+워드마스터,chapter16,demonstrate,"논증하다, 설명하다, 보여주다",demonstrate
+워드마스터,chapter16,democracy,"민주주의, 민주주의 국가",democracy
+워드마스터,chapter16,mature,"성숙한, 익은, 성숙해지다",mature
+워드마스터,chapter16,brilliant,"찬란한, 명석한",brilliant
+워드마스터,chapter16,annual,"1년의, 1년간의, 연례의",annual
+워드마스터,chapter16,faith,"신념, 믿음",faith
+워드마스터,chapter16,spare,"여분의, 검소한, 용서하다",spare
+워드마스터,chapter16,transfer,"이동하다, 옮기다",transfer
+워드마스터,chapter16,refrigerator,냉장고,refrigerator
+워드마스터,chapter16,oppose,반대하다,oppose
+워드마스터,chapter16,desperate,"필사적인, 절망적인",desperate
+워드마스터,chapter16,remote,"멀리 떨어진, 희박한",remote
+워드마스터,chapter16,offend,감정을 상하게 하다,offend
+워드마스터,chapter16,awake,"깨우다, 깨어나다",awake
+워드마스터,chapter16,aim,"겨냥하다, 조준",aim
+워드마스터,chapter17,vigor,활력,vigor
+워드마스터,chapter17,insight,"통찰, 통찰력",insight
+워드마스터,chapter17,achieve,"목적을 이루다, (명성을) 얻다",achieve
+워드마스터,chapter17,civil,"시민의, 민간의",civil
+워드마스터,chapter17,option,"선택, 선택권",option
+워드마스터,chapter17,prove,"입증하다, ~으로 판명되다",prove
+워드마스터,chapter17,lecture,강의를 하다,lecture
+워드마스터,chapter17,minor,"사소한, 2류의, 부전공하다, 미성년자",minor
+워드마스터,chapter17,duty,"의무, 관세",duty
+워드마스터,chapter17,pause,"중단, 중단하다",pause
+워드마스터,chapter17,complicated,복잡한,complicated
+워드마스터,chapter17,digest,"소화하다, 요약하다",digest
+워드마스터,chapter17,shortage,"부족, 결함",shortage
+워드마스터,chapter17,laboratory,"실험실, 실험실의",laboratory
+워드마스터,chapter17,generous,"관대한, 후한",generous
+워드마스터,chapter17,laundry,세탁물,laundry
+워드마스터,chapter17,transform,"변형시키다, 변환하다",transform
+워드마스터,chapter17,discipline,"훈련, 훈련하다, 단련하다",discipline
+워드마스터,chapter17,kindergarten,유치원,kindergarten
+워드마스터,chapter17,forbid,금지하다,forbid
+워드마스터,chapter17,ultimate,"궁극적인, 최후의",ultimate
+워드마스터,chapter17,thrive,"번영하다, 발전하다",thrive
+워드마스터,chapter17,bet,"돈을 걸다, 내기를 걸다",bet
+워드마스터,chapter17,royal,"왕족의, 왕의",royal
+워드마스터,chapter17,ruin,"파멸, 파산",ruin
+워드마스터,chapter17,arrive,도착하다,arrive
+워드마스터,chapter17,evil,"악, 사악, 사악한",evil
+워드마스터,chapter17,horror,"공포, 전율, 공포의",horror
+워드마스터,chapter17,worship,"예배, 숭배, 숭배하다",worship
+워드마스터,chapter17,afterward,"나중에, 그 후에",afterward
+워드마스터,chapter18,client,"고객, (변호사) 의뢰인",client
+워드마스터,chapter18,insure,"보험을 계약하다, 안전하게 하다",insure
+워드마스터,chapter18,scarce,"부족한, 드문",scarce
+워드마스터,chapter18,fancy,"공상, 공상하다",fancy
+워드마스터,chapter18,surgery,외과 수술,surgery
+워드마스터,chapter18,assign,"할당하다, 지정하다",assign
+워드마스터,chapter18,regulate,"규제하다, 조절하다",regulate
+워드마스터,chapter18,shelf,선반,shelf
+워드마스터,chapter18,highway,"고속도로, 간선도로",highway
+워드마스터,chapter18,utility,"효용, 공익 설비 시설",utility
+워드마스터,chapter18,yield,"생산하다, 양보하다",yield
+워드마스터,chapter18,decline,정중히 거절하다,decline
+워드마스터,chapter18,aside,"옆에, 제쳐두고",aside
+워드마스터,chapter18,tolerate,"참다, 묵인하다, 용인하다",tolerate
+워드마스터,chapter18,cottage,오두막 집,cottage
+워드마스터,chapter18,coincidence,"우연의 일치, 동시에 일어난 사건",coincidence
+워드마스터,chapter18,contemporary,"동시대의, 현대의",contemporary
+워드마스터,chapter18,bless,축복하다,bless
+워드마스터,chapter18,prey,먹이,prey
+워드마스터,chapter18,prior,"이전의, 우선하는",prior
+워드마스터,chapter18,necessity,"필수, 필수품, 필요",necessity
+워드마스터,chapter18,abstract,"추상, 개요, 추상적인",abstract
+워드마스터,chapter18,measure,"측정하다, 측정, 수단",measure
+워드마스터,chapter18,fuse,"융합하다, 전기 퓨즈",fuse
+워드마스터,chapter18,confirm,"확인하다, (결심을) 굳게 하다",confirm
+워드마스터,chapter18,explain,설명하다,explain
+워드마스터,chapter18,imitate,모방하다,imitate
+워드마스터,chapter18,defeat,"패배, 패배시키다",defeat
+워드마스터,chapter18,illustrate,"설명하다, 예증하다",illustrate
+워드마스터,chapter18,pupil,"학생, 눈동자, 동공",pupil
+워드마스터,chapter19,intellect,지성,intellect
+워드마스터,chapter19,spice,"향신료, 양념",spice
+워드마스터,chapter19,tempt,유혹하다,tempt
+워드마스터,chapter19,inspire,~에 영감을 주다,inspire
+워드마스터,chapter19,dine,"만찬을 대접하다, 식사하다",dine
+워드마스터,chapter19,literally,문자 그대로,literally
+워드마스터,chapter19,correct,"바로잡다, 올바른, 정확한",correct
+워드마스터,chapter19,resort,"의지하다, 자주 가다",resort
+워드마스터,chapter19,grab,움켜쥐다,grab
+워드마스터,chapter19,alien,"외국인, 외계인",alien
+워드마스터,chapter19,wreck,"난파, 조난",wreck
+워드마스터,chapter19,triumph,"승리, 승리하다",triumph
+워드마스터,chapter19,document,"문서, 서류, 기록하다",document
+워드마스터,chapter19,suspect,~가 아닐까 의심하다,suspect
+워드마스터,chapter19,prohibit,금지하다,prohibit
+워드마스터,chapter19,install,설치하다,install
+워드마스터,chapter19,propose,"제안하다, 청혼하다",propose
+워드마스터,chapter19,appropriate,적절한,appropriate
+워드마스터,chapter19,scholarship,"학문, 장학금",scholarship
+워드마스터,chapter19,execute,"실행하다, 사형을 집행하다",execute
+워드마스터,chapter19,receipt,영수증,receipt
+워드마스터,chapter19,defect,"결점, 탈당하다",defect
+워드마스터,chapter19,commute,"통근, 통근하다",commute
+워드마스터,chapter19,trait,"특성, 특징",trait
+워드마스터,chapter19,ensure,"확보하다, 분명히 하다",ensure
+워드마스터,chapter19,modest,"겸손한, 알맞은",modest
+워드마스터,chapter19,virtual,"가상의, 사실상의",virtual
+워드마스터,chapter19,nutrition,영양,nutrition
+워드마스터,chapter19,inner,내부의,inner
+워드마스터,chapter19,contrary,"반대의, 적합 지 않은",contrary
+워드마스터,chapter20,split,"찢다, 쪼개다, 분열",split
+워드마스터,chapter20,supervise,"감독하다, 관리하다",supervise
+워드마스터,chapter20,inhabit,"거주하다, 살다",inhabit
+워드마스터,chapter20,address,"연설하다, 연설, 인사말",address
+워드마스터,chapter20,earthquake,"지진, 대변동",earthquake
+워드마스터,chapter20,enroll,"입학하다, 등록하다",enroll
+워드마스터,chapter20,seal,"도장, 봉인, 바다표범",seal
+워드마스터,chapter20,greed,탐욕,greed
+워드마스터,chapter20,debate,"토론, 토론하다",debate
+워드마스터,chapter20,compare,비교하다,compare
+워드마스터,chapter20,abandon,"버리다, 포기하다",abandon
+워드마스터,chapter20,conquer,"극복하다, 정복하다",conquer
+워드마스터,chapter20,nevertheless,그럼에도 불구하고,nevertheless
+워드마스터,chapter20,contract,"계약하다, 계약서",contract
+워드마스터,chapter20,retail,"소매, 소매하다",retail
+워드마스터,chapter20,prejudice,"편견, 선입관",prejudice
+워드마스터,chapter20,register,"등록, 등록하다, 기재하다",register
+워드마스터,chapter20,agency,대리점,agency
+워드마스터,chapter20,nurture,"양육, 교육, 양육하다",nurture
+워드마스터,chapter20,priest,성직자,priest
+워드마스터,chapter20,elegant,"고상한, 우아한",elegant
+워드마스터,chapter20,appear,나타나다,appear
+워드마스터,chapter20,impose,"부과하다, 강요하다",impose
+워드마스터,chapter20,masterpiece,"명장, 대작",masterpiece
+워드마스터,chapter20,harsh,"거친, 가혹한",harsh
+워드마스터,chapter20,drought,가뭄,drought
+워드마스터,chapter20,arise,"발생하다, 생겨나다",arise
+워드마스터,chapter20,criteria,"기준, 표준",criteria
+워드마스터,chapter20,extraordinary,"비상한, 비범한",extraordinary
+워드마스터,chapter20,modify,"변형하다, 수정하다",modify
+워드마스터,chapter21,dim,"흐릿한, 어두운, 흐려지다",dim
+워드마스터,chapter21,general,"일반적인(육군, 공군, 해병대) 대장",general
+워드마스터,chapter21,scream,"절규, 절규하다, 소리치다",scream
+워드마스터,chapter21,spill,"엎지르다, 흘리다, 엎지름",spill
+워드마스터,chapter21,glare,"번쩍번쩍 빛나다, 번쩍임",glare
+워드마스터,chapter21,swallow,"삼키다, 삼킴, 제비",swallow
+워드마스터,chapter21,usual,"보통의, 일상의, 통상의",usual
+워드마스터,chapter21,routine,"일상적인 일, 일상적인",routine
+워드마스터,chapter21,eliminate,"제거하다, 삭제하다",eliminate
+워드마스터,chapter21,deny,"부인하다, 거절하다",deny
+워드마스터,chapter21,sensitive,"민감한, 신경 과민의",sensitive
+워드마스터,chapter21,tragic,"비극의, 비참한, 비장한",tragic
+워드마스터,chapter21,deprive,박탈하다,deprive
+워드마스터,chapter21,conscious,"의식하고 있는, 의식",conscious
+워드마스터,chapter21,interfere,"방해하다, 간섭하다",interfere
+워드마스터,chapter21,temporary,"일시적인, 임시의",temporary
+워드마스터,chapter21,council,"협회, 협의회",council
+워드마스터,chapter21,adolescent,"청소년기의, 청소년",adolescent
+워드마스터,chapter21,arctic,북극의,arctic
+워드마스터,chapter21,capture,"붙잡다, 포획하다, 포획",capture
+워드마스터,chapter21,dilute,"묽은, 희석시키다",dilute
+워드마스터,chapter21,associate,"연관짓다, 교제하다, 동료",associate
+워드마스터,chapter21,figure,"수치, 계산, 형태, 계산하다",figure
+워드마스터,chapter21,warehouse,창고,warehouse
+워드마스터,chapter21,crew,승무원,crew
+워드마스터,chapter21,barrier,"방해, 장애물",barrier
+워드마스터,chapter21,pedestrian,"보행자, 보행자의",pedestrian
+워드마스터,chapter21,glance,"흘긋 봄, 흘긋 보다",glance
+워드마스터,chapter21,errand,"심부름, 잡일",errand
+워드마스터,chapter21,irritate,"화나게 하다, 짜증나게 하다",irritate
+워드마스터,chapter22,welfare,복지,welfare
+워드마스터,chapter22,cruel,잔인한,cruel
+워드마스터,chapter22,fold,"접다, (동물의) 우리",fold
+워드마스터,chapter22,trial,"시도, 실험, 재판",trial
+워드마스터,chapter22,tribe,"부족, 종족",tribe
+워드마스터,chapter22,profound,"깊은, 심오한",profound
+워드마스터,chapter22,tradition,"전통, 관습",tradition
+워드마스터,chapter22,distinguish,구별하다,distinguish
+워드마스터,chapter22,statement,"진술, 성명서",statement
+워드마스터,chapter22,prevail,"우세하다, 보급되다",prevail
+워드마스터,chapter22,infection,"감염, 전염",infection
+워드마스터,chapter22,widespread,널리 퍼진,widespread
+워드마스터,chapter22,drastic,"격렬한, 과감한",drastic
+워드마스터,chapter22,fade,"사라지다, 희미해지다",fade
+워드마스터,chapter22,progress,"전진하다, 전진, 진보",progress
+워드마스터,chapter22,stiffen,굳어지다,stiffen
+워드마스터,chapter22,weapon,"무기, 병기",weapon
+워드마스터,chapter22,reinforcement,"강화, 보강",reinforcement
+워드마스터,chapter22,germ,"미생물, 세균, 싹트다",germ
+워드마스터,chapter22,endanger,위험에 빠뜨리다,endanger
+워드마스터,chapter22,pile,"축척, 쌓아올린 더미",pile
+워드마스터,chapter22,atom,원자,atom
+워드마스터,chapter22,peer,"동료, 동년배",peer
+워드마스터,chapter22,enrich,"풍성하게 하다, 부유하게 하다",enrich
+워드마스터,chapter22,protect,보호하다,protect
+워드마스터,chapter22,renew,"새롭게 하다, 갱신하다",renew
+워드마스터,chapter22,adjust,"조절하다, 조정하다",adjust
+워드마스터,chapter22,noble,"귀족의, 고결한",noble
+워드마스터,chapter22,repair,"수선(수리)하다, 수선(수리), 회복",repair
+워드마스터,chapter22,candidate,후보자,candidate
+워드마스터,chapter23,ideal,"이상, 이상적인",ideal
+워드마스터,chapter23,result,"결과로서 생기다, 결과",result
+워드마스터,chapter23,ethnic,"인종의, 민족의",ethnic
+워드마스터,chapter23,foretell,"예언하다, 예고하다",foretell
+워드마스터,chapter23,wonder,"이상하게 여기다, 경이",wonder
+워드마스터,chapter23,wholesale,"도매, 도매의",wholesale
+워드마스터,chapter23,debt,"빚, 부채",debt
+워드마스터,chapter23,representative,"대표, 대표하는 국회의원",representative
+워드마스터,chapter23,oral,"구두의, 구술의",oral
+워드마스터,chapter23,realize,"현실화 하다, 깨닫다",realize
+워드마스터,chapter23,excess,"초과, 초과량, 과도함",excess
+워드마스터,chapter23,strict,"엄한, 엄격한",strict
+워드마스터,chapter23,appliance,"(가정용) 기구, 장치",appliance
+워드마스터,chapter23,furthermore,"게다가, 더욱이",furthermore
+워드마스터,chapter23,command,"명령하다, 지휘하다",command
+워드마스터,chapter23,ecosystem,생태계,ecosystem
+워드마스터,chapter23,nap,"낮잠, 낮잠 자다",nap
+워드마스터,chapter23,fame,명성,fame
+워드마스터,chapter23,shift,"변화, 이동, 바꾸다",shift
+워드마스터,chapter23,drift,"표류, 표류하다",drift
+워드마스터,chapter23,outstanding,"눈의 띄는, 저명한",outstanding
+워드마스터,chapter23,mislead,"잘못 인도하다, 오해하게 하다",mislead
+워드마스터,chapter23,dedicate,"헌납하다, 바치다",dedicate
+워드마스터,chapter23,avoid,피하다,avoid
+워드마스터,chapter23,initial,"처음의, 머리글자",initial
+워드마스터,chapter23,sink,가라앉다,sink
+워드마스터,chapter23,beard,턱수염,beard
+워드마스터,chapter23,haste,"급함, 서두름",haste
+워드마스터,chapter23,crush,"분쇄하다, 뭉개다",crush
+워드마스터,chapter23,confront,직면하다,confront
+워드마스터,chapter24,destiny,운명,destiny
+워드마스터,chapter24,hardship,"고난, 역경",hardship
+워드마스터,chapter24,escape,"달아나다, 벗어나다, 탈출",escape
+워드마스터,chapter24,valid,"타당한, 유효한",valid
+워드마스터,chapter24,entire,"전체의, 완전한, 전부, 전체",entire
+워드마스터,chapter24,dispose,"배치하다, 처리하다",dispose
+워드마스터,chapter24,optimal,"최상의, 최적의",optimal
+워드마스터,chapter24,hydrogen,수소,hydrogen
+워드마스터,chapter24,thread,"실, 실을 꿰다",thread
+워드마스터,chapter24,dynasty,"왕조, 왕가",dynasty
+워드마스터,chapter24,scatter,"흩뿌리다, 산란시키다",scatter
+워드마스터,chapter24,gamble,"도박, 도박을 하다",gamble
+워드마스터,chapter24,temper,"성질, 기질, 완화하다",temper
+워드마스터,chapter24,exist,"존재하다, 살아가다",exist
+워드마스터,chapter24,undoubtedly,"의심할 여지없이, 확실히",undoubtedly
+워드마스터,chapter24,raft,"뗏목, 고무 보트",raft
+워드마스터,chapter24,minimal,"아주 작은, 최소의",minimal
+워드마스터,chapter24,soak,"적시다, 젖다, 흡수하다",soak
+워드마스터,chapter24,craft,"솜씨, 기능, 선박, 비행기",craft
+워드마스터,chapter24,combat,"전투, 싸우다",combat
+워드마스터,chapter24,cease,"그만두다, 중지하다",cease
+워드마스터,chapter24,ceiling,"천장, 상한선",ceiling
+워드마스터,chapter24,unify,"통합하다, 통일하다",unify
+워드마스터,chapter24,perspective,"관점, 견해, 원근법, 전망",perspective
+워드마스터,chapter24,doom,~할 운명이다,doom
+워드마스터,chapter24,bump,"부딪치다, 충돌하다",bump
+워드마스터,chapter24,primary,"주요한, 첫째의, 초기의",primary
+워드마스터,chapter24,genre,"장르, 유형, 형식",genre
+워드마스터,chapter24,erase,"삭제하다, 지우다",erase
+워드마스터,chapter24,review,"논평, 비평, 재검토",review
+워드마스터,chapter25,graze,"풀을 뜯다, 방목하다",graze
+워드마스터,chapter25,vital,"생명의, 매우 중요한",vital
+워드마스터,chapter25,incident,"일어난 일, 사건",incident
+워드마스터,chapter25,session,"회의, 회기, 비평",session
+워드마스터,chapter25,fragile,부서지기 쉬운,fragile
+워드마스터,chapter25,moderate,"온건한, 적당한",moderate
+워드마스터,chapter25,geometry,기하학,geometry
+워드마스터,chapter25,budget,"예산, 예산안",budget
+워드마스터,chapter25,myth,"신화, 사회적 통념",myth
+워드마스터,chapter25,fur,"부드러운 털, 모피",fur
+워드마스터,chapter25,indifferent,무관심한,indifferent
+워드마스터,chapter25,strain,"긴장시키다, 상하게 하다",strain
+워드마스터,chapter25,obvious,"명백한, 분명한",obvious
+워드마스터,chapter25,ingredient,"재료, 성분",ingredient
+워드마스터,chapter25,dismiss,"해고하다, 해산시키다",dismiss
+워드마스터,chapter25,glacier,빙하,glacier
+워드마스터,chapter25,urge,"촉구하다, 강요하다",urge
+워드마스터,chapter25,celebrity,"명성, 유명인사",celebrity
+워드마스터,chapter25,antique,"골동품, 고미술의",antique
+워드마스터,chapter25,sphere,"구체, 둥근 것, 구",sphere
+워드마스터,chapter25,inherit,~을 상속하다,inherit
+워드마스터,chapter25,disgrace,"불명예, 수치",disgrace
+워드마스터,chapter25,crawl,"기어가다, 서행하다, 서행",crawl
+워드마스터,chapter25,scratch,"긁다, 할퀴다, 긁은 자국",scratch
+워드마스터,chapter25,diabetes,당뇨병,diabetes
+워드마스터,chapter25,congestion,"밀집, 혼잡",congestion
+워드마스터,chapter25,constitute,"구성하다, 재정하다",constitute
+워드마스터,chapter25,barter,"교환하다, 물물교환",barter
+워드마스터,chapter25,investigate,"조사하다, 수사하다",investigate
+워드마스터,chapter25,circular,"원의, 순환의",circular
+워드마스터,chapter26,chilly,"쌀쌀한, 냉담한",chilly
+워드마스터,chapter26,profit,"이익, 이윤, 이익을 얻다",profit
+워드마스터,chapter26,ancestor,"조상, 선조",ancestor
+워드마스터,chapter26,fierce,"사나운, 맹렬한",fierce
+워드마스터,chapter26,vague,"막연한, 모호한, 흐릿한",vague
+워드마스터,chapter26,editorial,"사설, 논란, 편집자의",editorial
+워드마스터,chapter26,rough,"거친, 난폭한, 대강의",rough
+워드마스터,chapter26,content,"만족하여, 내용(물), 목차",content
+워드마스터,chapter26,flow,"흐르다, 흐름",flow
+워드마스터,chapter26,obstacle,"장애물, 방해가 되는 것",obstacle
+워드마스터,chapter26,fertile,"비옥한, 기름진",fertile
+워드마스터,chapter26,abolish,폐지하다,abolish
+워드마스터,chapter26,assure,"보증하다, 확실하게 하다",assure
+워드마스터,chapter26,rehearse,"리허설, 시연, 예행연습",rehearse
+워드마스터,chapter26,gender,"성, 성별",gender
+워드마스터,chapter26,innovation,혁신,innovation
+워드마스터,chapter26,emperor,황제,emperor
+워드마스터,chapter26,dwell,"살다, 거주하다",dwell
+워드마스터,chapter26,opponent,"반대하는, 반대자, 상대",opponent
+워드마스터,chapter26,chore,"집안일, 허드렛일",chore
+워드마스터,chapter26,fossil,화석,fossil
+워드마스터,chapter26,glitter,"반짝이다, 반짝임",glitter
+워드마스터,chapter26,carve,"베다, 새기다, 조각하다",carve
+워드마스터,chapter26,decay,"부식, 부식하다, 쇠퇴하다",decay
+워드마스터,chapter26,protein,단백질,protein
+워드마스터,chapter26,backward,"후방에, 뒤쪽으로, 거꾸로",backward
+워드마스터,chapter26,translate,"번역하다, 옮기다",translate
+워드마스터,chapter26,present,"제출하다, 나타내다",present
+워드마스터,chapter26,form,"형성하다, 형태",form
+워드마스터,chapter26,refresh,"상쾌하게 하다, 새롭게 하다",refresh
+워드마스터,chapter27,tissue,"(생물의 근육, 신경 등의) 조직",tissue
+워드마스터,chapter27,lord,"군주, 주인",lord
+워드마스터,chapter27,substitute,"대체하다, 대체물, 대리자",substitute
+워드마스터,chapter27,scan,정밀 검사하다,scan
+워드마스터,chapter27,pottery,도자기,pottery
+워드마스터,chapter27,layer,"층, 겹",layer
+워드마스터,chapter27,justify,정당화하다,justify
+워드마스터,chapter27,radiant,"빛나는, 아주 밝은",radiant
+워드마스터,chapter27,exclaim,(감탄하여) 외치다,exclaim
+워드마스터,chapter27,polish,"닦다, 윤내다",polish
+워드마스터,chapter27,flavor,"맛, 맛을 내다",flavor
+워드마스터,chapter27,imprint,"(도장 등을) 찍다, 감명시키다",imprint
+워드마스터,chapter27,heritage,"유산, 세습 재산",heritage
+워드마스터,chapter27,strive,"노력하다, 애쓰다",strive
+워드마스터,chapter27,property,재산,property
+워드마스터,chapter27,asset,"자산, 자질",asset
+워드마스터,chapter27,portray,"묘사하다, 설명하다",portray
+워드마스터,chapter27,subscribe,정기 구독하다,subscribe
+워드마스터,chapter27,administer,"관리하다, 운영하다",administer
+워드마스터,chapter27,wage,급료,wage
+워드마스터,chapter27,majesty,"위엄, 장엄",majesty
+워드마스터,chapter27,intimate,친밀한,intimate
+워드마스터,chapter27,merit,"장점, 공로, ~할 만하다",merit
+워드마스터,chapter27,launch,"발사하다, 발사",launch
+워드마스터,chapter27,conference,"회담, 회의",conference
+워드마스터,chapter27,reception,"환영회, 접수",reception
+워드마스터,chapter27,shrug,(어깨를) 으쓱하다,shrug
+워드마스터,chapter27,vicious,"사악한, 악의 있는",vicious
+워드마스터,chapter27,cherish,소중히 하다,cherish
+워드마스터,chapter27,accuse,"고발하다, 비난하다",accuse
+워드마스터,chapter28,eternal,영원한,eternal
+워드마스터,chapter28,shrink,"축소하다, 수축하다",shrink
+워드마스터,chapter28,colleague,동료,colleague
+워드마스터,chapter28,transmit,전달하다,transmit
+워드마스터,chapter28,copper,"구리, 구리의, 구릿빛의",copper
+워드마스터,chapter28,orbit,"궤도, 궤도를 그리며 돌다",orbit
+워드마스터,chapter28,overwhelm,"압도하다, 당황하게 하다",overwhelm
+워드마스터,chapter28,discard,"버리다, 처분하다",discard
+워드마스터,chapter28,famine,"굶주림, 기아",famine
+워드마스터,chapter28,pill,알약,pill
+워드마스터,chapter28,enhance,향상시키다,enhance
+워드마스터,chapter28,immune,"면역성의, 면제의",immune
+워드마스터,chapter28,superior,"우월한, 상사",superior
+워드마스터,chapter28,string,"끈, 끈으로 꿴 것, 줄",string
+워드마스터,chapter28,cope,"대처하다, 잘 처리하다",cope
+워드마스터,chapter28,raw,"날 것의, 가공하지 않은",raw
+워드마스터,chapter28,apply,적용하다,apply
+워드마스터,chapter28,cattle,"(집합적)소, 소떼",cattle
+워드마스터,chapter28,loan,"대출, 대출금, 대출하다",loan
+워드마스터,chapter28,obedient,"유순한, 순종하는",obedient
+워드마스터,chapter28,procedure,"절차, 과정",procedure
+워드마스터,chapter28,bond,"결속, 속박, 약정, 채권",bond
+워드마스터,chapter28,angle,"각도, 모서리",angle
+워드마스터,chapter28,subtle,"미묘한, 희미한",subtle
+워드마스터,chapter28,depict,"묘사하다, 그리다",depict
+워드마스터,chapter28,radical,"과격한, 급진적인",radical
+워드마스터,chapter28,therapy,"치료, 요법",therapy
+워드마스터,chapter28,caution,"조심, 주의, 주의하다",caution
+워드마스터,chapter28,persist,"고집하다, 지속하다",persist
+워드마스터,chapter28,reverse,"역(逆), 반대, 역의",reverse
+워드마스터,chapter29,architecture,"건축, 건축물",architecture
+워드마스터,chapter29,territory,영토,territory
+워드마스터,chapter29,strategy,전략,strategy
+워드마스터,chapter29,hence,"그러므로, 지금부터",hence
+워드마스터,chapter29,panic,"갑작스런, 공포",panic
+워드마스터,chapter29,wilderness,"황무지, 황야",wilderness
+워드마스터,chapter29,attract,주의나 흥미를 끌다,attract
+워드마스터,chapter29,category,범주,category
+워드마스터,chapter29,murder,"살인, 살인하다",murder
+워드마스터,chapter29,funeral,"장례식, 장례의",funeral
+워드마스터,chapter29,humiliation,"창피함, 굴욕",humiliation
+워드마스터,chapter29,ban,"금지하다, 금지",ban
+워드마스터,chapter29,flush,(얼굴이) 붉어지다,flush
+워드마스터,chapter29,omit,"생략하다, 빼다",omit
+워드마스터,chapter29,outcome,결과,outcome
+워드마스터,chapter29,despair,"절망, 절망하다",despair
+워드마스터,chapter29,alert,"방심하지 않는, 기민한",alert
+워드마스터,chapter29,compact,"아담한, 밀집한, 꽉 채우다",compact
+워드마스터,chapter29,likewise,마찬가지로,likewise
+워드마스터,chapter29,astonish,놀라게 하다,astonish
+워드마스터,chapter29,optimistic,"낙관적인, 낙천적인",optimistic
+워드마스터,chapter29,loyal,"충성스러운, 성실한",loyal
+워드마스터,chapter29,humid,"(날씨가) 습기 있는, 눅눅한",humid
+워드마스터,chapter29,pretend,"주장하다, ~인 척 하다",pretend
+워드마스터,chapter29,graduate,"졸업하다, 졸업생, 대학원 학생",graduate
+워드마스터,chapter29,delicate,섬세한,delicate
+워드마스터,chapter29,inflate,"팽창시키다, 자만하게 하다",inflate
+워드마스터,chapter29,adequate,적당한,adequate
+워드마스터,chapter29,physician,"의사, 내과의사",physician
+워드마스터,chapter29,joint,"이음매, 관절, 공동의, 연합의",joint
+워드마스터,chapter30,via,"~에 의하여, ~를 거쳐서(경유해서)",via
+워드마스터,chapter30,passage,"동행, 통과, (인용문의) 한 절",passage
+워드마스터,chapter30,prefer,~을 선호하다,prefer
+워드마스터,chapter30,vessel,"(물건을 담는) 용기, 배",vessel
+워드마스터,chapter30,restore,"복구하다, 재건하다",restore
+워드마스터,chapter30,passive,"수동적인, 간접의",passive
+워드마스터,chapter30,experience,"경험하다, 경험, 체험",experience
+워드마스터,chapter30,marble,"대리석, 구슬, 대리석의",marble
+워드마스터,chapter30,classify,분류하다,classify
+워드마스터,chapter30,fundamental,"근본, 근본의, 근본적인",fundamental
+워드마스터,chapter30,transaction,"거래, 처리",transaction
+워드마스터,chapter30,sufficient,충분한,sufficient
+워드마스터,chapter30,stable,"안정된, 마구간",stable
+워드마스터,chapter30,sympathy,"동정, 동감",sympathy
+워드마스터,chapter30,by-product,부산물,by-product
+워드마스터,chapter30,edible,"먹을 수 있는, 식용의",edible
+워드마스터,chapter30,federal,"연방의, 연합의",federal
+워드마스터,chapter30,bud,"싹, 싹트다",bud
+워드마스터,chapter30,trivial,사소한,trivial
+워드마스터,chapter30,anxiety,"걱정, 불안, 열망",anxiety
+워드마스터,chapter30,tablet,"(의학) 정제, 알약",tablet
+워드마스터,chapter30,prepare,준비하다,prepare
+워드마스터,chapter30,trade,"교환하다, 무역",trade
+워드마스터,chapter30,liquid,"액체, 액체의",liquid
+워드마스터,chapter30,contend,"싸우다, 경쟁하다",contend
+워드마스터,chapter30,outlook,"전망, 조망",outlook
+워드마스터,chapter30,roam,(정처없이) 배회하다,roam
+워드마스터,chapter30,decent,"괜찮은, 품위 있는",decent
+워드마스터,chapter30,concern,"~에 관계하다, 관심사, 걱정",concern
+워드마스터,chapter30,behalf,"이익, 자기편",behalf
+워드마스터,chapter31,suffer,고통받다,suffer
+워드마스터,chapter31,distortion,"왜곡, 찌그러뜨림",distortion
+워드마스터,chapter31,infinite,무한의,infinite
+워드마스터,chapter31,anticipate,"예상하다, 기대하다",anticipate
+워드마스터,chapter31,symbolic,상징적인,symbolic
+워드마스터,chapter31,municipal,"지방(자치제)의, 시의",municipal
+워드마스터,chapter31,phenomenon,"현상, 사건, 비범한 인물",phenomenon
+워드마스터,chapter31,devote,바치다,devote
+워드마스터,chapter31,peasant,"영세 농민, 소작농",peasant
+워드마스터,chapter31,tenant,"세입자, 주민",tenant
+워드마스터,chapter31,worthwhile,~할 가치가 있는,worthwhile
+워드마스터,chapter31,pavement,"보도, 포장도로",pavement
+워드마스터,chapter31,dioxide,이산화물,dioxide
+워드마스터,chapter31,diminish,"감소하다, 감소시키다",diminish
+워드마스터,chapter31,jealous,질투하는,jealous
+워드마스터,chapter31,limp,"절뚝거리다, 기운이 없는",limp
+워드마스터,chapter31,exclude,"배제하다, 제외하다",exclude
+워드마스터,chapter31,flexible,"융통성 있는, 구부리기 쉬운",flexible
+워드마스터,chapter31,nominate,(후보자로)지명되다,nominate
+워드마스터,chapter31,sacred,"신성한, 성스러운",sacred
+워드마스터,chapter31,support,"떠받치다, 지지하다",support
+워드마스터,chapter31,mammal,포유동물,mammal
+워드마스터,chapter31,iceberg,빙산,iceberg
+워드마스터,chapter31,monetary,화폐의,monetary
+워드마스터,chapter31,revise,개정하다,revise
+워드마스터,chapter31,resent,"분개하다, 화를 내다",resent
+워드마스터,chapter31,superb,"최고의, 훌륭한",superb
+워드마스터,chapter31,abrupt,갑작스러운,abrupt
+워드마스터,chapter31,diverse,"다른 종류의, 다양한",diverse
+워드마스터,chapter31,internal,내부의,internal
+워드마스터,chapter32,gloom,"어둠, 우울",gloom
+워드마스터,chapter32,refine,"정제하다, 맑게 하다",refine
+워드마스터,chapter32,dynamic,"동적인, 역학의",dynamic
+워드마스터,chapter32,nerve,신경,nerve
+워드마스터,chapter32,prompt,"즉각적인, 촉구하다",prompt
+워드마스터,chapter32,suspend,"매달다, 중지하다",suspend
+워드마스터,chapter32,control,"관리하다, 지배, 제어",control
+워드마스터,chapter32,distraction,"(정신의)산만함, 주의산만",distraction
+워드마스터,chapter32,collapse,"무너지다, 붕괴하다",collapse
+워드마스터,chapter32,monologue,독백,monologue
+워드마스터,chapter32,martial,"전쟁의, 군대의",martial
+워드마스터,chapter32,deliberate,"의도적인, 신중한",deliberate
+워드마스터,chapter32,trigger,"방아쇠, 계기, 유발하다",trigger
+워드마스터,chapter32,plot,"음모, 계획, 줄거리",plot
+워드마스터,chapter32,rod,"막대기, 회초리",rod
+워드마스터,chapter32,Atlantic,"대서양, 대서양의",Atlantic
+워드마스터,chapter32,industry,"산업(계), 공업",industry
+워드마스터,chapter32,weird,"이상한, 기묘한",weird
+워드마스터,chapter32,suggest,"제안하다, 암시하다",suggest
+워드마스터,chapter32,partial,부분적인,partial
+워드마스터,chapter32,priceless,대단히 소중한,priceless
+워드마스터,chapter32,mutual,"서로의, 공통의",mutual
+워드마스터,chapter32,fate,운명,fate
+워드마스터,chapter32,booth,"칸막이 한 좌석, 부스",booth
+워드마스터,chapter32,pursue,"추구하다, 쫓다",pursue
+워드마스터,chapter32,prescribe,"규정하다, (약을)처방하다",prescribe
+워드마스터,chapter32,erupt,"분출하다, 폭발하다",erupt
+워드마스터,chapter32,insult,"모욕, 모욕하다",insult
+워드마스터,chapter32,gaze,"뚫어지게 보다, 응시하다",gaze
+워드마스터,chapter32,supreme,"최고, 최고의",supreme
+워드마스터,chapter33,race,"경주(경쟁)하다, 질주하다",race
+워드마스터,chapter33,paralysis,마비,paralysis
+워드마스터,chapter33,dominate,지배하다,dominate
+워드마스터,chapter33,vehicle,"운송 수단, 탈 것",vehicle
+워드마스터,chapter33,context,"전후관계, 문맥",context
+워드마스터,chapter33,brochure,"소책자, 브로셔",brochure
+워드마스터,chapter33,sew,"꿰매다, 바느질하다",sew
+워드마스터,chapter33,masculine,"남자의, 남자다운",masculine
+워드마스터,chapter33,force,"강요하다, 힘",force
+워드마스터,chapter33,lever,"지레, 레버",lever
+워드마스터,chapter33,frown,"얼굴을 찡그리다, 찡그린 얼굴",frown
+워드마스터,chapter33,vest,"조끼, (권리를)부여하다",vest
+워드마스터,chapter33,astound,놀라게 하다,astound
+워드마스터,chapter33,dictator,"독재자, 구술자",dictator
+워드마스터,chapter33,alley,"오솔길, 골목길",alley
+워드마스터,chapter33,gain,"얻다, 이익",gain
+워드마스터,chapter33,crucial,"중대한, 결정적인",crucial
+워드마스터,chapter33,curriculum,"교육과정, 커리큘럼",curriculum
+워드마스터,chapter33,deck,갑판,deck
+워드마스터,chapter33,cheer,"성원하다, 환호, 갈채",cheer
+워드마스터,chapter33,complete,"완료하다, 안전한",complete
+워드마스터,chapter33,miserable,"비참한, 불쌍한",miserable
+워드마스터,chapter33,tease,"괴롭히다, 약 올리다",tease
+워드마스터,chapter33,aggressive,"공격적인, 적극적인",aggressive
+워드마스터,chapter33,cure,"치료하다, 치유, 회복",cure
+워드마스터,chapter33,attribute,"~의 탓으로 돌리다, 속성",attribute
+워드마스터,chapter33,foster,"육성시키다, 촉진시키다",foster
+워드마스터,chapter33,rob,"훔치다, 강탈하다",rob
+워드마스터,chapter33,postpone,"연기하다, 뒤로 미루다",postpone
+워드마스터,chapter33,abuse,"남용, 욕설, 확대",abuse
+워드마스터,chapter34,blueprint,"청사진, 청사진을 작성하다",blueprint
+워드마스터,chapter34,unemployed,"실업의, 실직한",unemployed
+워드마스터,chapter34,breakdown,"고장, 쇠약",breakdown
+워드마스터,chapter34,disguise,"변장, 변장시키다",disguise
+워드마스터,chapter34,tin,"양철, 주석",tin
+워드마스터,chapter34,sermon,설교,sermon
+워드마스터,chapter34,psychologist,심리학자,psychologist
+워드마스터,chapter34,output,"생산(고), 산출(량)",output
+워드마스터,chapter34,sprout,"싹, 싹이 트다",sprout
+워드마스터,chapter34,rear,"뒤, 뒤의, 후방의, 기르다",rear
+워드마스터,chapter34,reform,"개혁, 개혁하다",reform
+워드마스터,chapter34,deal,"다루다, 처리하다",deal
+워드마스터,chapter34,recruit,"모집하다, 징집하다",recruit
+워드마스터,chapter34,choke,"질식시키다, 숨이 막히다",choke
+워드마스터,chapter34,workshop,"작업장, 공동 연구회",workshop
+워드마스터,chapter34,patient,"인내심 있는, 환자",patient
+워드마스터,chapter34,convention,"집회, 총회, 관습",convention
+워드마스터,chapter34,devastate,황폐시키다,devastate
+워드마스터,chapter34,reap,수확하다,reap
+워드마스터,chapter34,overlook,"내려다보다, 간과하다",overlook
+워드마스터,chapter34,troop,"무리, 떼, 군사, 군대",troop
+워드마스터,chapter34,reject,"거절하다, 바라다",reject
+워드마스터,chapter34,nourish,"영양분을 주다, 기르다",nourish
+워드마스터,chapter34,bay,만(灣),bay
+워드마스터,chapter34,stun,"기절시키다, 멍하게 하다",stun
+워드마스터,chapter34,goodwill,"호의, 친선",goodwill
+워드마스터,chapter34,bulletin,"게시, 게시물",bulletin
+워드마스터,chapter34,fluid,"유동체(액체, 기체의 총칭), 유동체의",fluid
+워드마스터,chapter34,affair,"사건, 일",affair
+워드마스터,chapter34,dawn,"새벽, 날이 새다",dawn
+워드마스터,chapter35,hostile,적대적인,hostile
+워드마스터,chapter35,tray,쟁반,tray
+워드마스터,chapter35,respect,"존중하다, 존경",respect
+워드마스터,chapter35,await,~을 기다리다,await
+워드마스터,chapter35,mow,(풀을) 베다,mow
+워드마스터,chapter35,lease,"임대, 임대하다",lease
+워드마스터,chapter35,racial,인종의,racial
+워드마스터,chapter35,concrete,"구체적인, 콘크리트",concrete
+워드마스터,chapter35,satisfy,"만족시키다, 채우다",satisfy
+워드마스터,chapter35,rule,"지배하다, 지배, 규칙",rule
+워드마스터,chapter35,perseverance,인내심,perseverance
+워드마스터,chapter35,fatal,치명적인,fatal
+워드마스터,chapter35,compensate,보상하다,compensate
+워드마스터,chapter35,invert,거꾸로 하다,invert
+워드마스터,chapter35,reign,"통치, 통치하다",reign
+워드마스터,chapter35,tension,"긴장, 불안, 긴장시키다",tension
+워드마스터,chapter35,crack,"갈라진 틈, 금가다",crack
+워드마스터,chapter35,startle,깜짝 놀라게 하다,startle
+워드마스터,chapter35,discourage,"낙담시키다, 단념시키다",discourage
+워드마스터,chapter35,pierce,"꿰뚫다, ~에 구멍을 뚫다",pierce
+워드마스터,chapter35,convert,전환하다,convert
+워드마스터,chapter35,strike,"치다, (머릿속에)떠오르다",strike
+워드마스터,chapter35,suppress,"억압하다, 참다",suppress
+워드마스터,chapter35,core,"핵심, 핵심의",core
+워드마스터,chapter35,contribute,공헌하다,contribute
+워드마스터,chapter35,spear,창,spear
+워드마스터,chapter35,renowned,"유명한, 명성 있는",renowned
+워드마스터,chapter35,era,시대,era
+워드마스터,chapter35,withdraw,"(돈을)인출하다, 철회하다",withdraw
+워드마스터,chapter35,immigrate,(타국에서) 이주하다,immigrate
+워드마스터,chapter36,dignity,존엄,dignity
+워드마스터,chapter36,notify,"공지하다, 알리다",notify
+워드마스터,chapter36,animate,"생기 있게 하다, 살아 있는",animate
+워드마스터,chapter36,tender,"부드러운, 입찰하다, 입찰",tender
+워드마스터,chapter36,bilingual,2개 국어의,bilingual
+워드마스터,chapter36,mischief,"해악, 장난",mischief
+워드마스터,chapter36,discriminate,"차별하다, 구별하다",discriminate
+워드마스터,chapter36,maintain,"유지하다, 지지하다",maintain
+워드마스터,chapter36,adhere,"충실하다, 집착하다",adhere
+워드마스터,chapter36,judge,"판단하다, 재판관",judge
+워드마스터,chapter36,peculiar,독특한,peculiar
+워드마스터,chapter36,sake,"위함, 목적",sake
+워드마스터,chapter36,sanitation,위생,sanitation
+워드마스터,chapter36,folktale,"민간설화, 전설",folktale
+워드마스터,chapter36,simultaneously,동시에,simultaneously
+워드마스터,chapter36,range,"정렬시키다, 범위",range
+워드마스터,chapter36,groom,신랑,groom
+워드마스터,chapter36,supernatural,초자연적인,supernatural
+워드마스터,chapter36,prevent,예방하다,prevent
+워드마스터,chapter36,instinct,본능,instinct
+워드마스터,chapter36,gigantic,거대한,gigantic
+워드마스터,chapter36,meditate,명상하다,meditate
+워드마스터,chapter36,exemplify,"예증하다, 예시하다",exemplify
+워드마스터,chapter36,evolve,"발전하다, 진화하다",evolve
+워드마스터,chapter36,remove,제거하다,remove
+워드마스터,chapter36,afflict,괴롭히다,afflict
+워드마스터,chapter36,literate,읽고 쓸 수 있는,literate
+워드마스터,chapter36,coherent,"통일성 있는, 조리 있는",coherent
+워드마스터,chapter36,intolerable,참을 수 없는,intolerable
+워드마스터,chapter36,fountain,"분수, 근원",fountain
+워드마스터,chapter37,bold,"대담한, 선이 굵은",bold
+워드마스터,chapter37,compliment,"칭찬, 칭찬하다",compliment
+워드마스터,chapter37,summit,"꼭대기, 정상",summit
+워드마스터,chapter37,deliver,"배달하다, 전하다",deliver
+워드마스터,chapter37,alter,"바꾸다, 변경하다",alter
+워드마스터,chapter37,conceive,"생각해내다, ~을 마음에 그리다",conceive
+워드마스터,chapter37,durability,내구성,durability
+워드마스터,chapter37,destroy,파괴하다,destroy
+워드마스터,chapter37,shallow,"얕은, 얇은, 천박한, 피상적인",shallow
+워드마스터,chapter37,face,"직면하다, 얼굴",face
+워드마스터,chapter37,particular,"특정한, 개개의, 사항, 상세",particular
+워드마스터,chapter37,grasp,"붙잡다, 이해하다, 파악하다",grasp
+워드마스터,chapter37,overall,"전부의, 전체적인, 작업복",overall
+워드마스터,chapter37,weep,울다,weep
+워드마스터,chapter37,superstition,미신,superstition
+워드마스터,chapter37,colony,"식민지, 공동체, 군생",colony
+워드마스터,chapter37,absurd,"불합리한, 우스꽝스러운",absurd
+워드마스터,chapter37,dormitory,기숙사,dormitory
+워드마스터,chapter37,casual,"우연한, 무심결의, 격식을 차리지 않는",casual
+워드마스터,chapter37,prone,~하는 경향이 있는,prone
+워드마스터,chapter37,conceal,숨기다,conceal
+워드마스터,chapter37,retreat,"퇴각, 후퇴하다",retreat
+워드마스터,chapter37,compulsive,"강제적인, 강박의",compulsive
+워드마스터,chapter37,clinic,"전문 병원, 개인 병원",clinic
+워드마스터,chapter37,banner,"깃발, 현수막",banner
+워드마스터,chapter37,formula,"공식, 이유식, 분유",formula
+워드마스터,chapter37,vow,"맹세, 맹세하다",vow
+워드마스터,chapter37,malnutrition,영양실조,malnutrition
+워드마스터,chapter37,relate,관련시키다,relate
+워드마스터,chapter37,undergo,겪다,undergo
+워드마스터,chapter38,boast,"자랑하다, 떠벌리다",boast
+워드마스터,chapter38,neutral,"중립의, 공평한",neutral
+워드마스터,chapter38,stain,"얼룩, 얼룩지게 하다",stain
+워드마스터,chapter38,wrestle,"(일과)씨름하다, 싸우다",wrestle
+워드마스터,chapter38,tendency,"경향, 추세",tendency
+워드마스터,chapter38,float,"뜨다, 떠다니다, 부유물",float
+워드마스터,chapter38,applause,박수갈채,applause
+워드마스터,chapter38,incentive,"격려, 자극, 장려금",incentive
+워드마스터,chapter38,sensation,"감각, 느낌, 대사건(센세이션)",sensation
+워드마스터,chapter38,Confucian,"공자의, 유고의",Confucian
+워드마스터,chapter38,draft,"밑그림, 원고, 초안을 그리다",draft
+워드마스터,chapter38,crude,"가공하지 않은, 조잡한",crude
+워드마스터,chapter38,supplement,"보충, 보충하다",supplement
+워드마스터,chapter38,velocity,속력,velocity
+워드마스터,chapter38,tame,"길들여진, 길들이다",tame
+워드마스터,chapter38,molecule,분자,molecule
+워드마스터,chapter38,reed,"갈대, 갈대의",reed
+워드마스터,chapter38,dismay,"실망시키다, 낙담시키다",dismay
+워드마스터,chapter38,diagnose,진단하다,diagnose
+워드마스터,chapter38,versus,"~와 대비하여, ~대(對)",versus
+워드마스터,chapter38,reservoir,"저장소, 저수지",reservoir
+워드마스터,chapter38,conform,"적합하게 하다, 순응시키다",conform
+워드마스터,chapter38,spacious,"넓은, 환히 트인",spacious
+워드마스터,chapter38,weave,"엮다, 짜다",weave
+워드마스터,chapter38,ceremony,"의식, 식, 의례",ceremony
+워드마스터,chapter38,motive,동기 (행동의 원인),motive
+워드마스터,chapter38,prominent,"현저한, 저명한",prominent
+워드마스터,chapter38,archaeology,고고학,archaeology
+워드마스터,chapter38,rigid,완고한,rigid
+워드마스터,chapter38,inferior,열등한,inferior
+워드마스터,chapter39,subtract,빼다,subtract
+워드마스터,chapter39,impulse,"충동, 추진",impulse
+워드마스터,chapter39,utmost,"최대한의, 최대한도",utmost
+워드마스터,chapter39,proficient,숙달된,proficient
+워드마스터,chapter39,accumulate,"모으다, 축적하다",accumulate
+워드마스터,chapter39,navigate,"(배, 비행기를) 조종하다",navigate
+워드마스터,chapter39,equity,공평,equity
+워드마스터,chapter39,violate,"침해하다, 위반하다",violate
+워드마스터,chapter39,ambitious,야심 있는,ambitious
+워드마스터,chapter39,intact,"본래대로의, 손상되지 않은",intact
+워드마스터,chapter39,plea,"탄원, 간청, 변명",plea
+워드마스터,chapter39,attend,"출석하다, 보살피다",attend
+워드마스터,chapter39,trim,"잘라내다, 다듬다",trim
+워드마스터,chapter39,embody,"구체화하다, 구현하다",embody
+워드마스터,chapter39,characteristic,"특징, 특색, 독특한, 특징적인",characteristic
+워드마스터,chapter39,consist,이루어져 있다,consist
+워드마스터,chapter39,boundary,"경계, 경계선",boundary
+워드마스터,chapter39,attack,"공격하다, 공격",attack
+워드마스터,chapter39,confine,"한정하다, 감금하다, 한계",confine
+워드마스터,chapter39,dispatch,"급파, 발송, 급파하다, 발송하다",dispatch
+워드마스터,chapter39,diameter,"지름, 직경",diameter
+워드마스터,chapter39,ultrasound,초음파,ultrasound
+워드마스터,chapter39,propriety,"적절성, 예의바름",propriety
+워드마스터,chapter39,anecdote,"일화, 비화",anecdote
+워드마스터,chapter39,shrub,관목(灌木),shrub
+워드마스터,chapter39,pledge,"약속, 맹세, 약속하다, 맹세하다",pledge
+워드마스터,chapter39,cost,"비용, 대가, (비용이) 들다",cost
+워드마스터,chapter39,geology,지질학,geology
+워드마스터,chapter39,detect,발견하다,detect
+워드마스터,chapter39,temperate,"절제하는, (기후가)온화한",temperate
+워드마스터,chapter40,soar,높이 치솟다,soar
+워드마스터,chapter40,mock,"조롱하다, 가짜의",mock
+워드마스터,chapter40,disclose,"드러내다, 폭로하다",disclose
+워드마스터,chapter40,exhibit,"전시하다, 보여주다, 전시, 전시품",exhibit
+워드마스터,chapter40,symptom,증상,symptom
+워드마스터,chapter40,manage,"~을 잘 해 내다, 다루다",manage
+워드마스터,chapter40,awkward,"서투른, 어색한, 꼴사나운",awkward
+워드마스터,chapter40,grind,"갈다, 빻다",grind
+워드마스터,chapter40,expose,"드러내다, (비밀을) 폭로하다",expose
+워드마스터,chapter40,closet,벽장,closet
+워드마스터,chapter40,damp,"축축한, 습기",damp
+워드마스터,chapter40,script,"손으로 쓰기, 대본",script
+워드마스터,chapter40,possibility,"가능성, 가망",possibility
+워드마스터,chapter40,fad,일시적 유행,fad
+워드마스터,chapter40,sibling,"형제자매, 동기",sibling
+워드마스터,chapter40,linger,"오래 머물다, 계속되다",linger
+워드마스터,chapter40,flourish,"번영하다, 번창하다",flourish
+워드마스터,chapter40,discharge,"배출, 내보냄, 방전, 해고하다",discharge
+워드마스터,chapter40,thorough,철저한,thorough
+워드마스터,chapter40,undertake,"수행하다, (일을) 떠맡다, 착수하다",undertake
+워드마스터,chapter40,cord,"끈, 전기코드",cord
+워드마스터,chapter40,linguistic,"언어의, 언어학의",linguistic
+워드마스터,chapter40,remedy,"치료, 요법",remedy
+워드마스터,chapter40,sole,유일한,sole
+워드마스터,chapter40,sophomore,"(대학,고등학교의) 2학년생",sophomore
+워드마스터,chapter40,panel,"토론자단, 패널, 넓은 직사각형의 합판",panel
+워드마스터,chapter40,suitor,"소송인, 구혼자",suitor
+워드마스터,chapter40,pillar,기둥,pillar
+워드마스터,chapter40,explode,폭발하다,explode
+워드마스터,chapter40,illusion,"환상, 착각",illusion
+워드마스터,chapter41,regret,"후회하다, 한탄하다, 유감, 후회",regret
+워드마스터,chapter41,coffin,관(棺),coffin
+워드마스터,chapter41,divine,"신성한, 신으로부터의",divine
+워드마스터,chapter41,revenue,"수입, 수익",revenue
+워드마스터,chapter41,corrupt,"부정한, 부패한, 타락시키다",corrupt
+워드마스터,chapter41,probe,"조사하다, 탐사선",probe
+워드마스터,chapter41,factual,실제의,factual
+워드마스터,chapter41,swamp,늪지,swamp
+워드마스터,chapter41,expedition,탐험(대),expedition
+워드마스터,chapter41,abnormal,비정상의,abnormal
+워드마스터,chapter41,storage,"저장, 저장고",storage
+워드마스터,chapter41,revive,되살아나다,revive
+워드마스터,chapter41,stool,"(등받이가 없는)걸상, 변기",stool
+워드마스터,chapter41,hinder,방해하다,hinder
+워드마스터,chapter41,flattery,아첨,flattery
+워드마스터,chapter41,virtue,미덕,virtue
+워드마스터,chapter41,deadline,"마감 시간, 최종 기한",deadline
+워드마스터,chapter41,equator,적도,equator
+워드마스터,chapter41,cognitive,"인식의, 인식력 있는",cognitive
+워드마스터,chapter41,motion,"몸짓, 몸짓으로 지시(신호)하다",motion
+워드마스터,chapter41,humble,"겸손한, 비천한",humble
+워드마스터,chapter41,bounce,"(공이)튀다, 뛰어오르다",bounce
+워드마스터,chapter41,imprison,투옥하다,imprison
+워드마스터,chapter41,enlist,"(군인을) 모집하다, 도움을 얻다",enlist
+워드마스터,chapter41,hygiene,"위생, 위생학",hygiene
+워드마스터,chapter41,upcoming,다가오는,upcoming
+워드마스터,chapter41,trace,"흔적, 흔적을 쫓다",trace
+워드마스터,chapter41,pulse,맥박,pulse
+워드마스터,chapter41,controversy,"논란, 논쟁",controversy
+워드마스터,chapter41,locate,"~에 위치하다, (위치를)찾아내다",locate
+워드마스터,chapter42,patent,"특허, 특허권, ~의 특허를 얻다",patent
+워드마스터,chapter42,lyric,"노래 가사, 서정시, 서정적인",lyric
+워드마스터,chapter42,convenience,"편의, 편리",convenience
+워드마스터,chapter42,rush,"돌진하다, 갑자기 일어나다",rush
+워드마스터,chapter42,carbon,탄소,carbon
+워드마스터,chapter42,contaminate,오염시키다,contaminate
+워드마스터,chapter42,external,외부의,external
+워드마스터,chapter42,herd,짐승의 떼,herd
+워드마스터,chapter42,allocate,"할당하다, 배분하다",allocate
+워드마스터,chapter42,gorgeous,"화려한, 아주 멋진",gorgeous
+워드마스터,chapter42,confess,고백하다,confess
+워드마스터,chapter42,subjective,"주관적인, 주격의",subjective
+워드마스터,chapter42,hell,지옥,hell
+워드마스터,chapter42,acknowledge,인정하다,acknowledge
+워드마스터,chapter42,accord,"일치하다, 협정, 일치",accord
+워드마스터,chapter42,immense,막대한,immense
+워드마스터,chapter42,extract,"추출하다, 추출물",extract
+워드마스터,chapter42,sewage,하수,sewage
+워드마스터,chapter42,reconciliation,화해,reconciliation
+워드마스터,chapter42,amid,~의 한가운데,amid
+워드마스터,chapter42,warrant,"보증, 영장, 보증하다",warrant
+워드마스터,chapter42,complement,"보완하다, 보충물",complement
+워드마스터,chapter42,ceramic,"도자기, 도자기의",ceramic
+워드마스터,chapter42,license,"면허, 인가, 면허를 내주다",license
+워드마스터,chapter42,emerge,"나오다, 나타나다, 드러나다",emerge
+워드마스터,chapter42,halt,"정지, 일시 멈춤, 정지하다",halt
+워드마스터,chapter42,ivory,"상아, 상아색",ivory
+워드마스터,chapter42,ponder,심사숙고하다,ponder
+워드마스터,chapter42,lottery,"복권, 추첨",lottery
+워드마스터,chapter42,stroke,"뇌졸중, 강타",stroke
+워드마스터,chapter43,burglar,(주거침입) 강도,burglar
+워드마스터,chapter43,blame,"비난하다, ~의 탓으로 돌리다",blame
+워드마스터,chapter43,transplant,"이식, 이식하다",transplant
+워드마스터,chapter43,cluster,"(사람들의)무리, (과일의)송이, 성단",cluster
+워드마스터,chapter43,borrow,빌리다,borrow
+워드마스터,chapter43,derive,"끌어내다, ~에서 비롯하다",derive
+워드마스터,chapter43,plague,전염병,plague
+워드마스터,chapter43,certificate,증명서,certificate
+워드마스터,chapter43,deluxe,"호화로운, 사치스러운",deluxe
+워드마스터,chapter43,convey,"전달하다, 나르다",convey
+워드마스터,chapter43,depth,깊이,depth
+워드마스터,chapter43,evaporate,증발하다,evaporate
+워드마스터,chapter43,lame,절름발이의,lame
+워드마스터,chapter43,conduct,"(업무 따위를) 실시하다, 행위, 안내",conduct
+워드마스터,chapter43,sour,신맛이 나는,sour
+워드마스터,chapter43,repetitive,반복성의,repetitive
+워드마스터,chapter43,oppress,억압하다,oppress
+워드마스터,chapter43,leftover,"나머지의, 남은",leftover
+워드마스터,chapter43,embrace,"포옹하다, 받아들이다",embrace
+워드마스터,chapter43,blade,칼날,blade
+워드마스터,chapter43,abundant,풍부한,abundant
+워드마스터,chapter43,duplicate,"복제품, 복제하다, 이중으로 하다",duplicate
+워드마스터,chapter43,remind,"생각나게 하다, 상기시키다",remind
+워드마스터,chapter43,altitude,"고도, 높이",altitude
+워드마스터,chapter43,glimpse,"흘긋 봄, 흘긋 보다, 깨닫다",glimpse
+워드마스터,chapter43,blend,"혼합, 혼합하다",blend
+워드마스터,chapter43,swell,"부풀다, 팽창",swell
+워드마스터,chapter43,grief,큰 슬픔,grief
+워드마스터,chapter43,beverage,음료,beverage
+워드마스터,chapter43,warrior,용사,warrior
+워드마스터,chapter44,earn,"평판을) 얻다, 벌다",earn
+워드마스터,chapter44,slice,"얇은 조각, 얇게 썰다",slice
+워드마스터,chapter44,exotic,이국적인,exotic
+워드마스터,chapter44,arrogant,거만한,arrogant
+워드마스터,chapter44,vanish,사라지다,vanish
+워드마스터,chapter44,rational,"이성적인, 합리적인",rational
+워드마스터,chapter44,predominant,"뛰어난, 우세한",predominant
+워드마스터,chapter44,cozy,아늑한,cozy
+워드마스터,chapter44,broker,중개인,broker
+워드마스터,chapter44,auction,"경매, 경매에 부치다",auction
+워드마스터,chapter44,obsess,"강박관념을 갖다, (망상이) 사로잡다",obsess
+워드마스터,chapter44,feed,"먹이를 주다, 부양하다",feed
+워드마스터,chapter44,outbreak,"(전쟁, 질병 등의)발발, 폭동",outbreak
+워드마스터,chapter44,invent,발명하다,invent
+워드마스터,chapter44,pioneer,"개척자, 개척자의, 개척하다",pioneer
+워드마스터,chapter44,assert,"주장하다, 행사하다",assert
+워드마스터,chapter44,undo,"원상태로 돌리다, (매듭을) 풀다",undo
+워드마스터,chapter44,bouquet,꽃다발,bouquet
+워드마스터,chapter44,elaborate,"정교한, 공들인",elaborate
+워드마스터,chapter44,toss,던지다,toss
+워드마스터,chapter44,retain,보유하다,retain
+워드마스터,chapter44,radioactive,방사성의,radioactive
+워드마스터,chapter44,buildup,축적,buildup
+워드마스터,chapter44,machinery,(집합적) 기계,machinery
+워드마스터,chapter44,passerby,"통행인, 지나가는 사람",passerby
+워드마스터,chapter44,auditorium,강당,auditorium
+워드마스터,chapter44,lay,"(물건을) 놓다, 알을 낳다",lay
+워드마스터,chapter44,neglect,"무시하다, 소홀, 무시",neglect
+워드마스터,chapter44,feedback,"반응, 피드백",feedback
+워드마스터,chapter44,promote,"증진하다, 승진시키다",promote
+워드마스터,chapter45,impair,손상시키다,impair
+워드마스터,chapter45,metaphor,"은유, 은유법",metaphor
+워드마스터,chapter45,dispense,분배하다,dispense
+워드마스터,chapter45,bruise,"타박상, 멍, 타박상을 입히다, 멍들게 하다",bruise
+워드마스터,chapter45,attorney,변호사,attorney
+워드마스터,chapter45,framework,"하부구조, 뼈대, 틀",framework
+워드마스터,chapter45,heredity,"유전, 유전형질",heredity
+워드마스터,chapter45,naive,순진한,naive
+워드마스터,chapter45,shed,"떨구다, 흘리다, 발산하다",shed
+워드마스터,chapter45,metropolitan,"수도권의, 대도시의",metropolitan
+워드마스터,chapter45,shield,"방패, 보호물, 보호하다",shield
+워드마스터,chapter45,induce,"유도하다, 설득하다",induce
+워드마스터,chapter45,bazaar,"시장, 바자, (중동의) 상점가",bazaar
+워드마스터,chapter45,expel,쫓아내다,expel
+워드마스터,chapter45,plow,"쟁기, 쟁기질하다",plow
+워드마스터,chapter45,prolong,연장하다,prolong
+워드마스터,chapter45,fluent,유창한,fluent
+워드마스터,chapter45,margin,가장자리,margin
+워드마스터,chapter45,ecology,생태학,ecology
+워드마스터,chapter45,interior,"내부, 내부의",interior
+워드마스터,chapter45,ornament,"장식, 장식하다",ornament
+워드마스터,chapter45,separate,분리하다,separate
+워드마스터,chapter45,ripe,익은,ripe
+워드마스터,chapter45,vibrate,"진동하다, 흔들다",vibrate
+워드마스터,chapter45,urgent,"긴급한, 다급한",urgent
+워드마스터,chapter45,speculate,"사색하다, 투기하다",speculate
+워드마스터,chapter45,epidemic,"전염병, 유행병, 전염병의",epidemic
+워드마스터,chapter45,precede,"~에 앞서다, 먼저 일어나다",precede
+워드마스터,chapter45,breathtaking,"아슬아슬한, 숨 막히는",breathtaking
+워드마스터,chapter45,portfolio,"대표 작품 선집, 포트폴리오",portfolio
+워드마스터,chapter46,beware,조심하다,beware
+워드마스터,chapter46,handcuff,수갑,handcuff
+워드마스터,chapter46,overturn,"전복시키다, 전복",overturn
+워드마스터,chapter46,pregnant,임신한,pregnant
+워드마스터,chapter46,intelligence,"지능, 지성",intelligence
+워드마스터,chapter46,adapt,적응시키다,adapt
+워드마스터,chapter46,settle,"정착하다, 정착시키다",settle
+워드마스터,chapter46,assassinate,암살하다,assassinate
+워드마스터,chapter46,vapor,"증기, 증발하다",vapor
+워드마스터,chapter46,tuition,수업료,tuition
+워드마스터,chapter46,literature,"문학, 문예, 문헌",literature
+워드마스터,chapter46,loop,고리,loop
+워드마스터,chapter46,quote,인용하다,quote
+워드마스터,chapter46,inhale,(숨을) 들이쉬다,inhale
+워드마스터,chapter46,prospect,"가능성, 전망",prospect
+워드마스터,chapter46,anchor,"닻, 닻을 내리다, 앵커",anchor
+워드마스터,chapter46,reference,"참고, 참조, 언급",reference
+워드마스터,chapter46,compound,"화합물, 합성의, 혼합하다",compound
+워드마스터,chapter46,withstand,견디다,withstand
+워드마스터,chapter46,implement,"도구, 실행하다",implement
+워드마스터,chapter46,anonymous,익명의,anonymous
+워드마스터,chapter46,collide,충돌하다,collide
+워드마스터,chapter46,memorial,"기념물, 기념관",memorial
+워드마스터,chapter46,vacant,"빈, 비어있는",vacant
+워드마스터,chapter46,technical,"기술(기법)의, 전문적인",technical
+워드마스터,chapter46,summon,"소집하다, 소환하다",summon
+워드마스터,chapter46,orchard,과수원,orchard
+워드마스터,chapter46,proportion,"비율, 부분",proportion
+워드마스터,chapter46,antibiotic,항생물질,antibiotic
+워드마스터,chapter46,overtake,따라잡다,overtake
+워드마스터,chapter47,resemble,닮다,resemble
+워드마스터,chapter47,wander,(정처 없이)돌아다니다,wander
+워드마스터,chapter47,compassion,"연민, 동정",compassion
+워드마스터,chapter47,preoccupation,"몰두, 집착, 선취",preoccupation
+워드마스터,chapter47,paste,"풀, 반죽, 풀칠하다, 붙이다",paste
+워드마스터,chapter47,provoke,"선동하다, 자극하다",provoke
+워드마스터,chapter47,wicked,사악한,wicked
+워드마스터,chapter47,sprain,"(손목, 발목 등을) 삐다",sprain
+워드마스터,chapter47,propaganda,"선전 활동, 선전",propaganda
+워드마스터,chapter47,consistent,"일관된, 모순이 없는",consistent
+워드마스터,chapter47,disrupt,~을 혼란에 빠뜨리다,disrupt
+워드마스터,chapter47,solitary,"혼자의, 외로운, 고독한",solitary
+워드마스터,chapter47,bury,파묻다,bury
+워드마스터,chapter47,rust,"녹, 녹슬다",rust
+워드마스터,chapter47,discuss,토론하다,discuss
+워드마스터,chapter47,referee,"심판, 심판하다",referee
+워드마스터,chapter47,sector,"분야, 지역, 부채꼴",sector
+워드마스터,chapter47,boost,"상승, 밀어올리다, (생산량을) 증가하다",boost
+워드마스터,chapter47,gymnastics,"체육, 체조",gymnastics
+워드마스터,chapter47,gross,"총합, 총합의, 엄청난",gross
+워드마스터,chapter47,crook,"사기꾼, 갈고리, 구부리다",crook
+워드마스터,chapter47,tariff,"관세, 관세를 부과하다",tariff
+워드마스터,chapter47,beloved,사랑스러운,beloved
+워드마스터,chapter47,regard,"~으로 여기다, 관계, 고려",regard
+워드마스터,chapter47,yeast,"효모, 발효하다",yeast
+워드마스터,chapter47,skyscraper,"마천루, 고층 건물",skyscraper
+워드마스터,chapter47,inquire,"묻다, 조사하다",inquire
+워드마스터,chapter47,spade,삽,spade
+워드마스터,chapter47,vacuum,"진공, 진공청소기, 진공청소기로 청소하다",vacuum
+워드마스터,chapter47,migrate,"이동하다, 이주하다",migrate
+워드마스터,chapter48,spectacle,광경,spectacle
+워드마스터,chapter48,surplus,"나머지, 과잉, 과잉의, 나머지의",surplus
+워드마스터,chapter48,overlap,"겹치다, 중복",overlap
+워드마스터,chapter48,integration,"통합, (수학) 적분",integration
+워드마스터,chapter48,hypothesis,가설(假說),hypothesis
+워드마스터,chapter48,affirm,단언하다,affirm
+워드마스터,chapter48,fortress,(대규모의) 요새,fortress
+워드마스터,chapter48,armor,갑옷,armor
+워드마스터,chapter48,cue,"단서, 신호",cue
+워드마스터,chapter48,obscure,"분명치 않은, 이해하기 어려운",obscure
+워드마스터,chapter48,divide,"나누다, 분리하다, 분할",divide
+워드마스터,chapter48,inborn,타고난,inborn
+워드마스터,chapter48,simulate,"흉내를 내다, 모의시험 하다",simulate
+워드마스터,chapter48,fatigue,"피로, 피곤하게 하다",fatigue
+워드마스터,chapter48,clone,"복제 생물, 클론, 복제하다",clone
+워드마스터,chapter48,peel,"~의 껍질을 벗기다, 껍질",peel
+워드마스터,chapter48,ease,"진정시키다, 편함, 용이함",ease
+워드마스터,chapter48,explore,탐험하다,explore
+워드마스터,chapter48,mole,"사마귀, 점",mole
+워드마스터,chapter48,flea,벼룩,flea
+워드마스터,chapter48,vaccine,"백신, (컴퓨터) 바이러스 예방",vaccine
+워드마스터,chapter48,tread,"밟다, 걷다, 밟음",tread
+워드마스터,chapter48,vomit,토하다,vomit
+워드마스터,chapter48,prophecy,예언,prophecy
+워드마스터,chapter48,correspond,"일치하다, 서신 왕래하다",correspond
+워드마스터,chapter48,cling,"달라붙다, 집착하다",cling
+워드마스터,chapter48,mutation,"돌연변이, 변화",mutation
+워드마스터,chapter48,fund,"기금, 자금을 제공하다",fund
+워드마스터,chapter48,tyrant,"폭주, 전제군주",tyrant
+워드마스터,chapter48,odd,"이상한, 홀수의",odd
+워드마스터,chapter49,intriguing,아주 흥미로운,intriguing
+워드마스터,chapter49,restrain,"억제하다, 구속하다",restrain
+워드마스터,chapter49,bundle,"묶음, 꾸러미",bundle
+워드마스터,chapter49,enclose,"동봉하다, 에워싸다",enclose
+워드마스터,chapter49,insert,삽입하다,insert
+워드마스터,chapter49,keen,"날카로운, 예민한",keen
+워드마스터,chapter49,constrict,"죄다, 수축시키다",constrict
+워드마스터,chapter49,submit,"복종시키다, 복종하다",submit
+워드마스터,chapter49,reputation,"평판, 명성",reputation
+워드마스터,chapter49,measurement,"측량, 측정, 지수",measurement
+워드마스터,chapter49,originate,"시작되다, 비롯하다",originate
+워드마스터,chapter49,flour,밀가루,flour
+워드마스터,chapter49,testify,"검증하다, 증명하다",testify
+워드마스터,chapter49,Celsius,"섭씨의, 섭씨",Celsius
+워드마스터,chapter49,patriot,애국자,patriot
+워드마스터,chapter49,interchange,"교환, 교차점, 교환하다",interchange
+워드마스터,chapter49,intuitive,"직관적인, 직관에 의한",intuitive
+워드마스터,chapter49,garment,의복,garment
+워드마스터,chapter49,spontaneous,"자발적인, 자연히 일어나는",spontaneous
+워드마스터,chapter49,vertical,수직의,vertical
+워드마스터,chapter49,manipulate,"조종하다, 조작하다",manipulate
+워드마스터,chapter49,mentor,조언자,mentor
+워드마스터,chapter49,vivid,생생한,vivid
+워드마스터,chapter49,pasture,"목초지, 목장",pasture
+워드마스터,chapter49,crust,"껍질, 지각",crust
+워드마스터,chapter49,inevitable,피할 수 없는,inevitable
+워드마스터,chapter49,plunge,"뛰어들다, 던져 넣다",plunge
+워드마스터,chapter49,appreciate,"이해하다, 고맙게 생각하다",appreciate
+워드마스터,chapter49,emigrate,(타국으로) 이주하다,emigrate
+워드마스터,chapter49,forehead,이마,forehead
+워드마스터,chapter50,deed,"행위, 업적",deed
+워드마스터,chapter50,skinny,"마른, 피골이 상접한",skinny
+워드마스터,chapter50,grill,"석쇠, 석쇠로 굽다, 심문하다",grill
+워드마스터,chapter50,curse,"저주, 저주하다",curse
+워드마스터,chapter50,canal,"수로, 운하",canal
+워드마스터,chapter50,adverse,"거스르는, 반대의, 부정적인",adverse
+워드마스터,chapter50,censorship,검열,censorship
+워드마스터,chapter50,wrist,손목,wrist
+워드마스터,chapter50,nasty,"더러운, 불쾌한",nasty
+워드마스터,chapter50,flaw,"결점, 흠",flaw
+워드마스터,chapter50,outgoing,외향적인,outgoing
+워드마스터,chapter50,dye,"염료, 염색하다",dye
+워드마스터,chapter50,foundation,"기초, 토대, 재단",foundation
+워드마스터,chapter50,segregation,"인종 차별, 분리",segregation
+워드마스터,chapter50,cemetery,공동묘지,cemetery
+워드마스터,chapter50,underlying,"밑에 놓인, 기초를 이루는",underlying
+워드마스터,chapter50,contemplate,"~을 숙고하다, 응시하다",contemplate
+워드마스터,chapter50,riddle,수수께끼,riddle
+워드마스터,chapter50,stimulate,"자극하다, 고무하다",stimulate
+워드마스터,chapter50,irrigation,관개 (물대는 시설),irrigation
+워드마스터,chapter50,consecutive,"연속적인, 일관된",consecutive
+워드마스터,chapter50,superficial,"표면상의, 피상적인",superficial
+워드마스터,chapter50,refuge,"피난, 피난처, 위안",refuge
+워드마스터,chapter50,swear,"맹세하다, 욕하다",swear
+워드마스터,chapter50,allergy,알레르기,allergy
+워드마스터,chapter50,semiconductor,반도체,semiconductor
+워드마스터,chapter50,endeavor,"노력, 노력하다",endeavor
+워드마스터,chapter50,erect,"세우다, 똑바로 선",erect
+워드마스터,chapter50,feminine,"여성의, 여성스러운",feminine
+워드마스터,chapter50,drowsy,졸리는,drowsy
+워드마스터,chapter51,inspect,"검사하다, 점검하다",inspect
+워드마스터,chapter51,carriage,"마차, 탈 것",carriage
+워드마스터,chapter51,primitive,"원시의, 초기의, 미개의, 원시인",primitive
+워드마스터,chapter51,compress,압축하다,compress
+워드마스터,chapter51,govern,다스리다,govern
+워드마스터,chapter51,abort,"유산하다, 낙태하다, 실패하다, 중단되다",abort
+워드마스터,chapter51,shatter,"산산이 부서지다, 파편",shatter
+워드마스터,chapter51,exaggerate,"과장하다, 과장해서 말하다",exaggerate
+워드마스터,chapter51,random,"무작위의, 임의의",random
+워드마스터,chapter51,bass,"저음, 베이스",bass
+워드마스터,chapter51,commemorate,기념하다,commemorate
+워드마스터,chapter51,steep,"가파른, 경사가 급한",steep
+워드마스터,chapter51,forfeit,"박탈, 몰수, 박탈당하다",forfeit
+워드마스터,chapter51,toxic,"유독한, 중독의",toxic
+워드마스터,chapter51,recommend,추천하다,recommend
+워드마스터,chapter51,chronic,"만성적인, 장기간의",chronic
+워드마스터,chapter51,designate,"지정하다, 가리키다",designate
+워드마스터,chapter51,slot,(자동판매기 따위의) 투입 구멍,slot
+워드마스터,chapter51,intense,강렬한,intense
+워드마스터,chapter51,sequence,"순서, 결과, 연속",sequence
+워드마스터,chapter51,numerous,"다수의, 수많은",numerous
+워드마스터,chapter51,shiver,"떨림, 떨다",shiver
+워드마스터,chapter51,retarded,"(정서, 지능, 학력) 발달이 뒤진",retarded
+워드마스터,chapter51,ongoing,"진행, 진행 중인",ongoing
+워드마스터,chapter51,mention,언급하다,mention
+워드마스터,chapter51,executive,"집행의, 경영의, 임원, 경영진",executive
+워드마스터,chapter51,chaos,"혼돈, 무질서",chaos
+워드마스터,chapter51,microscope,현미경,microscope
+워드마스터,chapter51,belonging,"소유물, 소지품",belonging
+워드마스터,chapter51,vulnerable,"취약한, 상처 입기 쉬운",vulnerable
+워드마스터,chapter52,implication,"함축, 암시",implication
+워드마스터,chapter52,appetite,식욕,appetite
+워드마스터,chapter52,authentic,"진짜의, 진정한",authentic
+워드마스터,chapter52,compel,"강요하다, ~하게 만들다",compel
+워드마스터,chapter52,transition,"변천, 과도기",transition
+워드마스터,chapter52,index,"지수, 색인",index
+워드마스터,chapter52,incline,"내키게 하다, 기울이다",incline
+워드마스터,chapter52,attain,달성하다,attain
+워드마스터,chapter52,innate,"천부적인, 본질적인",innate
+워드마스터,chapter52,ingenuity,"솜씨, 독창력",ingenuity
+워드마스터,chapter52,record,"기록하다, 녹음하다, 기록, 증언",record
+워드마스터,chapter52,bias,편견,bias
+워드마스터,chapter52,seize,"잡다, 이해하다",seize
+워드마스터,chapter52,screw,"나사, 나사로 고정하다",screw
+워드마스터,chapter52,savage,"야만스런, 잔인한, 야만인",savage
+워드마스터,chapter52,province,"지방, (광역 행정 구역으로서의) 도, 분야",province
+워드마스터,chapter52,coordinate,"조정하다, 동등한",coordinate
+워드마스터,chapter52,deficient,"부족한, 불완전한",deficient
+워드마스터,chapter52,privilege,"특권, 특권을 주다",privilege
+워드마스터,chapter52,preview,"미리보기, 예고편, 시사회",preview
+워드마스터,chapter52,equivalent,"동등한, 상당하는",equivalent
+워드마스터,chapter52,loom,"베틀, 흐릿하게 보이다, 불쑥 나타나다",loom
+워드마스터,chapter52,purple,"자주색, 자주색의",purple
+워드마스터,chapter52,outlaw,"금지하다, 법적으로 무효화하다",outlaw
+워드마스터,chapter52,squeeze,~을 짜내다,squeeze
+워드마스터,chapter52,breakthrough,"비약적 발전, 획기적 발전, 돌파구",breakthrough
+워드마스터,chapter52,consent,"동의, 허락, 동의하다",consent
+워드마스터,chapter52,orphan,고아,orphan
+워드마스터,chapter52,negotiate,협상하다,negotiate
+워드마스터,chapter52,nuisance,"귀찮은 사람, 성가신 것",nuisance
+워드마스터,chapter53,recipe,"조리법, 비법",recipe
+워드마스터,chapter53,deceive,속이다,deceive
+워드마스터,chapter53,sweep,"휩쓸다, 청소하다",sweep
+워드마스터,chapter53,profile,"옆 얼굴, 인물 소개",profile
+워드마스터,chapter53,enterprise,"기업, 사업",enterprise
+워드마스터,chapter53,successive,"연속되는, 상속의",successive
+워드마스터,chapter53,paradox,"역설, 패러독스",paradox
+워드마스터,chapter53,surpass,~을 능가하다,surpass
+워드마스터,chapter53,correlation,"상하관계, 상호 관련",correlation
+워드마스터,chapter53,magnitude,"거대함, 중요성, (지진) 진도",magnitude
+워드마스터,chapter53,aesthetics,미학,aesthetics
+워드마스터,chapter53,earnest,"진지한, 진심",earnest
+워드마스터,chapter53,tremble,떨다,tremble
+워드마스터,chapter53,slaughter,"도살하다, 도살, 대학살",slaughter
+워드마스터,chapter53,surrender,"넘겨주다, 포기하다, 항복하다",surrender
+워드마스터,chapter53,philosophy,철학,philosophy
+워드마스터,chapter53,deplete,"고갈시키다, 격감시키다",deplete
+워드마스터,chapter53,admire,"감탄하다, 존경하다",admire
+워드마스터,chapter53,deform,"불구로 만들다, 변형시키다",deform
+워드마스터,chapter53,thrill,"스릴, 전율, 감동(흥분)시키다",thrill
+워드마스터,chapter53,afford,~할 여유가 있다,afford
+워드마스터,chapter53,blunt,"무뚝뚝한, 퉁명스러운",blunt
+워드마스터,chapter53,sprint,"단거리 경주, 전력질주",sprint
+워드마스터,chapter53,aid,"돕다, 도움, 원조, 조력",aid
+워드마스터,chapter53,tense,"팽팽한, 긴장한, 긴장시키다",tense
+워드마스터,chapter53,amplify,"확대하다, 증폭시키다",amplify
+워드마스터,chapter53,timber,목재,timber
+워드마스터,chapter53,collaborate,협력하다,collaborate
+워드마스터,chapter53,stance,"서 있는 자세, 태도",stance
+워드마스터,chapter53,blow,"바람에 날리다, 불다",blow
+워드마스터,chapter54,ballot,"투표, 투표용지, 투표하다",ballot
+워드마스터,chapter54,division,"분할, 나누기, (군대) 사단",division
+워드마스터,chapter54,acquaintance,"아는 사이, 교제",acquaintance
+워드마스터,chapter54,boil,"끓다, 삶다",boil
+워드마스터,chapter54,contradict,"부정하다, 반박하다, 모순되다",contradict
+워드마스터,chapter54,burst,"터뜨리다, 폭발, 파열",burst
+워드마스터,chapter54,cast,"내던지다, (빛을) 발하다",cast
+워드마스터,chapter54,falsify,잘못을 입증하다,falsify
+워드마스터,chapter54,psychic,"초능력이 있는, 초자연적인, 무당, 영매",psychic
+워드마스터,chapter54,paddle,"노, 노를 젓다",paddle
+워드마스터,chapter54,steer,"~을 조종하다, 인도하다",steer
+워드마스터,chapter54,verbal,"말의, 구두의",verbal
+워드마스터,chapter54,bid,"말하다, 명령하다, 입찰하다, 입찰",bid
+워드마스터,chapter54,unpredictable,예측할 수 없는,unpredictable
+워드마스터,chapter54,temperament,"기질, 성질",temperament
+워드마스터,chapter54,harass,"괴롭히다, 희롱하다",harass
+워드마스터,chapter54,shred,"갈기갈기 찢다, 째다",shred
+워드마스터,chapter54,compost,"혼합물, 퇴비",compost
+워드마스터,chapter54,tribute,"감사(존경)의 표시, 증정물",tribute
+워드마스터,chapter54,artery,"동맥, 간선 도로",artery
+워드마스터,chapter54,conflict,"충돌하다, 투쟁, 충돌",conflict
+워드마스터,chapter54,housewarming,집들이,housewarming
+워드마스터,chapter54,slum,빈민가,slum
+워드마스터,chapter54,gracious,"상냥한, 우아한",gracious
+워드마스터,chapter54,spike,"대못, 대못을 박다",spike
+워드마스터,chapter54,mandate,"명령하다, 위임하다",mandate
+워드마스터,chapter54,sophisticated,"세련된, 순진함을 잃은",sophisticated
+워드마스터,chapter54,fiery,"불의, 열렬한, 불같은",fiery
+워드마스터,chapter54,enlightenment,"계몽, 개화, 깨달음",enlightenment
+워드마스터,chapter54,cosmetic,"화장품, 미용의",cosmetic
+워드마스터,chapter55,oval,"달걀 모양의, 타원형의, 타원체",oval
+워드마스터,chapter55,aspire,"열망하다, 동경하다",aspire
+워드마스터,chapter55,obstruct,"막다, 방해하다",obstruct
+워드마스터,chapter55,patrol,"순찰, 순찰병, 순찰하다",patrol
+워드마스터,chapter55,accelerate,"가속하다, 촉진하다",accelerate
+워드마스터,chapter55,heatstroke,"일사병, 열사병",heatstroke
+워드마스터,chapter55,catalog,"카탈로그, 목록",catalog
+워드마스터,chapter55,veteran,"경험이 많은, 베테랑, 퇴역 군인",veteran
+워드마스터,chapter55,dramatic,"연극의, 극적인",dramatic
+워드마스터,chapter55,vocation,"직업, 천직",vocation
+워드마스터,chapter55,vegetarian,"채식주의자, 채식주의자의, 채식의",vegetarian
+워드마스터,chapter55,stereotype,"인습, 고정관념",stereotype
+워드마스터,chapter55,fellow,"사나이, 동료, 동료의",fellow
+워드마스터,chapter55,sneak,"살금살금 움직이다, 몰래 움직이다",sneak
+워드마스터,chapter55,perish,"죽다, 소멸하다",perish
+워드마스터,chapter55,inseparable,"불가분의, 떼어 낼 수 없는",inseparable
+워드마스터,chapter55,domain,"영역, 영토, 분야",domain
+워드마스터,chapter55,statesman,정치가,statesman
+워드마스터,chapter55,connotation,"함축, 내포",connotation
+워드마스터,chapter55,decode,암호를 해독하다,decode
+워드마스터,chapter55,hollow,"속이 빈, 오목한, 움푹한 곳",hollow
+워드마스터,chapter55,apron,앞치마,apron
+워드마스터,chapter55,mortgage,"저당, 주택 융자",mortgage
+워드마스터,chapter55,rebel,"반역자, 반역을 일으키다",rebel
+워드마스터,chapter55,shabby,"누추한, 초라한",shabby
+워드마스터,chapter55,latter,"나중 쪽의, 후자의",latter
+워드마스터,chapter55,illuminate,"밝게 비추다, 설명하다",illuminate
+워드마스터,chapter55,mimic,"모방하다, 흉내를 잘내는, 모조의",mimic
+워드마스터,chapter55,unearth,"발굴하다, 발견하다",unearth
+워드마스터,chapter55,wail,"울부짖다, 울부짖음",wail
+워드마스터,chapter56,shudder,"떨다, 몸서리치다",shudder
+워드마스터,chapter56,stride,"성큼성큼 걷다, 성큼성큼 걷기",stride
+워드마스터,chapter56,applicant,"신청자, 지원자",applicant
+워드마스터,chapter56,disprove,오류를 증명하다,disprove
+워드마스터,chapter56,disturb,"방해하다, 어지럽히다",disturb
+워드마스터,chapter56,hemisphere,"반구체, (지구, 천체의) 반구",hemisphere
+워드마스터,chapter56,recur,"재발하다, 되풀이하다",recur
+워드마스터,chapter56,elastic,"탄력 있는, 융통성 있는",elastic
+워드마스터,chapter56,saint,성인(聖人),saint
+워드마스터,chapter56,stubborn,"완고한, 고집이 센",stubborn
+워드마스터,chapter56,suicide,자살,suicide
+워드마스터,chapter56,lure,"유혹하다, 매력",lure
+워드마스터,chapter56,underprivileged,"(경제적, 사회적으로)권리가 적은, 혜택 받지 못한",underprivileged
+워드마스터,chapter56,sway,"흔들림, 흔들리다",sway
+워드마스터,chapter56,examine,"검사하다, 진찰하다",examine
+워드마스터,chapter56,compromise,"타협하다, 타협",compromise
+워드마스터,chapter56,foremost,"주요한, 으뜸가는",foremost
+워드마스터,chapter56,precaution,"조심, 예방조치",precaution
+워드마스터,chapter56,torture,"고문, 고문하다",torture
+워드마스터,chapter56,peep,"엿보다, 엿보기",peep
+워드마스터,chapter56,morale,"사기, 의욕",morale
+워드마스터,chapter56,religious,"종교(상)의, 종교적인",religious
+워드마스터,chapter56,obligation,"의무, 계약, 채무",obligation
+워드마스터,chapter56,pest,"해충, 역병, 귀찮은 것",pest
+워드마스터,chapter56,incorporate,"통합시키다, 법인회사로 만들다",incorporate
+워드마스터,chapter56,subdue,"정복하다, 진압하다",subdue
+워드마스터,chapter56,regime,"정권, 제도",regime
+워드마스터,chapter56,terminate,"끝내다, 종결짓다",terminate
+워드마스터,chapter56,inject,"주사하다, 도입하다",inject
+워드마스터,chapter56,theft,"도둑질, (야구)도루",theft
+워드마스터,chapter57,folklore,"민속, 민속 신앙, 신화",folklore
+워드마스터,chapter57,vast,"막대한, 방대한",vast
+워드마스터,chapter57,preliminary,"예비의, 임시의 예시",preliminary
+워드마스터,chapter57,meanwhile,"한편, 그 동안에",meanwhile
+워드마스터,chapter57,painkiller,진통제,painkiller
+워드마스터,chapter57,amend,"수정하다, 고치다",amend
+워드마스터,chapter57,recess,"휴식, 휴업, 구석진 곳",recess
+워드마스터,chapter57,shelter,"피난하다, 보호하다",shelter
+워드마스터,chapter57,autonomy,"자치, 자율",autonomy
+워드마스터,chapter57,outfit,"용품, 의복, 공급하다, 준비하다",outfit
+워드마스터,chapter57,mourn,"슬퍼하다, 애도하다",mourn
+워드마스터,chapter57,evoke,"일깨우다, (영혼 등을)불러내다",evoke
+워드마스터,chapter57,stretch,"잡아 늘리다, 신축성",stretch
+워드마스터,chapter57,latitude,"(지리)위도, 위선",latitude
+워드마스터,chapter57,patch,"좁은 땅, 헝겊 조각을 붙이다",patch
+워드마스터,chapter57,maternal,"어머니의, 모국어의, 모계의",maternal
+워드마스터,chapter57,pharmacy,"약국, 약학",pharmacy
+워드마스터,chapter57,burden,"짐, 부담, 짐을 지우다",burden
+워드마스터,chapter57,prestigious,"명성이 있는, 고급의, 일류의",prestigious
+워드마스터,chapter57,friction,"마찰, 의견 충돌",friction
+워드마스터,chapter57,defend,"방어하다, 수비하다",defend
+워드마스터,chapter57,fraud,"속임, 사기꾼, 사기",fraud
+워드마스터,chapter57,easygoing,"태평스러운, 안이한",easygoing
+워드마스터,chapter57,insomnia,불면증,insomnia
+워드마스터,chapter57,intermediate,"중간의, 중간물",intermediate
+워드마스터,chapter57,transport,"수송(운송)하다, 수송",transport
+워드마스터,chapter57,paradigm,"패러다임, 이론적 틀",paradigm
+워드마스터,chapter57,breast,가슴,breast
+워드마스터,chapter57,anthropology,인류학,anthropology
+워드마스터,chapter57,premature,"조숙한, 조산한, 시기 상조의",premature
+워드마스터,chapter58,dual,"둘의, 이중의",dual
+워드마스터,chapter58,altruism,이타주의,altruism
+워드마스터,chapter58,fiber,섬유(질),fiber
+워드마스터,chapter58,irony,"반어법, 아이러니",irony
+워드마스터,chapter58,spectator,"관객, 구경꾼",spectator
+워드마스터,chapter58,medieval,중세의,medieval
+워드마스터,chapter58,analogy,"유추, 비슷함",analogy
+워드마스터,chapter58,snatch,"잡아채다, 날치기하다",snatch
+워드마스터,chapter58,upset,"마음이 상한, 엉망인",upset
+워드마스터,chapter58,throughout,"곳곳에, 도처에, 처음부터 끝까지",throughout
+워드마스터,chapter58,slogan,"선전 문구, 슬로건",slogan
+워드마스터,chapter58,composure,"침착, 평정",composure
+워드마스터,chapter58,incurable,"불치의, 구제 불능의, 불치 환자",incurable
+워드마스터,chapter58,revenge,"복수, 복수하다",revenge
+워드마스터,chapter58,indulge,"탐닉하다, 버릇없이 기르다, 만족시키다",indulge
+워드마스터,chapter58,meadow,"목초지, 초원",meadow
+워드마스터,chapter58,venture,"모험하다, 모험",venture
+워드마스터,chapter58,deflect,"빗나가다, 비끼다, 막다",deflect
+워드마스터,chapter58,adorable,"귀여운, 사랑스러운",adorable
+워드마스터,chapter58,complacent,스스로 만족해 하는,complacent
+워드마스터,chapter58,explicit,"명백한, 분명한",explicit
+워드마스터,chapter58,sturdy,"견고한, 강건한",sturdy
+워드마스터,chapter58,narrative,"(실제의) 이야기, 서술, 이야기의",narrative
+워드마스터,chapter58,lurk,"숨다, 잠복하다",lurk
+워드마스터,chapter58,advance,"나아가게 하다, 진척시키다",advance
+워드마스터,chapter58,manifest,"명백하게 하다, 증명하다",manifest
+워드마스터,chapter58,imperial,"제국의, 황제의",imperial
+워드마스터,chapter58,duration,"지속, 지속기간",duration
+워드마스터,chapter58,populate,거주시키다,populate
+워드마스터,chapter58,frugal,"검소한, 절약하는",frugal
+워드마스터,chapter59,phony,"가짜의, 가짜, 사기꾼",phony
+워드마스터,chapter59,beaver,"근면한 사람, 비버",beaver
+워드마스터,chapter59,comprise,"포함하다, 구성하다",comprise
+워드마스터,chapter59,textile,"직물, 직물의, 방직의",textile
+워드마스터,chapter59,patron,"후원자, 단골 손님, 고객",patron
+워드마스터,chapter59,spouse,배우자,spouse
+워드마스터,chapter59,approximate,"~에 가까워지다, 대략의",approximate
+워드마스터,chapter59,parallel,"평행의, 평행선, ~에 필적하는 것",parallel
+워드마스터,chapter59,sarcastic,"비꼬는, 풍자적인",sarcastic
+워드마스터,chapter59,terrain,"지형, 지역, 분야, 범위",terrain
+워드마스터,chapter59,toll,"사용세, 통행료, 요금으로 징수하다",toll
+워드마스터,chapter59,warfare,"전쟁, 교전 상태",warfare
+워드마스터,chapter59,mortal,"죽을 운명의, 치명적인",mortal
+워드마스터,chapter59,humanity,"인류, 인간성, 인간애",humanity
+워드마스터,chapter59,crispy,"바삭바삭한, 부서지기 쉬운",crispy
+워드마스터,chapter59,headmaster,교장,headmaster
+워드마스터,chapter59,rubbish,"쓰레기, 폐기물",rubbish
+워드마스터,chapter59,feeble,"가냘픈, 연약한",feeble
+워드마스터,chapter59,clumsy,"어색한, 서투른",clumsy
+워드마스터,chapter59,subsequent,"그 후의, ~에 이어 일어나는",subsequent
+워드마스터,chapter59,daze,"멍한 상태, 멍하게 하다",daze
+워드마스터,chapter59,strenuous,"피나는, 격렬한",strenuous
+워드마스터,chapter59,caravan,"순례자 무리, (사막의) 대상",caravan
+워드마스터,chapter59,countless,"셀 수 없는, 무수한",countless
+워드마스터,chapter59,condense,"농축하다, 요약하다",condense
+워드마스터,chapter59,stout,"뚱뚱한, (옷 등이)튼튼한",stout
+워드마스터,chapter59,poise,"균형, 평정, 균형을 잡다",poise
+워드마스터,chapter59,disciple,"문하생, 제자",disciple
+워드마스터,chapter59,gust,"돌풍, 질풍",gust
+워드마스터,chapter59,hail,"싸락눈, 우박, 우박이 내리다",hail
+워드마스터,chapter60,collective,"집합적인, 집단적인, 집단",collective
+워드마스터,chapter60,scope,"(관찰, 활동의) 범위, 시야, 조사하다",scope
+워드마스터,chapter60,border,"접하다, 가장자리, 국경",border
+워드마스터,chapter60,frontier,"국경, 국경의, 최첨단의",frontier
+워드마스터,chapter60,withhold,"억누르다, 억제하다, 보류하다",withhold
+워드마스터,chapter60,vanity,"허영심, 허무함",vanity
+워드마스터,chapter60,stall,"마구간, 우리, 핑계",stall
+워드마스터,chapter60,apparatus,"장치, 기구, 조직",apparatus
+워드마스터,chapter60,compatible,"모순이 없는, 양립할 수 있는",compatible
+워드마스터,chapter60,detest,"혐오하다, 미워하다",detest
+워드마스터,chapter60,vanity,"허영심, 허무함",vanity
+워드마스터,chapter60,firsthand,"직접, 바로, 직접의",firsthand
+워드마스터,chapter60,obesity,"(병적인)비만, 비대",obesity
+워드마스터,chapter60,dilemma,"진퇴양난, 딜레마, 궁지",dilemma
+워드마스터,chapter60,render,"~이 되게 하다, 주다",render
+워드마스터,chapter60,indispensable,"없어서는 안 될 것, 필수 불가결한",indispensable
+워드마스터,chapter60,structural,"구조(상)의, 조직(상)의",structural
+워드마스터,chapter60,bother,"일부러~하다, 괴롭히다",bother
+워드마스터,chapter60,counteract,"(효력을) 중화시키다, 약화시키다",counteract
+워드마스터,chapter60,static,"정적인, 고정된",static
+워드마스터,chapter60,sheriff,보안관,sheriff
+워드마스터,chapter60,charge,"채우다, 요금을 청구하다",charge
+워드마스터,chapter60,discourse,"강연, 담화",discourse
+워드마스터,chapter60,bribe,"뇌물, 뇌물을 주다",bribe
+워드마스터,chapter60,juggle,"잘 처리하다, 저글링하다",juggle
+워드마스터,chapter60,perspiration,"땀, 노력",perspiration
+워드마스터,chapter60,retention,"보유, 기억(력)",retention
+워드마스터,chapter60,valiant,"용감한, 용맹스런",valiant
+워드마스터,chapter60,distress,"고민, 고통, ~을 괴롭히다",distress
+워드마스터,chapter60,nursery,"육아실, 탁아소, 양성소",nursery
+워드마스터,chapter61,encircle,"에워싸다, 둘러싸다",encircle
+워드마스터,chapter61,notion,"개념, 의견",notion
+워드마스터,chapter61,disgust,"혐오감, 역겹게 하다",disgust
+워드마스터,chapter61,fragment,"일부분, 부서진 조각",fragment
+워드마스터,chapter61,oversee,"감독하다, 감시하다",oversee
+워드마스터,chapter61,creep,"기다, (덩굴 등이) 얽히다",creep
+워드마스터,chapter61,clarify,명백히 하다,clarify
+워드마스터,chapter61,dissolve,"용해하다, 해산하다, 해소하다",dissolve
+워드마스터,chapter61,deterioration,"약화, 가치의 하락",deterioration
+워드마스터,chapter61,equilibrium,"평형, 균형 상태",equilibrium
+워드마스터,chapter61,janitor,"문지기, 관리인, 잡역부",janitor
+워드마스터,chapter61,blush,"얼굴을 붉히다, 부끄러워하다",blush
+워드마스터,chapter61,intervene,"개입하다, 방해하다",intervene
+워드마스터,chapter61,nomad,"유목민, 방랑자",nomad
+워드마스터,chapter61,cuisine,"(독특한) 요리, 요리법",cuisine
+워드마스터,chapter61,dare,감히~하다,dare
+워드마스터,chapter61,solvent,"용해력이 있는, 지불 능력이 있는, 용제",solvent
+워드마스터,chapter61,cultivate,"경작하다, 양성하다, 계발하다",cultivate
+워드마스터,chapter61,ascent,"상승, 오름",ascent
+워드마스터,chapter61,advocate,"옹호자, 지지자, 지지하다",advocate
+워드마스터,chapter61,spur,"자극, 고무, 박차를 가하다",spur
+워드마스터,chapter61,discern,"분별하다, 식별하다, ~을 인식하다",discern
+워드마스터,chapter61,scheme,"계획, 음모, 계획하다",scheme
+워드마스터,chapter61,reproach,"비난, 비난하다",reproach
+워드마스터,chapter61,publicity,"널리 알려짐, 명성, 광고,선전",publicity
+워드마스터,chapter61,declare,선언하다,declare
+워드마스터,chapter61,brisk,"활발한, 번창하는, 상쾌한",brisk
+워드마스터,chapter61,exile,"망명, 망명시키다, 망명자",exile
+워드마스터,chapter61,handle,다루다,handle
+워드마스터,chapter61,fling,"내던지다, 돌진하다",fling
+워드마스터,chapter62,deviation,"변경, 일탈",deviation
+워드마스터,chapter62,contagious,"전염성의, 감염성의",contagious
+워드마스터,chapter62,constraint,"강제, 압박, 거북스러움",constraint
+워드마스터,chapter62,unanimous,"만장일치의, 합의의",unanimous
+워드마스터,chapter62,itch,"가려움, 가렵다, (~하고싶어) 못 견디다",itch
+워드마스터,chapter62,delude,"속이다, 착각하게 하다",delude
+워드마스터,chapter62,dehydrate,"탈수하다, 건조시키다",dehydrate
+워드마스터,chapter62,underneath,"~의 아래에, 밑에",underneath
+워드마스터,chapter62,metabolism,"물질대사, 신진대사",metabolism
+워드마스터,chapter62,decree,"법령, 포고하다",decree
+워드마스터,chapter62,pinch,"~을 꼬집다, 집다, 괴롭히다",pinch
+워드마스터,chapter62,punctual,"시간을 지키는, 기한을 지키는",punctual
+워드마스터,chapter62,last,"계속하다, 끈기",last
+워드마스터,chapter62,thorn,"가시, 괴로움의 원인",thorn
+워드마스터,chapter62,exert,"(힘, 지식 등을) 쓰다, 발휘하다",exert
+워드마스터,chapter62,aviate,"비행하다, (비행기를)조종하다",aviate
+워드마스터,chapter62,headquarters,본부(단수 취급),headquarters
+워드마스터,chapter62,rectangular,"직사각형의, 직각의",rectangular
+워드마스터,chapter62,delegate,"파견하다, 사절, 대표",delegate
+워드마스터,chapter62,elect,선출하다,elect
+워드마스터,chapter62,catastrophe,"대참사, 큰 재앙",catastrophe
+워드마스터,chapter62,empathize,"공감하다, 감정이입을 하다",empathize
+워드마스터,chapter62,expertise,전문 지식(기술),expertise
+워드마스터,chapter62,renovate,"~을 새롭게 하다, 수리하다",renovate
+워드마스터,chapter62,wrench,"렌치(너트를 죄는 기구), 비틀기",wrench
+워드마스터,chapter62,interval,"간격, 틈",interval
+워드마스터,chapter62,experiment,"실험, 실험하다",experiment
+워드마스터,chapter62,retort,"반박, 반박하다",retort
+워드마스터,chapter62,inherent,"선천적인, 본래의",inherent
+워드마스터,chapter62,asthma,천식,asthma
+워드마스터,chapter63,realm,"왕국, 영토, 영역",realm
+워드마스터,chapter63,segment,"부분, 분할하다",segment
+워드마스터,chapter63,coexist,공존하다,coexist
+워드마스터,chapter63,hospitality,"환대, 후한 대접",hospitality
+워드마스터,chapter63,estate,"소유지, 재산",estate
+워드마스터,chapter63,discreet,"분별 있는, 사려 깊은",discreet
+워드마스터,chapter63,cripple,"~을 불구로 만들다, 지체 부자유자",cripple
+워드마스터,chapter63,drawback,"문제점, 장애",drawback
+워드마스터,chapter63,tactics,"방안, 전술",tactics
+워드마스터,chapter63,dread,"공포, 무서워하다",dread
+워드마스터,chapter63,dispute,"논쟁, 분쟁, 토의하다",dispute
+워드마스터,chapter63,console,위로하다,console
+워드마스터,chapter63,stack,"더미, 쌓아올림, 쌓다",stack
+워드마스터,chapter63,cynical,"냉소적인, 비꼬는",cynical
+워드마스터,chapter63,reprove,"꾸짖다, 책망하다",reprove
+워드마스터,chapter63,verify,"검증하다, 입증하다",verify
+워드마스터,chapter63,engross,열중하게 하다,engross
+워드마스터,chapter63,bulk,"크기, 부피, 대부분",bulk
+워드마스터,chapter63,despise,~을 경멸하다,despise
+워드마스터,chapter63,manuscript,"손으로 쓴 것, 필사본, 원고",manuscript
+워드마스터,chapter63,prehistoric,선사 시대의,prehistoric
+워드마스터,chapter63,barrel,"통, (석유) 1배럴",barrel
+워드마스터,chapter63,predecessor,"앞서 있었던 것, 선배",predecessor
+워드마스터,chapter63,pastor,"목사, 종교 지도자",pastor
+워드마스터,chapter63,proclaim,"선언하다, 증명하다",proclaim
+워드마스터,chapter63,subordinate,"하급의, 부차적인",subordinate
+워드마스터,chapter63,furnish,(필요한 것을) 제공하다,furnish
+워드마스터,chapter63,fume,"연기, 연기가 나다",fume
+워드마스터,chapter63,staple,"주요한, 주요 산물",staple
+워드마스터,chapter63,reverence,"존경, 숭배",reverence
+워드마스터,chapter64,rapid,"빠른, 신속한",rapid
+워드마스터,chapter64,eloquent,"웅변의, 표현이 풍부한",eloquent
+워드마스터,chapter64,innermost,"가장 깊숙한, 가장 깊은부분",innermost
+워드마스터,chapter64,hazardous,"위험한, 모험적인",hazardous
+워드마스터,chapter64,skull,두개골,skull
+워드마스터,chapter64,detergent,세제,detergent
+워드마스터,chapter64,brutal,"야만적인, 짐승 같은, 잔혹한",brutal
+워드마스터,chapter64,rash,"발진, 뾰루지, 무분별한, 성급한",rash
+워드마스터,chapter64,bypass,"우회하다, 우회로",bypass
+워드마스터,chapter64,accommodate,"수용하다, 숙박시키다",accommodate
+워드마스터,chapter64,tact,"재치, 기지",tact
+워드마스터,chapter64,melancholy,"우울한, 우울함",melancholy
+워드마스터,chapter64,perpetual,"영구의, 끊임없는",perpetual
+워드마스터,chapter64,eligible,"적격의, 적임자",eligible
+워드마스터,chapter64,legacy,유산,legacy
+워드마스터,chapter64,monotonous,"단조로운, 지루한",monotonous
+워드마스터,chapter64,simplicity,"간단, 단순, 소박",simplicity
+워드마스터,chapter64,ditch,"수로, 도랑",ditch
+워드마스터,chapter64,reside,"거주하다, 속하다",reside
+워드마스터,chapter64,enact,"법제화하다, 제정하다",enact
+워드마스터,chapter64,burnout,"극도의 피로, 쇠진",burnout
+워드마스터,chapter64,presider,"주재자, 사회지",presider
+워드마스터,chapter64,shuffle,"질질 끌며 걷다, 뒤섞다",shuffle
+워드마스터,chapter64,summarize,요약하다,summarize
+워드마스터,chapter64,eject,"~를 쫓아내다, 배출하다",eject
+워드마스터,chapter64,intersection,"교차(로), 횡단",intersection
+워드마스터,chapter64,quest,"탐색, 탐구",quest
+워드마스터,chapter64,linear,"직선의, 길이의, 1차원의",linear
+워드마스터,chapter64,landslide,"산사태, 압도적인 승리",landslide
+워드마스터,chapter64,plausible,"그럴듯한, 말재주 있는",plausible
+워드마스터,chapter65,overcome,"~을 압도하다, 정복하다",overcome
+워드마스터,chapter65,extrinsic,"외적인, 외부의",extrinsic
+워드마스터,chapter65,merge,"합병하다, 차차 변하다",merge
+워드마스터,chapter65,frantic,"광란의, 미친",frantic
+워드마스터,chapter65,moan,"신음, 신음하다, 불평하다",moan
+워드마스터,chapter65,merchandise,(집합적) 상품,merchandise
+워드마스터,chapter65,respectively,"각각, 저마다",respectively
+워드마스터,chapter65,yearn,"그리워하다, 열망하다",yearn
+워드마스터,chapter65,conviction,"확신, 유죄 판결",conviction
+워드마스터,chapter65,post,"붙이다, 우편",post
+워드마스터,chapter65,reckon,"세다, 계산하다, 생각하다",reckon
+워드마스터,chapter65,dusk,"땅거미, 어스름",dusk
+워드마스터,chapter65,sustain,"지탱하다, 유지하다",sustain
+워드마스터,chapter65,demolish,"파괴하다, 폐지하다",demolish
+워드마스터,chapter65,degenerate,"퇴보하다, 타락하다",degenerate
+워드마스터,chapter65,sentiment,"감상, 정서",sentiment
+워드마스터,chapter65,offspring,"자식, 새끼, 성과",offspring
+워드마스터,chapter65,rent,"임대하다, 집세",rent
+워드마스터,chapter65,tackle,"(일, 문제를) 다루다",tackle
+워드마스터,chapter65,defy,"물리치다, ~에게 공공연히 반항하다",defy
+워드마스터,chapter65,predator,"육식 동물, 약탈자, 포식자",predator
+워드마스터,chapter65,embed,"깊숙이 박다, 깊이 간직하다",embed
+워드마스터,chapter65,enchant,"~에 매혹되다, ~에 마법을 걸다",enchant
+워드마스터,chapter65,detach,"떼어내다, 분리하다",detach
+워드마스터,chapter65,antagonist,"적대자, 라이벌",antagonist
+워드마스터,chapter65,thrust,"밀다, 밀치다",thrust
+워드마스터,chapter65,creed,"신념, (종교의) 교의",creed
+워드마스터,chapter65,endure,"참다, 인내하다, 견디다",endure
+워드마스터,chapter65,misplace,잘못 두다,misplace
+워드마스터,chapter65,auditory,"귀의, 청각의",auditory
+워드마스터,chapter66,missionary,선교사,missionary
+워드마스터,chapter66,cosmopolitan,"세계적인, 세계주의의",cosmopolitan
+워드마스터,chapter66,secondhand,"중고의, 간접적인",secondhand
+워드마스터,chapter66,multiple,"복합적인, 다수의, (수학)배수",multiple
+워드마스터,chapter66,refraction,"(빛, 소리 따위의) 굴절",refraction
+워드마스터,chapter66,propel,~을 나아가게 하다,propel
+워드마스터,chapter66,reptile,파충류,reptile
+워드마스터,chapter66,fixate,고정시키다,fixate
+워드마스터,chapter66,feat,"위업, 공적",feat
+워드마스터,chapter66,utensil,"가정용품, 기구, 용구",utensil
+워드마스터,chapter66,penetrate,"침투하다, 꿰뚫다",penetrate
+워드마스터,chapter66,cringe,"위축되다, 굽실거리다",cringe
+워드마스터,chapter66,notable,주목할 만한,notable
+워드마스터,chapter66,grumble,"불평, 불평하다, 으르렁거리다",grumble
+워드마스터,chapter66,jest,"농담, 조롱",jest
+워드마스터,chapter66,scrutiny,면밀한 조사,scrutiny
+워드마스터,chapter66,reckless,"부주의한, 무모한",reckless
+워드마스터,chapter66,synthetic,합성의,synthetic
+워드마스터,chapter66,productive,"생산적인, 다산의",productive
+워드마스터,chapter66,outset,"착수, 시작",outset
+워드마스터,chapter66,inaugural,"취임의, 취임사",inaugural
+워드마스터,chapter66,meek,"얌전한, 온순한",meek
+워드마스터,chapter66,kidnap,"유괴, 납치하다",kidnap
+워드마스터,chapter66,liable,"책임을 져야 할, ~할 것 같은",liable
+워드마스터,chapter66,insane,"정신이상의, 비상식적인",insane
+워드마스터,chapter66,radius,반지름,radius
+워드마스터,chapter66,compartment,"구획, 칸막이",compartment
+워드마스터,chapter66,hybrid,"혼합, 잡종",hybrid
+워드마스터,chapter66,uncover,"폭로하다, (비밀 등을) 알아내다",uncover
+워드마스터,chapter66,limb,"사지, 팔다리",limb
+워드마스터,chapter67,barefoot,"맨발의, 맨발로",barefoot
+워드마스터,chapter67,prudent,"신중한, 빈틈없는",prudent
+워드마스터,chapter67,registration,"기재, 등록",registration
+워드마스터,chapter67,grudge,"원한, 유감",grudge
+워드마스터,chapter67,lessen,줄(이)다,lessen
+워드마스터,chapter67,tangle,"얽히게 하다, 혼란시키다",tangle
+워드마스터,chapter67,relevant,"관련된, 적절한",relevant
+워드마스터,chapter67,ambiguous,애매모호한,ambiguous
+워드마스터,chapter67,enthusiasm,"열광, 열정, 열의",enthusiasm
+워드마스터,chapter67,bankruptcy,파산,bankruptcy
+워드마스터,chapter67,duel,결투,duel
+워드마스터,chapter67,prosper,"번영하다, 번창하다",prosper
+워드마스터,chapter67,phase,"단계, 국면, 상, 면, 양상",phase
+워드마스터,chapter67,veterinarian,수의사,veterinarian
+워드마스터,chapter67,counterattack,"반격, 역습, 반격하다",counterattack
+워드마스터,chapter67,cumulative,"누적되는, 점증적인",cumulative
+워드마스터,chapter67,weigh,무게를 달다,weigh
+워드마스터,chapter67,wound,"부상, 부상하게 하다",wound
+워드마스터,chapter67,discrete,"분리된, 별개의",discrete
+워드마스터,chapter67,transgenic,이식 유전자의(에 의한),transgenic

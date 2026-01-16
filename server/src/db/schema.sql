@@ -4,6 +4,7 @@
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
+    is_admin BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -43,10 +44,10 @@ CREATE INDEX IF NOT EXISTS idx_user_progress_book_unit ON user_progress(book_nam
 CREATE INDEX IF NOT EXISTS idx_user_progress_created_at ON user_progress(created_at);
 
 -- 샘플 데이터 (테스트용)
-INSERT INTO users (username) VALUES 
-    ('홍길동'),
-    ('김철수'),
-    ('이영희')
+INSERT INTO users (username, is_admin) VALUES 
+    ('홍길동', FALSE),
+    ('김철수', FALSE),
+    ('이영희', TRUE)  -- 관리자
 ON CONFLICT (username) DO NOTHING;
 
 INSERT INTO books (book_name, unit, english, korean, example) VALUES

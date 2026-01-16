@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
 
-// API 베이스 URL
-const API_BASE = '/api'
+// API 베이스 URL (프로덕션에서는 환경변수 사용)
+const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
 function App() {
   const [activeTab, setActiveTab] = useState('quiz')
@@ -11,6 +11,7 @@ function App() {
   const [userName, setUserName] = useState('')
   const [userId, setUserId] = useState(null)
   const [isVerified, setIsVerified] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [verifyError, setVerifyError] = useState('')
   
   // 단어장/단원 관련 상태
@@ -48,6 +49,16 @@ function App() {
   const [progressStats, setProgressStats] = useState(null)
   const [isLoadingProgress, setIsLoadingProgress] = useState(false)
 
+  // 정답 입력창 ref
+  const answerInputRef = useRef(null)
+
+  // feedback이 null로 바뀌면 (다음 문제로 넘어가면) 입력창에 자동 focus
+  useEffect(() => {
+    if (feedback === null && isQuizStarted && !isQuizFinished) {
+      answerInputRef.current?.focus()
+    }
+  }, [feedback, isQuizStarted, isQuizFinished])
+
   // 현재 표시할 단어
   const currentWords = isRetryMode ? retryWords : words
   const currentIndex = isRetryMode ? retryIndex : currentWordIndex
@@ -72,6 +83,7 @@ function App() {
         setUserId(data.userId)
         setBooks(data.books)
         setIsVerified(true)
+        setIsAdmin(data.isAdmin || false)
         setVerifyError('')
       } else {
         setVerifyError(data.message)
@@ -163,18 +175,22 @@ function App() {
 
       if (data.correct) {
         setFeedback({ type: 'correct', message: '정답입니다! 🎉' })
+        // 정답일 경우 1.5초 후 다음 문제로 이동하고 입력창에 focus
+        setTimeout(() => {
+          moveToNextWord()
+          answerInputRef.current?.focus()
+        }, 1500)
       } else {
         setFeedback({ type: 'incorrect', message: `오답입니다. 정답: ${data.correctAnswer}` })
         // 현재 라운드의 틀린 단어 목록에 추가
         if (!wrongWordsInRound.find(w => w.id === currentWord.id)) {
           setWrongWordsInRound(prev => [...prev, currentWord])
         }
+        // 오답일 경우 1.5초 후 다음 문제로 이동
+        setTimeout(() => {
+          moveToNextWord()
+        }, 1500)
       }
-
-      // 1.5초 후 다음 문제로 이동
-      setTimeout(() => {
-        moveToNextWord()
-      }, 1500)
     } catch (error) {
       console.error('Check answer error:', error)
       setFeedback({ type: 'incorrect', message: '서버 오류가 발생했습니다' })
@@ -273,6 +289,7 @@ function App() {
     setIsVerified(false)
     setUserId(null)
     setUserName('')
+    setIsAdmin(false)
     setBooks([])
     setSelectedBook('')
     setUnits([])
@@ -284,12 +301,12 @@ function App() {
 
   // ===== 수행 확인 관련 =====
   
-  // 사용자 목록 조회
+  // 사용자 목록 조회 (관리자만)
   useEffect(() => {
-    if (activeTab === 'review') {
+    if (activeTab === 'review' && isAdmin) {
       fetchAllUsers()
     }
-  }, [activeTab])
+  }, [activeTab, isAdmin])
 
   const fetchAllUsers = async () => {
     try {
@@ -303,10 +320,13 @@ function App() {
 
   // 수행 기록 조회
   const fetchProgress = async () => {
+    if (!userId) return // 로그인하지 않은 경우 조회하지 않음
+    
     setIsLoadingProgress(true)
     try {
       const params = new URLSearchParams()
-      if (selectedUserId) params.append('userId', selectedUserId)
+      params.append('requesterId', userId) // 요청자 ID (권한 체크용)
+      if (isAdmin && selectedUserId) params.append('userId', selectedUserId) // 관리자만 다른 사용자 조회 가능
       if (selectedDate) params.append('date', selectedDate)
 
       const response = await fetch(`${API_BASE}/progress?${params}`)
@@ -321,10 +341,10 @@ function App() {
   }
 
   useEffect(() => {
-    if (activeTab === 'review') {
+    if (activeTab === 'review' && userId) {
       fetchProgress()
     }
-  }, [activeTab, selectedUserId, selectedDate])
+  }, [activeTab, selectedUserId, selectedDate, userId, isAdmin])
 
   // 날짜 포맷팅
   const formatDate = (dateString) => {
@@ -564,6 +584,7 @@ function App() {
                 {/* 정답 입력 */}
                 <div className="answer-input-container">
                   <input
+                    ref={answerInputRef}
                     type="text"
                     className={`answer-input ${feedback?.type || ''}`}
                     placeholder={getPlaceholder()}
@@ -601,94 +622,107 @@ function App() {
 
       {activeTab === 'review' && (
         <div className="review-container">
-          {/* 필터 영역 */}
-          <div className="filter-bar">
-            <select 
-              className="filter-select"
-              value={selectedUserId}
-              onChange={(e) => setSelectedUserId(e.target.value)}
-            >
-              <option value="">전체 사용자</option>
-              {allUsers.map(user => (
-                <option key={user.id} value={user.id}>{user.username}</option>
-              ))}
-            </select>
-            
-            <input
-              type="date"
-              className="filter-date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-            />
-          </div>
-
-          {/* 통계 영역 */}
-          {progressStats && progressStats.totalWords > 0 && (
-            <div className="stats-card">
-              <div className="stat-item">
-                <span className="stat-label">총 문제</span>
-                <span className="stat-value">{progressStats.totalWords}</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-label">정답</span>
-                <span className="stat-value correct">{progressStats.correctCount}</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-label">오답</span>
-                <span className="stat-value incorrect">{progressStats.wrongCount}</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-label">정답률</span>
-                <span className={`stat-value ${progressStats.accuracy >= 80 ? 'high' : progressStats.accuracy >= 50 ? 'medium' : 'low'}`}>
-                  {progressStats.accuracy}%
-                </span>
-              </div>
+          {!isVerified ? (
+            <div className="welcome-message">
+              <h2>로그인이 필요합니다</h2>
+              <p>"단어 맞추기" 탭에서 이름을 입력하고 로그인해주세요.</p>
             </div>
-          )}
+          ) : (
+            <>
+              {/* 필터 영역 */}
+              <div className="filter-bar">
+                {isAdmin ? (
+                  <select 
+                    className="filter-select"
+                    value={selectedUserId}
+                    onChange={(e) => setSelectedUserId(e.target.value)}
+                  >
+                    <option value="">전체 사용자</option>
+                    {allUsers.map(user => (
+                      <option key={user.id} value={user.id}>{user.username}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className="user-filter-label">내 학습 기록</span>
+                )}
+                
+                <input
+                  type="date"
+                  className="filter-date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                />
+              </div>
 
-          {/* 수행 기록 목록 */}
-          <div className="records-container">
-            {isLoadingProgress ? (
-              <div className="loading">로딩 중...</div>
-            ) : progressRecords.length === 0 ? (
-              <div className="no-records">수행 기록이 없습니다</div>
-            ) : (
-              <table className="records-table">
-                <thead>
-                  <tr>
-                    <th>사용자</th>
-                    <th>단어장</th>
-                    <th>단원</th>
-                    <th>영어</th>
-                    <th>한국어</th>
-                    <th>오답</th>
-                    <th>결과</th>
-                    <th>라운드</th>
-                    <th>일시</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {progressRecords.map(record => (
-                    <tr key={record.id} className={record.is_correct ? 'correct-row' : 'incorrect-row'}>
-                      <td>{record.username}</td>
-                      <td>{record.book_name}</td>
-                      <td>{record.unit}</td>
-                      <td>{record.english}</td>
-                      <td>{record.korean}</td>
-                      <td>{record.wrong_answer || '-'}</td>
-                      <td>
-                        <span className={`result-badge ${record.is_correct ? 'correct' : 'incorrect'}`}>
-                          {record.is_correct ? '정답' : '오답'}
-                        </span>
-                      </td>
-                      <td>{record.round}</td>
-                      <td>{formatDate(record.created_at)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+              {/* 통계 영역 */}
+              {progressStats && progressStats.totalWords > 0 && (
+                <div className="stats-card">
+                  <div className="stat-item">
+                    <span className="stat-label">총 문제</span>
+                    <span className="stat-value">{progressStats.totalWords}</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">정답</span>
+                    <span className="stat-value correct">{progressStats.correctCount}</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">오답</span>
+                    <span className="stat-value incorrect">{progressStats.wrongCount}</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">정답률</span>
+                    <span className={`stat-value ${progressStats.accuracy >= 80 ? 'high' : progressStats.accuracy >= 50 ? 'medium' : 'low'}`}>
+                      {progressStats.accuracy}%
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* 수행 기록 목록 */}
+              <div className="records-container">
+                {isLoadingProgress ? (
+                  <div className="loading">로딩 중...</div>
+                ) : progressRecords.length === 0 ? (
+                  <div className="no-records">수행 기록이 없습니다</div>
+                ) : (
+                  <table className="records-table">
+                    <thead>
+                      <tr>
+                        {isAdmin && <th>사용자</th>}
+                        <th>단어장</th>
+                        <th>단원</th>
+                        <th>영어</th>
+                        <th>한국어</th>
+                        <th>오답</th>
+                        <th>결과</th>
+                        <th>라운드</th>
+                        <th>일시</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {progressRecords.map(record => (
+                        <tr key={record.id} className={record.is_correct ? 'correct-row' : 'incorrect-row'}>
+                          {isAdmin && <td>{record.username}</td>}
+                          <td>{record.book_name}</td>
+                          <td>{record.unit}</td>
+                          <td>{record.english}</td>
+                          <td>{record.korean}</td>
+                          <td>{record.wrong_answer || '-'}</td>
+                          <td>
+                            <span className={`result-badge ${record.is_correct ? 'correct' : 'incorrect'}`}>
+                              {record.is_correct ? '정답' : '오답'}
+                            </span>
+                          </td>
+                          <td>{record.round}</td>
+                          <td>{formatDate(record.created_at)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
