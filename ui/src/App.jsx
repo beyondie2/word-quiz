@@ -4,6 +4,10 @@ import './App.css'
 // API 베이스 URL (프로덕션에서는 환경변수 사용)
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
+// 디버깅용 (배포 후 삭제)
+console.log('VITE_API_URL:', import.meta.env.VITE_API_URL)
+console.log('API_BASE:', API_BASE)
+
 function App() {
   const [activeTab, setActiveTab] = useState('quiz')
   
