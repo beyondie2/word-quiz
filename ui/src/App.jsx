@@ -77,6 +77,14 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: userName.trim() })
       })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Server error:', response.status, errorText)
+        setVerifyError(`서버 오류 (${response.status})`)
+        return
+      }
+
       const data = await response.json()
 
       if (data.success) {
@@ -91,7 +99,11 @@ function App() {
       }
     } catch (error) {
       console.error('Verify error:', error)
-      setVerifyError('서버 연결에 실패했습니다')
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        setVerifyError('서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.')
+      } else {
+        setVerifyError('서버 연결에 실패했습니다')
+      }
     }
   }
 
