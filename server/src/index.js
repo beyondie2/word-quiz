@@ -13,27 +13,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS 설정
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  'http://localhost:5173',  // 로컬 개발용
-  'http://localhost:4173',  // 로컬 프리뷰용
-].filter(Boolean);
-
-app.use(cors({
-  origin: function(origin, callback) {
-    // 서버 간 요청이나 Postman 등은 origin이 없을 수 있음
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('Blocked by CORS:', origin);
-      callback(null, true); // 일단 모두 허용 (디버깅용, 추후 제한 가능)
-    }
-  },
-  credentials: true
-}));
+// CORS 설정 - 모든 origin 허용 (디버깅용)
+app.use(cors());
 app.use(express.json());
 
 // 라우터
