@@ -200,6 +200,9 @@ function App() {
       })
       const data = await response.json()
 
+      // 정답/오답 상관없이 영어 단어 발음
+      speakEnglish(currentWord.english)
+
       if (data.correct) {
         setFeedback({ type: 'correct', message: '정답입니다! 🎉' })
         // 정답일 경우 1.5초 후 다음 문제로 이동하고 입력창에 focus
@@ -309,6 +312,22 @@ function App() {
   // 플레이스홀더 텍스트
   const getPlaceholder = () => {
     return practiceMode === 'english' ? '한국어_의미' : '영어_의미'
+  }
+
+  // 영어 단어 미국식 발음으로 읽기 (TTS)
+  const speakEnglish = (text) => {
+    if ('speechSynthesis' in window) {
+      // 이전 발화 중지
+      window.speechSynthesis.cancel()
+      
+      const utterance = new SpeechSynthesisUtterance(text)
+      utterance.lang = 'en-US' // 미국식 영어
+      utterance.rate = 0.9 // 약간 느리게
+      utterance.pitch = 1
+      utterance.volume = 1
+      
+      window.speechSynthesis.speak(utterance)
+    }
   }
 
   // 로그아웃 (이름 재입력)
