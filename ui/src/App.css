@@ -547,6 +547,270 @@
   color: #F87171;
 }
 
+/* ===== 관리자 페이지 ===== */
+.admin-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 관리자 서브 탭 */
+.admin-sub-tabs {
+  display: flex;
+  gap: 10px;
+  padding: 10px 20px;
+  background-color: #1B3A4B;
+  border-radius: 8px;
+}
+
+.sub-tab-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  background-color: #0D2535;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #6B9AAD;
+  transition: all 0.2s ease;
+}
+
+.sub-tab-button:hover {
+  background-color: #153045;
+  color: #A0C4D8;
+}
+
+.sub-tab-button.active {
+  background-color: #3D7A8C;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+/* 사용자 추가 폼 */
+.add-user-form {
+  background-color: #1B3A4B;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.add-user-form h3 {
+  color: #E8F4FD;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.user-input {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  background-color: #0D2535;
+  color: #E8F4FD;
+  font-size: 0.95rem;
+  outline: none;
+  min-width: 200px;
+}
+
+.user-input:focus {
+  background-color: #153045;
+}
+
+.user-input::placeholder {
+  color: #6B9AAD;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #A0C4D8;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #5BA3B5;
+  cursor: pointer;
+}
+
+.add-button {
+  padding: 10px 25px;
+  border: none;
+  border-radius: 8px;
+  background-color: #3D7A8C;
+  color: #E8F4FD;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.add-button:hover {
+  background-color: #4D8A9C;
+}
+
+.admin-error {
+  color: #F87171;
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+/* 사용자 목록 */
+.users-list {
+  background-color: #1B3A4B;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.users-list h3 {
+  color: #E8F4FD;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
+/* 관리자 테이블 */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid #2E5A6B;
+}
+
+.admin-table th {
+  background-color: #0D2535;
+  color: #A0C4D8;
+  font-weight: 600;
+}
+
+.admin-table td {
+  color: #E8F4FD;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #2E5A6B;
+}
+
+/* 권한 뱃지 */
+.role-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.role-badge.admin {
+  background-color: #4C1D95;
+  color: #C4B5FD;
+}
+
+.role-badge.user {
+  background-color: #1E3A5F;
+  color: #93C5FD;
+}
+
+/* 작업 버튼 */
+.admin-table .action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.toggle-admin-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #4C1D95;
+  color: #E8F4FD;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.toggle-admin-btn:hover {
+  background-color: #5B21B6;
+}
+
+.delete-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #7F1D1D;
+  color: #FCA5A5;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  background-color: #991B1B;
+}
+
+.current-user {
+  color: #6B9AAD;
+  font-style: italic;
+}
+
+/* 통계 대시보드 */
+.admin-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.stats-overview {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  flex: 1;
+  min-width: 150px;
+  background-color: #1B3A4B;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-card-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #5BA3B5;
+  margin-bottom: 5px;
+}
+
+.stat-card-label {
+  color: #6B9AAD;
+  font-size: 0.9rem;
+}
+
+/* 주간 통계 & 상위 사용자 */
+.weekly-stats,
+.top-users {
+  background-color: #1B3A4B;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.weekly-stats h3,
+.top-users h3 {
+  color: #E8F4FD;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .header {
@@ -583,5 +847,32 @@
   .records-table th,
   .records-table td {
     padding: 8px 5px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .user-input {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .stats-overview {
+    flex-direction: column;
+  }
+
+  .stat-card {
+    min-width: auto;
+  }
+
+  .admin-table {
+    font-size: 0.8rem;
+  }
+
+  .admin-table .action-buttons {
+    flex-direction: column;
+    gap: 5px;
   }
 }

@@ -4,10 +4,6 @@ import './App.css'
 // API 베이스 URL (프로덕션에서는 환경변수 사용)
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
-// 디버깅용 (배포 후 삭제)
-console.log('VITE_API_URL:', import.meta.env.VITE_API_URL)
-console.log('API_BASE:', API_BASE)
-
 function App() {
   const [activeTab, setActiveTab] = useState('quiz')
   
@@ -52,6 +48,15 @@ function App() {
   const [progressRecords, setProgressRecords] = useState([])
   const [progressStats, setProgressStats] = useState(null)
   const [isLoadingProgress, setIsLoadingProgress] = useState(false)
+
+  // 관리자 페이지 관련 상태
+  const [adminUsers, setAdminUsers] = useState([])
+  const [adminStats, setAdminStats] = useState(null)
+  const [newUserName, setNewUserName] = useState('')
+  const [newUserIsAdmin, setNewUserIsAdmin] = useState(false)
+  const [isLoadingAdmin, setIsLoadingAdmin] = useState(false)
+  const [adminError, setAdminError] = useState('')
+  const [adminSubTab, setAdminSubTab] = useState('users') // 'users' or 'stats'
 
   // 정답 입력창 ref
   const answerInputRef = useRef(null)
@@ -374,6 +379,132 @@ function App() {
     })
   }
 
+  // ===== 관리자 페이지 관련 =====
+
+  // 관리자 페이지 데이터 로드
+  useEffect(() => {
+    if (activeTab === 'admin' && isAdmin && userId) {
+      fetchAdminUsers()
+      fetchAdminStats()
+    }
+  }, [activeTab, isAdmin, userId])
+
+  // 관리자용 사용자 목록 조회
+  const fetchAdminUsers = async () => {
+    setIsLoadingAdmin(true)
+    try {
+      const response = await fetch(`${API_BASE}/admin/users?adminId=${userId}`)
+      const data = await response.json()
+      if (data.users) {
+        setAdminUsers(data.users)
+      }
+    } catch (error) {
+      console.error('Fetch admin users error:', error)
+    } finally {
+      setIsLoadingAdmin(false)
+    }
+  }
+
+  // 관리자용 통계 조회
+  const fetchAdminStats = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/admin/stats?adminId=${userId}`)
+      const data = await response.json()
+      setAdminStats(data)
+    } catch (error) {
+      console.error('Fetch admin stats error:', error)
+    }
+  }
+
+  // 새 사용자 추가
+  const handleAddUser = async () => {
+    if (!newUserName.trim()) {
+      setAdminError('사용자 이름을 입력해주세요')
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/admin/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adminId: userId,
+          username: newUserName.trim(),
+          isAdmin: newUserIsAdmin
+        })
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        setNewUserName('')
+        setNewUserIsAdmin(false)
+        setAdminError('')
+        fetchAdminUsers()
+      } else {
+        setAdminError(data.error || '사용자 추가에 실패했습니다')
+      }
+    } catch (error) {
+      console.error('Add user error:', error)
+      setAdminError('서버 오류가 발생했습니다')
+    }
+  }
+
+  // 사용자 삭제
+  const handleDeleteUser = async (targetUserId, username) => {
+    if (!confirm(`"${username}" 사용자를 삭제하시겠습니까?\n모든 학습 기록도 함께 삭제됩니다.`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/admin/users/${targetUserId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: userId })
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        fetchAdminUsers()
+      } else {
+        alert(data.error || '삭제에 실패했습니다')
+      }
+    } catch (error) {
+      console.error('Delete user error:', error)
+      alert('서버 오류가 발생했습니다')
+    }
+  }
+
+  // 관리자 권한 토글
+  const handleToggleAdmin = async (targetUserId) => {
+    try {
+      const response = await fetch(`${API_BASE}/admin/users/${targetUserId}/toggle-admin`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: userId })
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        fetchAdminUsers()
+      } else {
+        alert(data.error || '권한 변경에 실패했습니다')
+      }
+    } catch (error) {
+      console.error('Toggle admin error:', error)
+      alert('서버 오류가 발생했습니다')
+    }
+  }
+
+  // 날짜만 포맷팅
+  const formatDateOnly = (dateString) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    })
+  }
+
   return (
     <div className="app-container">
       {/* 헤더 영역 */}
@@ -427,6 +558,14 @@ function App() {
           >
             수행 확인
           </button>
+          {isAdmin && (
+            <button
+              className={`tab-button ${activeTab === 'admin' ? 'active' : ''}`}
+              onClick={() => setActiveTab('admin')}
+            >
+              관리자
+            </button>
+          )}
         </nav>
       </header>
 
@@ -738,6 +877,204 @@ function App() {
                 )}
               </div>
             </>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'admin' && isAdmin && (
+        <div className="admin-container">
+          {/* 관리자 서브 탭 */}
+          <div className="admin-sub-tabs">
+            <button
+              className={`sub-tab-button ${adminSubTab === 'users' ? 'active' : ''}`}
+              onClick={() => setAdminSubTab('users')}
+            >
+              사용자 관리
+            </button>
+            <button
+              className={`sub-tab-button ${adminSubTab === 'stats' ? 'active' : ''}`}
+              onClick={() => setAdminSubTab('stats')}
+            >
+              통계 대시보드
+            </button>
+          </div>
+
+          {adminSubTab === 'users' && (
+            <div className="admin-users">
+              {/* 새 사용자 추가 */}
+              <div className="add-user-form">
+                <h3>새 사용자 추가</h3>
+                <div className="form-row">
+                  <input
+                    type="text"
+                    className="user-input"
+                    placeholder="사용자 이름"
+                    value={newUserName}
+                    onChange={(e) => setNewUserName(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddUser()}
+                  />
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={newUserIsAdmin}
+                      onChange={(e) => setNewUserIsAdmin(e.target.checked)}
+                    />
+                    관리자 권한
+                  </label>
+                  <button className="add-button" onClick={handleAddUser}>
+                    추가
+                  </button>
+                </div>
+                {adminError && <div className="admin-error">{adminError}</div>}
+              </div>
+
+              {/* 사용자 목록 */}
+              <div className="users-list">
+                <h3>사용자 목록 ({adminUsers.length}명)</h3>
+                {isLoadingAdmin ? (
+                  <div className="loading">로딩 중...</div>
+                ) : (
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>이름</th>
+                        <th>권한</th>
+                        <th>가입일</th>
+                        <th>작업</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {adminUsers.map(user => (
+                        <tr key={user.id}>
+                          <td>{user.id}</td>
+                          <td>{user.username}</td>
+                          <td>
+                            <span className={`role-badge ${user.is_admin ? 'admin' : 'user'}`}>
+                              {user.is_admin ? '관리자' : '사용자'}
+                            </span>
+                          </td>
+                          <td>{formatDateOnly(user.created_at)}</td>
+                          <td className="action-buttons">
+                            {user.id !== userId && (
+                              <>
+                                <button 
+                                  className="toggle-admin-btn"
+                                  onClick={() => handleToggleAdmin(user.id)}
+                                >
+                                  {user.is_admin ? '권한 해제' : '관리자 지정'}
+                                </button>
+                                <button 
+                                  className="delete-btn"
+                                  onClick={() => handleDeleteUser(user.id, user.username)}
+                                >
+                                  삭제
+                                </button>
+                              </>
+                            )}
+                            {user.id === userId && (
+                              <span className="current-user">(나)</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          )}
+
+          {adminSubTab === 'stats' && adminStats && (
+            <div className="admin-stats">
+              {/* 전체 통계 카드 */}
+              <div className="stats-overview">
+                <div className="stat-card">
+                  <div className="stat-card-value">{adminStats.userCount}</div>
+                  <div className="stat-card-label">전체 사용자</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-card-value">{adminStats.wordCount}</div>
+                  <div className="stat-card-label">등록된 단어</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-card-value">{adminStats.totalProgress}</div>
+                  <div className="stat-card-label">총 학습 기록</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-card-value">{adminStats.todayProgress}</div>
+                  <div className="stat-card-label">오늘 학습</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-card-value">{adminStats.accuracy}%</div>
+                  <div className="stat-card-label">전체 정답률</div>
+                </div>
+              </div>
+
+              {/* 최근 7일 학습량 */}
+              <div className="weekly-stats">
+                <h3>최근 7일 학습 현황</h3>
+                {adminStats.weeklyStats && adminStats.weeklyStats.length > 0 ? (
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>날짜</th>
+                        <th>학습 수</th>
+                        <th>정답 수</th>
+                        <th>정답률</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {adminStats.weeklyStats.map((stat, index) => (
+                        <tr key={index}>
+                          <td>{formatDateOnly(stat.date)}</td>
+                          <td>{stat.count}</td>
+                          <td>{stat.correct}</td>
+                          <td>{Math.round((stat.correct / stat.count) * 100)}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="no-records">최근 7일간 학습 기록이 없습니다</div>
+                )}
+              </div>
+
+              {/* 사용자별 학습량 */}
+              <div className="top-users">
+                <h3>사용자별 학습량 (상위 10명)</h3>
+                {adminStats.topUsers && adminStats.topUsers.length > 0 ? (
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>순위</th>
+                        <th>사용자</th>
+                        <th>총 학습</th>
+                        <th>정답</th>
+                        <th>정답률</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {adminStats.topUsers.map((user, index) => (
+                        <tr key={index}>
+                          <td>{index + 1}</td>
+                          <td>{user.username}</td>
+                          <td>{user.total_attempts}</td>
+                          <td>{user.correct_count}</td>
+                          <td>
+                            {user.total_attempts > 0 
+                              ? Math.round((user.correct_count / user.total_attempts) * 100) 
+                              : 0}%
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="no-records">학습 기록이 없습니다</div>
+                )}
+              </div>
+            </div>
           )}
         </div>
       )}

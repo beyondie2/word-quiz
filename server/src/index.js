@@ -6,6 +6,7 @@ import usersRouter from './routes/users.js';
 import booksRouter from './routes/books.js';
 import quizRouter from './routes/quiz.js';
 import progressRouter from './routes/progress.js';
+import adminRouter from './routes/admin.js';
 
 // 환경 변수 로드
 dotenv.config();
@@ -22,6 +23,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/books', booksRouter);
 app.use('/api/quiz', quizRouter);
 app.use('/api/progress', progressRouter);
+app.use('/api/admin', adminRouter);
 
 // 헬스 체크
 app.get('/api/health', (req, res) => {
