@@ -56,7 +56,13 @@ function App() {
   const [newUserIsAdmin, setNewUserIsAdmin] = useState(false)
   const [isLoadingAdmin, setIsLoadingAdmin] = useState(false)
   const [adminError, setAdminError] = useState('')
-  const [adminSubTab, setAdminSubTab] = useState('users') // 'users' or 'stats'
+  const [adminSubTab, setAdminSubTab] = useState('users') // 'users', 'stats', or 'books'
+
+  // 단어장 관리 관련 상태
+  const [adminBooks, setAdminBooks] = useState([])
+  const [uploadFile, setUploadFile] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadResult, setUploadResult] = useState(null)
 
   // 정답 입력창 ref
   const answerInputRef = useRef(null)
@@ -386,6 +392,7 @@ function App() {
     if (activeTab === 'admin' && isAdmin && userId) {
       fetchAdminUsers()
       fetchAdminStats()
+      fetchAdminBooks()
     }
   }, [activeTab, isAdmin, userId])
 
@@ -503,6 +510,99 @@ function App() {
       month: '2-digit',
       day: '2-digit'
     })
+  }
+
+  // 관리자용 단어장 목록 조회
+  const fetchAdminBooks = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/admin/books?adminId=${userId}`)
+      const data = await response.json()
+      if (data.books) {
+        setAdminBooks(data.books)
+      }
+    } catch (error) {
+      console.error('Fetch admin books error:', error)
+    }
+  }
+
+  // 엑셀 파일 업로드
+  const handleFileUpload = async () => {
+    if (!uploadFile) {
+      setUploadResult({ error: '파일을 선택해주세요' })
+      return
+    }
+
+    setIsUploading(true)
+    setUploadResult(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', uploadFile)
+      formData.append('adminId', userId)
+
+      const response = await fetch(`${API_BASE}/admin/books/upload`, {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setUploadResult({
+          success: true,
+          message: data.message,
+          insertedCount: data.insertedCount,
+          skippedCount: data.skippedCount,
+          errors: data.errors
+        })
+        setUploadFile(null)
+        // 파일 input 초기화
+        const fileInput = document.getElementById('excel-file-input')
+        if (fileInput) fileInput.value = ''
+        // 단어장 목록 새로고침
+        fetchAdminBooks()
+        // 책 목록도 새로고침 (퀴즈에서 사용)
+        const booksResponse = await fetch(`${API_BASE}/books`)
+        const booksData = await booksResponse.json()
+        setBooks(booksData.books || [])
+      } else {
+        setUploadResult({ error: data.error || '업로드에 실패했습니다', hint: data.hint })
+      }
+    } catch (error) {
+      console.error('Upload error:', error)
+      setUploadResult({ error: '서버 연결에 실패했습니다' })
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  // 단어장 삭제
+  const handleDeleteBook = async (bookName) => {
+    if (!confirm(`"${bookName}" 단어장을 삭제하시겠습니까?\n모든 단어가 삭제됩니다.`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/admin/books/${encodeURIComponent(bookName)}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: userId })
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        fetchAdminBooks()
+        // 책 목록도 새로고침
+        const booksResponse = await fetch(`${API_BASE}/books`)
+        const booksData = await booksResponse.json()
+        setBooks(booksData.books || [])
+      } else {
+        alert(data.error || '삭제에 실패했습니다')
+      }
+    } catch (error) {
+      console.error('Delete book error:', error)
+      alert('서버 오류가 발생했습니다')
+    }
   }
 
   return (
@@ -892,6 +992,12 @@ function App() {
               사용자 관리
             </button>
             <button
+              className={`sub-tab-button ${adminSubTab === 'books' ? 'active' : ''}`}
+              onClick={() => setAdminSubTab('books')}
+            >
+              단어장 관리
+            </button>
+            <button
               className={`sub-tab-button ${adminSubTab === 'stats' ? 'active' : ''}`}
               onClick={() => setAdminSubTab('stats')}
             >
@@ -975,6 +1081,99 @@ function App() {
                             {user.id === userId && (
                               <span className="current-user">(나)</span>
                             )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          )}
+
+          {adminSubTab === 'books' && (
+            <div className="admin-books">
+              {/* 엑셀 파일 업로드 */}
+              <div className="upload-section">
+                <h3>엑셀 파일로 단어 추가</h3>
+                <div className="upload-info">
+                  <p>엑셀 파일 형식: 첫 번째 행에 컬럼명이 있어야 합니다.</p>
+                  <p><strong>필수 컬럼:</strong> book_name, unit, english, korean</p>
+                  <p><strong>선택 컬럼:</strong> example</p>
+                </div>
+                <div className="upload-form">
+                  <input
+                    id="excel-file-input"
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    onChange={(e) => setUploadFile(e.target.files[0])}
+                    className="file-input"
+                  />
+                  <button 
+                    className="upload-button"
+                    onClick={handleFileUpload}
+                    disabled={isUploading || !uploadFile}
+                  >
+                    {isUploading ? '업로드 중...' : '업로드'}
+                  </button>
+                </div>
+                {uploadResult && (
+                  <div className={`upload-result ${uploadResult.success ? 'success' : 'error'}`}>
+                    {uploadResult.success ? (
+                      <>
+                        <p>{uploadResult.message}</p>
+                        {uploadResult.skippedCount > 0 && (
+                          <p>건너뛴 항목: {uploadResult.skippedCount}개</p>
+                        )}
+                        {uploadResult.errors && uploadResult.errors.length > 0 && (
+                          <div className="upload-errors">
+                            <p>오류 목록:</p>
+                            <ul>
+                              {uploadResult.errors.map((err, idx) => (
+                                <li key={idx}>{err}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <p>{uploadResult.error}</p>
+                        {uploadResult.hint && <p className="hint">{uploadResult.hint}</p>}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* 단어장 목록 */}
+              <div className="books-list">
+                <h3>단어장 목록 ({adminBooks.length}개)</h3>
+                {adminBooks.length === 0 ? (
+                  <div className="no-records">등록된 단어장이 없습니다</div>
+                ) : (
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>단어장 이름</th>
+                        <th>단원 수</th>
+                        <th>단어 수</th>
+                        <th>작업</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {adminBooks.map((book, index) => (
+                        <tr key={index}>
+                          <td>{book.book_name}</td>
+                          <td>{book.unit_count}</td>
+                          <td>{book.word_count}</td>
+                          <td>
+                            <button 
+                              className="delete-btn"
+                              onClick={() => handleDeleteBook(book.book_name)}
+                            >
+                              삭제
+                            </button>
                           </td>
                         </tr>
                       ))}

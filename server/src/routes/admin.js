@@ -1,5 +1,26 @@
 import express from 'express';
+import multer from 'multer';
+import XLSX from 'xlsx';
 import pool from '../config/database.js';
+
+// 파일 업로드 설정 (메모리 저장)
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB 제한
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel', // .xls
+      'text/csv' // .csv
+    ];
+    if (allowedTypes.includes(file.mimetype) || 
+        file.originalname.match(/\.(xlsx|xls|csv)$/i)) {
+      cb(null, true);
+    } else {
+      cb(new Error('엑셀 파일(.xlsx, .xls) 또는 CSV 파일만 업로드 가능합니다'), false);
+    }
+  }
+});
 
 const router = express.Router();
 
@@ -228,6 +249,159 @@ router.get('/stats', async (req, res) => {
   } catch (error) {
     console.error('Error fetching stats:', error);
     res.status(500).json({ error: '통계 조회에 실패했습니다' });
+  }
+});
+
+// POST /api/admin/books/upload - 엑셀 파일로 단어 일괄 추가
+router.post('/books/upload', upload.single('file'), async (req, res) => {
+  const { adminId } = req.body;
+
+  // 관리자 권한 확인
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: '파일이 업로드되지 않았습니다' });
+    }
+
+    // 엑셀 파일 파싱
+    const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet);
+
+    if (data.length === 0) {
+      return res.status(400).json({ error: '엑셀 파일에 데이터가 없습니다' });
+    }
+
+    // 필수 컬럼 확인 (book_name, unit, english, korean)
+    const requiredColumns = ['book_name', 'unit', 'english', 'korean'];
+    const firstRow = data[0];
+    const missingColumns = requiredColumns.filter(col => !(col in firstRow));
+
+    if (missingColumns.length > 0) {
+      return res.status(400).json({ 
+        error: `필수 컬럼이 누락되었습니다: ${missingColumns.join(', ')}`,
+        hint: '엑셀 파일의 첫 번째 행에 book_name, unit, english, korean 컬럼이 있어야 합니다'
+      });
+    }
+
+    // 데이터베이스에 삽입
+    let insertedCount = 0;
+    let skippedCount = 0;
+    const errors = [];
+
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      const rowNum = i + 2; // 엑셀 행 번호 (헤더 제외)
+
+      // 필수 필드 검증
+      if (!row.book_name || !row.unit || !row.english || !row.korean) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: 필수 필드가 비어있습니다`);
+        continue;
+      }
+
+      try {
+        await pool.query(
+          `INSERT INTO books (book_name, unit, english, korean, example) 
+           VALUES ($1, $2, $3, $4, $5)`,
+          [
+            String(row.book_name).trim(),
+            String(row.unit).trim(),
+            String(row.english).trim(),
+            String(row.korean).trim(),
+            row.example ? String(row.example).trim() : null
+          ]
+        );
+        insertedCount++;
+      } catch (dbError) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: ${dbError.message}`);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `${insertedCount}개의 단어가 추가되었습니다`,
+      insertedCount,
+      skippedCount,
+      totalRows: data.length,
+      errors: errors.length > 0 ? errors.slice(0, 10) : undefined // 최대 10개 오류만 반환
+    });
+
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: error.message || '파일 업로드에 실패했습니다' });
+  }
+});
+
+// GET /api/admin/books - 단어장 목록 조회 (관리자용)
+router.get('/books', async (req, res) => {
+  const { adminId } = req.query;
+
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    // 단어장별 통계
+    const result = await pool.query(`
+      SELECT 
+        book_name,
+        COUNT(DISTINCT unit) as unit_count,
+        COUNT(*) as word_count
+      FROM books 
+      GROUP BY book_name 
+      ORDER BY book_name
+    `);
+
+    res.json({ books: result.rows });
+  } catch (error) {
+    console.error('Error fetching books:', error);
+    res.status(500).json({ error: '단어장 목록 조회에 실패했습니다' });
+  }
+});
+
+// DELETE /api/admin/books/:bookName - 단어장 삭제
+router.delete('/books/:bookName', async (req, res) => {
+  const { bookName } = req.params;
+  const { adminId } = req.body;
+
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    const result = await pool.query(
+      'DELETE FROM books WHERE book_name = $1',
+      [bookName]
+    );
+
+    res.json({ 
+      success: true, 
+      deletedCount: result.rowCount 
+    });
+  } catch (error) {
+    console.error('Error deleting book:', error);
+    res.status(500).json({ error: '단어장 삭제에 실패했습니다' });
   }
 });
 
