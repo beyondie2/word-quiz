@@ -72,6 +72,70 @@
   border-radius: 8px;
 }
 
+/* 인증 폼 */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 5px;
+}
+
+.auth-tab {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 6px 6px 0 0;
+  background-color: #0D2535;
+  color: #6B9AAD;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.auth-tab:hover {
+  background-color: #153045;
+}
+
+.auth-tab.active {
+  background-color: #3D7A8C;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.auth-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.auth-input {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  min-width: 150px;
+  flex: 1;
+  outline: none;
+  background-color: #0D2535;
+  color: #E8F4FD;
+  transition: background-color 0.2s ease;
+}
+
+.auth-input::placeholder {
+  color: #6B9AAD;
+}
+
+.auth-input:focus {
+  background-color: #153045;
+  box-shadow: 0 0 0 2px #3D7A8C;
+}
+
 .name-input {
   padding: 10px 15px;
   border: none;

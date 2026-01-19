@@ -9,10 +9,15 @@ function App() {
   
   // 사용자 관련 상태
   const [userName, setUserName] = useState('')
+  const [userEmail, setUserEmail] = useState('')
+  const [userPassword, setUserPassword] = useState('')
   const [userId, setUserId] = useState(null)
   const [isVerified, setIsVerified] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [verifyError, setVerifyError] = useState('')
+  const [authMode, setAuthMode] = useState('login') // 'login' or 'register'
+  const [accessToken, setAccessToken] = useState(localStorage.getItem('accessToken') || '')
+  const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refreshToken') || '')
   
   // 단어장/단원 관련 상태
   const [books, setBooks] = useState([])
@@ -74,58 +79,181 @@ function App() {
     }
   }, [feedback, isQuizStarted, isQuizFinished])
 
+  // 앱 시작 시 토큰 확인 및 자동 로그인
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('accessToken')
+      if (token) {
+        try {
+          const response = await fetch(`${API_BASE}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+          if (response.ok) {
+            const data = await response.json()
+            setUserId(data.user.id)
+            setUserName(data.user.username)
+            setUserEmail(data.user.email)
+            setIsAdmin(data.user.isAdmin)
+            setIsVerified(true)
+            // 단어장 목록 가져오기
+            const booksResponse = await fetch(`${API_BASE}/books`)
+            const booksData = await booksResponse.json()
+            setBooks(booksData.books || [])
+          } else {
+            // 토큰 만료 시 갱신 시도
+            const refreshed = await refreshAccessToken()
+            if (!refreshed) {
+              handleLogout()
+            }
+          }
+        } catch (error) {
+          console.error('Auth check error:', error)
+        }
+      }
+    }
+    checkAuth()
+  }, [])
+
+  // Access Token 갱신
+  const refreshAccessToken = async () => {
+    const storedRefreshToken = localStorage.getItem('refreshToken')
+    if (!storedRefreshToken) return false
+
+    try {
+      const response = await fetch(`${API_BASE}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: storedRefreshToken })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        localStorage.setItem('accessToken', data.accessToken)
+        localStorage.setItem('refreshToken', data.refreshToken)
+        setAccessToken(data.accessToken)
+        setRefreshToken(data.refreshToken)
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('Token refresh error:', error)
+      return false
+    }
+  }
+
   // 현재 표시할 단어
   const currentWords = isRetryMode ? retryWords : words
   const currentIndex = isRetryMode ? retryIndex : currentWordIndex
   const currentWord = currentWords[currentIndex]
 
-  // 사용자 인증
-  const handleVerifyUser = async () => {
-    if (!userName.trim()) {
-      setVerifyError('이름을 입력해주세요')
+  // 로그인
+  const handleLogin = async () => {
+    if (!userEmail.trim() || !userPassword) {
+      setVerifyError('이메일과 비밀번호를 입력해주세요')
       return
     }
 
     try {
-      const response = await fetch(`${API_BASE}/users/verify`, {
+      const response = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: userName.trim() })
+        body: JSON.stringify({ 
+          email: userEmail.trim(), 
+          password: userPassword 
+        })
       })
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('Server error:', response.status, errorText)
-        setVerifyError(`서버 오류 (${response.status})`)
-        return
-      }
 
       const data = await response.json()
 
-      if (data.success) {
-        setUserId(data.userId)
-        setBooks(data.books)
+      if (response.ok && data.success) {
+        // 토큰 저장
+        localStorage.setItem('accessToken', data.accessToken)
+        localStorage.setItem('refreshToken', data.refreshToken)
+        setAccessToken(data.accessToken)
+        setRefreshToken(data.refreshToken)
+        
+        // 사용자 정보 설정
+        setUserId(data.user.id)
+        setUserName(data.user.username)
+        setIsAdmin(data.user.isAdmin)
         setIsVerified(true)
-        setIsAdmin(data.isAdmin || false)
         setVerifyError('')
+        setUserPassword('')
+        
+        // 단어장 목록 가져오기
+        const booksResponse = await fetch(`${API_BASE}/books`)
+        const booksData = await booksResponse.json()
+        setBooks(booksData.books || [])
       } else {
-        setVerifyError(data.message)
-        setIsVerified(false)
+        setVerifyError(data.error || '로그인에 실패했습니다')
       }
     } catch (error) {
-      console.error('Verify error:', error)
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        setVerifyError('서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.')
-      } else {
-        setVerifyError('서버 연결에 실패했습니다')
-      }
+      console.error('Login error:', error)
+      setVerifyError('서버 연결에 실패했습니다')
     }
   }
 
-  // Enter 키로 사용자 인증
-  const handleNameKeyPress = (e) => {
+  // 회원가입
+  const handleRegister = async () => {
+    if (!userName.trim() || !userEmail.trim() || !userPassword) {
+      setVerifyError('이름, 이메일, 비밀번호를 모두 입력해주세요')
+      return
+    }
+
+    if (userPassword.length < 4) {
+      setVerifyError('비밀번호는 최소 4자 이상이어야 합니다')
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          username: userName.trim(),
+          email: userEmail.trim(), 
+          password: userPassword 
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        // 토큰 저장
+        localStorage.setItem('accessToken', data.accessToken)
+        localStorage.setItem('refreshToken', data.refreshToken)
+        setAccessToken(data.accessToken)
+        setRefreshToken(data.refreshToken)
+        
+        // 사용자 정보 설정
+        setUserId(data.user.id)
+        setUserName(data.user.username)
+        setIsAdmin(data.user.isAdmin)
+        setIsVerified(true)
+        setVerifyError('')
+        setUserPassword('')
+        
+        // 단어장 목록 가져오기
+        const booksResponse = await fetch(`${API_BASE}/books`)
+        const booksData = await booksResponse.json()
+        setBooks(booksData.books || [])
+      } else {
+        setVerifyError(data.error || '회원가입에 실패했습니다')
+      }
+    } catch (error) {
+      console.error('Register error:', error)
+      setVerifyError('서버 연결에 실패했습니다')
+    }
+  }
+
+  // Enter 키로 인증
+  const handleAuthKeyPress = (e) => {
     if (e.key === 'Enter') {
-      handleVerifyUser()
+      if (authMode === 'login') {
+        handleLogin()
+      } else {
+        handleRegister()
+      }
     }
   }
 
@@ -338,11 +466,31 @@ function App() {
     }
   }
 
-  // 로그아웃 (이름 재입력)
-  const handleLogout = () => {
+  // 로그아웃
+  const handleLogout = async () => {
+    // 서버에 로그아웃 요청 (토큰이 있으면)
+    const token = localStorage.getItem('accessToken')
+    if (token) {
+      try {
+        await fetch(`${API_BASE}/auth/logout`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+      } catch (error) {
+        console.error('Logout error:', error)
+      }
+    }
+    
+    // 로컬 상태 초기화
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    setAccessToken('')
+    setRefreshToken('')
     setIsVerified(false)
     setUserId(null)
     setUserName('')
+    setUserEmail('')
+    setUserPassword('')
     setIsAdmin(false)
     setBooks([])
     setSelectedBook('')
@@ -351,6 +499,7 @@ function App() {
     setWords([])
     setIsQuizStarted(false)
     setIsQuizFinished(false)
+    setAuthMode('login')
   }
 
   // ===== 수행 확인 관련 =====
@@ -701,25 +850,62 @@ function App() {
           {/* 설정 바 영역 */}
           <div className="settings-bar">
             {!isVerified ? (
-              <>
-                <input
-                  type="text"
-                  className="name-input"
-                  placeholder="이름"
-                  value={userName}
-                  onChange={(e) => setUserName(e.target.value)}
-                  onKeyPress={handleNameKeyPress}
-                />
-                <button className="select-button primary" onClick={handleVerifyUser}>
-                  확인
-                </button>
+              <div className="auth-form">
+                <div className="auth-tabs">
+                  <button 
+                    className={`auth-tab ${authMode === 'login' ? 'active' : ''}`}
+                    onClick={() => { setAuthMode('login'); setVerifyError(''); }}
+                  >
+                    로그인
+                  </button>
+                  <button 
+                    className={`auth-tab ${authMode === 'register' ? 'active' : ''}`}
+                    onClick={() => { setAuthMode('register'); setVerifyError(''); }}
+                  >
+                    회원가입
+                  </button>
+                </div>
+                <div className="auth-inputs">
+                  {authMode === 'register' && (
+                    <input
+                      type="text"
+                      className="auth-input"
+                      placeholder="이름"
+                      value={userName}
+                      onChange={(e) => setUserName(e.target.value)}
+                      onKeyPress={handleAuthKeyPress}
+                    />
+                  )}
+                  <input
+                    type="email"
+                    className="auth-input"
+                    placeholder="이메일"
+                    value={userEmail}
+                    onChange={(e) => setUserEmail(e.target.value)}
+                    onKeyPress={handleAuthKeyPress}
+                  />
+                  <input
+                    type="password"
+                    className="auth-input"
+                    placeholder="비밀번호"
+                    value={userPassword}
+                    onChange={(e) => setUserPassword(e.target.value)}
+                    onKeyPress={handleAuthKeyPress}
+                  />
+                  <button 
+                    className="select-button primary" 
+                    onClick={authMode === 'login' ? handleLogin : handleRegister}
+                  >
+                    {authMode === 'login' ? '로그인' : '회원가입'}
+                  </button>
+                </div>
                 {verifyError && <span className="error-message">{verifyError}</span>}
-              </>
+              </div>
             ) : (
               <>
                 <div className="user-info">
                   <span className="user-name">{userName}</span>
-                  <button className="logout-button" onClick={handleLogout}>변경</button>
+                  <button className="logout-button" onClick={handleLogout}>로그아웃</button>
                 </div>
                 
                 <div className="dropdown-container">

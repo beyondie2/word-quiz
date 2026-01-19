@@ -7,6 +7,7 @@ import booksRouter from './routes/books.js';
 import quizRouter from './routes/quiz.js';
 import progressRouter from './routes/progress.js';
 import adminRouter from './routes/admin.js';
+import authRouter from './routes/auth.js';
 
 // 환경 변수 로드
 dotenv.config();
@@ -19,6 +20,7 @@ app.use(cors());
 app.use(express.json());
 
 // 라우터
+app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/books', booksRouter);
 app.use('/api/quiz', quizRouter);
