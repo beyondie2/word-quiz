@@ -6,6 +6,9 @@ dotenv.config();
 const { Pool } = pg;
 
 // Render.com에서는 DATABASE_URL 환경변수를 제공
+// 외부 PostgreSQL 연결 시 SSL 필요
+const isRemoteDB = process.env.DB_HOST && !process.env.DB_HOST.includes('localhost');
+
 const pool = process.env.DATABASE_URL
   ? new Pool({
       connectionString: process.env.DATABASE_URL,
@@ -17,6 +20,7 @@ const pool = process.env.DATABASE_URL
       database: process.env.DB_NAME || 'word_quiz',
       user: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
+      ssl: isRemoteDB ? { rejectUnauthorized: false } : false,
     });
 
 // 연결 테스트

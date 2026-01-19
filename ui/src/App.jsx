@@ -314,6 +314,14 @@ function App() {
     return practiceMode === 'english' ? '한국어_의미' : '영어_의미'
   }
 
+  // 한국어 힌트 생성 (글자 수만큼 별표 표시)
+  const getKoreanHint = () => {
+    if (!currentWord || practiceMode !== 'english') return ''
+    const korean = currentWord.korean
+    // 한글만 별표로 변환하고, 나머지 문자(공백, 쉼표 등)는 그대로 유지
+    return korean.split('').map(char => /[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(char) ? '*' : char).join('')
+  }
+
   // 영어 단어 미국식 발음으로 읽기 (TTS)
   const speakEnglish = (text) => {
     if ('speechSynthesis' in window) {
@@ -854,6 +862,13 @@ function App() {
                 <div className="question-word">
                   {getQuestionWord()}
                 </div>
+
+                {/* 힌트 (영어 모드일 때만 - 한국어 글자 수 표시) */}
+                {practiceMode === 'english' && currentWord && (
+                  <div className="korean-hint">
+                    {getKoreanHint()}
+                  </div>
+                )}
 
                 {/* 정답 입력 */}
                 <div className="answer-input-container">
