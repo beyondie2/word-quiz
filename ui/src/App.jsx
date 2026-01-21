@@ -79,6 +79,21 @@ function App() {
     }
   }, [feedback, isQuizStarted, isQuizFinished])
 
+  // 오답 피드백 상태에서 Enter 키를 누르면 다음 문제로 이동
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Enter' && feedback && feedback.type === 'incorrect') {
+        moveToNextWord()
+        answerInputRef.current?.focus()
+      }
+    }
+
+    if (feedback && feedback.type === 'incorrect') {
+      window.addEventListener('keydown', handleKeyDown)
+      return () => window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [feedback])
+
   // 앱 시작 시 토큰 확인 및 자동 로그인
   useEffect(() => {
     const checkAuth = async () => {
@@ -333,21 +348,18 @@ function App() {
 
       if (data.correct) {
         setFeedback({ type: 'correct', message: '정답입니다! 🎉' })
-        // 정답일 경우 1.5초 후 다음 문제로 이동하고 입력창에 focus
+        // 정답일 경우 즉시 다음 문제로 이동
         setTimeout(() => {
           moveToNextWord()
           answerInputRef.current?.focus()
-        }, 1500)
+        }, 0)
       } else {
-        setFeedback({ type: 'incorrect', message: `오답입니다. 정답: ${data.correctAnswer}` })
+        setFeedback({ type: 'incorrect', message: `오답입니다. 정답: ${data.correctAnswer}`, hint: 'Enter 키를 눌러 계속하세요' })
         // 현재 라운드의 틀린 단어 목록에 추가
         if (!wrongWordsInRound.find(w => w.id === currentWord.id)) {
           setWrongWordsInRound(prev => [...prev, currentWord])
         }
-        // 오답일 경우 1.5초 후 다음 문제로 이동
-        setTimeout(() => {
-          moveToNextWord()
-        }, 1500)
+        // 오답일 경우 사용자가 Enter 키를 누를 때까지 대기 (handleAnswerKeyPress에서 처리)
       }
     } catch (error) {
       console.error('Check answer error:', error)
@@ -384,10 +396,19 @@ function App() {
     }
   }
 
-  // Enter 키로 정답 제출
+  // Enter 키로 정답 제출 또는 오답 확인 후 다음으로 이동
   const handleAnswerKeyPress = (e) => {
     if (e.key === 'Enter') {
-      checkAnswer()
+      // 오답 피드백 상태일 때 Enter를 누르면 다음 문제로 이동
+      if (feedback && feedback.type === 'incorrect') {
+        moveToNextWord()
+        answerInputRef.current?.focus()
+        return
+      }
+      // 피드백이 없을 때만 정답 체크
+      if (!feedback) {
+        checkAnswer()
+      }
     }
   }
 
@@ -1074,7 +1095,8 @@ function App() {
                 {/* 피드백 메시지 */}
                 {feedback && (
                   <div className={`feedback ${feedback.type}`}>
-                    {feedback.message}
+                    <div>{feedback.message}</div>
+                    {feedback.hint && <div className="feedback-hint">{feedback.hint}</div>}
                   </div>
                 )}
 

@@ -325,6 +325,13 @@
   border: 1px solid #F87171;
 }
 
+.feedback-hint {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  opacity: 0.8;
+  font-weight: normal;
+}
+
 /* 진행 상황 표시 */
 .progress-info {
   text-align: center;
