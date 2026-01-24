@@ -850,6 +850,12 @@ function App() {
             단어 맞추기
           </button>
           <button
+            className={`tab-button ${activeTab === 'grammar' ? 'active' : ''}`}
+            onClick={() => setActiveTab('grammar')}
+          >
+            문법 익히기
+          </button>
+          <button
             className={`tab-button ${activeTab === 'review' ? 'active' : ''}`}
             onClick={() => setActiveTab('review')}
           >
@@ -1217,6 +1223,51 @@ function App() {
                     </tbody>
                   </table>
                 )}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'grammar' && (
+        <div className="grammar-container">
+          {!isVerified ? (
+            <div className="welcome-message">
+              <h2>로그인이 필요합니다</h2>
+              <p>"단어 맞추기" 탭에서 로그인해주세요.</p>
+            </div>
+          ) : (
+            <>
+              {/* 설정 바 영역 */}
+              <div className="settings-bar">
+                <div className="user-info">
+                  <span className="user-name">{userName}</span>
+                </div>
+                <button className="select-button">분류1</button>
+                <button className="select-button">분류2</button>
+                <button className="select-button">분류3</button>
+              </div>
+
+              {/* 문법 문제 영역 */}
+              <div className="grammar-area">
+                {/* 지시문 영역 */}
+                <div className="grammar-instruction">
+                  <p>문제 전체에 대한 지시문 영역</p>
+                </div>
+
+                {/* 문항 내용 영역 */}
+                <div className="grammar-question">
+                  <p>단일 문항 내용을 보여주는 영역</p>
+                </div>
+
+                {/* 정답 입력 영역 */}
+                <div className="grammar-answer-container">
+                  <input
+                    type="text"
+                    className="answer-input"
+                    placeholder="정답 입력"
+                  />
+                </div>
               </div>
             </>
           )}

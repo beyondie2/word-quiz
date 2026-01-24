@@ -1031,6 +1031,76 @@
   font-size: 1.1rem;
 }
 
+/* ===== 문법 익히기 화면 ===== */
+.grammar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.grammar-area {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 30px;
+  background-color: #1B3A4B;
+  border-radius: 8px;
+}
+
+.grammar-instruction {
+  padding: 20px;
+  background-color: #0D2535;
+  border-radius: 8px;
+  border-left: 4px solid #5BA3B5;
+}
+
+.grammar-instruction p {
+  color: #A0C4D8;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.grammar-question {
+  padding: 25px;
+  background-color: #0D2535;
+  border-radius: 8px;
+  min-height: 100px;
+}
+
+.grammar-question p {
+  color: #E8F4FD;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  margin: 0;
+}
+
+.grammar-answer-container {
+  margin-top: 10px;
+}
+
+.grammar-answer-container .answer-input {
+  width: 100%;
+  padding: 18px 25px;
+  border: 2px solid #3D7A8C;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  outline: none;
+  background-color: #0D2535;
+  color: #E8F4FD;
+  transition: all 0.2s ease;
+}
+
+.grammar-answer-container .answer-input::placeholder {
+  color: #6B9AAD;
+}
+
+.grammar-answer-container .answer-input:focus {
+  border-color: #FF69B4;
+  background-color: #153045;
+  box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .header {
