@@ -1246,6 +1246,7 @@ function App() {
                 <button className="select-button">분류1</button>
                 <button className="select-button">분류2</button>
                 <button className="select-button">분류3</button>
+                <button className="select-button">수준</button>
               </div>
 
               {/* 문법 문제 영역 */}
