@@ -36,9 +36,31 @@ CREATE TABLE IF NOT EXISTS user_progress (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Grammar 테이블: 문법 문제 정보
+CREATE TABLE IF NOT EXISTS grammar (
+    id SERIAL PRIMARY KEY,
+    category1 VARCHAR(200),          -- 분류1
+    category2 VARCHAR(200),          -- 분류2
+    level VARCHAR(100),              -- 수준
+    image_file VARCHAR(500),         -- 이미지파일
+    instruction TEXT,                -- 분류 내 전체 문항 지시 사항
+    question TEXT,                   -- 단일 문항
+    answer TEXT,                     -- 정답
+    sentence1 TEXT,                  -- 문장1
+    sentence2 TEXT,                  -- 문장2
+    sentence3 TEXT,                  -- 문장3
+    translation1 TEXT,               -- 해석1
+    translation2 TEXT,               -- 해석2
+    translation3 TEXT,               -- 해석3
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
 -- 인덱스 생성
 CREATE INDEX IF NOT EXISTS idx_books_book_name ON books(book_name);
 CREATE INDEX IF NOT EXISTS idx_books_unit ON books(unit);
+CREATE INDEX IF NOT EXISTS idx_grammar_category1 ON grammar(category1);
+CREATE INDEX IF NOT EXISTS idx_grammar_category2 ON grammar(category2);
+CREATE INDEX IF NOT EXISTS idx_grammar_level ON grammar(level);
 CREATE INDEX IF NOT EXISTS idx_user_progress_user_id ON user_progress(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_progress_book_unit ON user_progress(book_name, unit);
 CREATE INDEX IF NOT EXISTS idx_user_progress_created_at ON user_progress(created_at);

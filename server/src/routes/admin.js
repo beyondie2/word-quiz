@@ -405,4 +405,148 @@ router.delete('/books/:bookName', async (req, res) => {
   }
 });
 
+// ==================== 문법 관리 API ====================
+
+// POST /api/admin/grammar/upload - 엑셀 파일로 문법 문제 일괄 추가
+router.post('/grammar/upload', upload.single('file'), async (req, res) => {
+  const { adminId } = req.body;
+
+  // 관리자 권한 확인
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: '파일이 업로드되지 않았습니다' });
+    }
+
+    // 엑셀 파일 파싱
+    const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet);
+
+    if (data.length === 0) {
+      return res.status(400).json({ error: '엑셀 파일에 데이터가 없습니다' });
+    }
+
+    // 데이터베이스에 삽입
+    let insertedCount = 0;
+    let skippedCount = 0;
+    const errors = [];
+
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      const rowNum = i + 2; // 엑셀 행 번호 (헤더 제외)
+
+      try {
+        await pool.query(
+          `INSERT INTO grammar (category1, category2, level, image_file, instruction, question, answer, sentence1, sentence2, sentence3, translation1, translation2, translation3) 
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+          [
+            row['분류1'] ? String(row['분류1']).trim() : null,
+            row['분류2'] ? String(row['분류2']).trim() : null,
+            row['수준'] ? String(row['수준']).trim() : null,
+            row['이미지파일'] ? String(row['이미지파일']).trim() : null,
+            row['분류 내 전체 문항 지시 사항'] ? String(row['분류 내 전체 문항 지시 사항']).trim() : null,
+            row['단일 문항'] ? String(row['단일 문항']).trim() : null,
+            row['정답'] ? String(row['정답']).trim() : null,
+            row['문장1'] ? String(row['문장1']).trim() : null,
+            row['문장2'] ? String(row['문장2']).trim() : null,
+            row['문장3'] ? String(row['문장3']).trim() : null,
+            row['해석1'] ? String(row['해석1']).trim() : null,
+            row['해석2'] ? String(row['해석2']).trim() : null,
+            row['해석3'] ? String(row['해석3']).trim() : null
+          ]
+        );
+        insertedCount++;
+      } catch (dbError) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: ${dbError.message}`);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `${insertedCount}개의 문법 문제가 추가되었습니다`,
+      insertedCount,
+      skippedCount,
+      totalRows: data.length,
+      errors: errors.length > 0 ? errors.slice(0, 10) : undefined
+    });
+
+  } catch (error) {
+    console.error('Grammar upload error:', error);
+    res.status(500).json({ error: error.message || '파일 업로드에 실패했습니다' });
+  }
+});
+
+// GET /api/admin/grammar - 문법 분류 목록 조회 (관리자용)
+router.get('/grammar', async (req, res) => {
+  const { adminId } = req.query;
+
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    // 분류1별 통계
+    const result = await pool.query(`
+      SELECT 
+        category1,
+        COUNT(DISTINCT category2) as category2_count,
+        COUNT(*) as question_count
+      FROM grammar 
+      GROUP BY category1 
+      ORDER BY category1
+    `);
+
+    res.json({ grammar: result.rows });
+  } catch (error) {
+    console.error('Error fetching grammar:', error);
+    res.status(500).json({ error: '문법 목록 조회에 실패했습니다' });
+  }
+});
+
+// DELETE /api/admin/grammar/:category1 - 문법 분류 삭제
+router.delete('/grammar/:category1', async (req, res) => {
+  const { category1 } = req.params;
+  const { adminId } = req.body;
+
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    const result = await pool.query(
+      'DELETE FROM grammar WHERE category1 = $1',
+      [category1]
+    );
+
+    res.json({ 
+      success: true, 
+      deletedCount: result.rowCount 
+    });
+  } catch (error) {
+    console.error('Error deleting grammar:', error);
+    res.status(500).json({ error: '문법 삭제에 실패했습니다' });
+  }
+});
+
 export default router;

@@ -61,13 +61,19 @@ function App() {
   const [newUserIsAdmin, setNewUserIsAdmin] = useState(false)
   const [isLoadingAdmin, setIsLoadingAdmin] = useState(false)
   const [adminError, setAdminError] = useState('')
-  const [adminSubTab, setAdminSubTab] = useState('users') // 'users', 'stats', or 'books'
+  const [adminSubTab, setAdminSubTab] = useState('users') // 'users', 'stats', 'books', or 'grammar'
 
   // 단어장 관리 관련 상태
   const [adminBooks, setAdminBooks] = useState([])
   const [uploadFile, setUploadFile] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadResult, setUploadResult] = useState(null)
+
+  // 문법 관리 관련 상태
+  const [adminGrammar, setAdminGrammar] = useState([])
+  const [grammarUploadFile, setGrammarUploadFile] = useState(null)
+  const [isGrammarUploading, setIsGrammarUploading] = useState(false)
+  const [grammarUploadResult, setGrammarUploadResult] = useState(null)
 
   // 정답 입력창 ref
   const answerInputRef = useRef(null)
@@ -590,6 +596,7 @@ function App() {
       fetchAdminUsers()
       fetchAdminStats()
       fetchAdminBooks()
+      fetchAdminGrammar()
     }
   }, [activeTab, isAdmin, userId])
 
@@ -798,6 +805,91 @@ function App() {
       }
     } catch (error) {
       console.error('Delete book error:', error)
+      alert('서버 오류가 발생했습니다')
+    }
+  }
+
+  // 관리자용 문법 목록 조회
+  const fetchAdminGrammar = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/admin/grammar?adminId=${userId}`)
+      const data = await response.json()
+      if (data.grammar) {
+        setAdminGrammar(data.grammar)
+      }
+    } catch (error) {
+      console.error('Fetch admin grammar error:', error)
+    }
+  }
+
+  // 문법 엑셀 파일 업로드
+  const handleGrammarFileUpload = async () => {
+    if (!grammarUploadFile) {
+      setGrammarUploadResult({ error: '파일을 선택해주세요' })
+      return
+    }
+
+    setIsGrammarUploading(true)
+    setGrammarUploadResult(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', grammarUploadFile)
+      formData.append('adminId', userId)
+
+      const response = await fetch(`${API_BASE}/admin/grammar/upload`, {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setGrammarUploadResult({
+          success: true,
+          message: data.message,
+          insertedCount: data.insertedCount,
+          skippedCount: data.skippedCount,
+          errors: data.errors
+        })
+        setGrammarUploadFile(null)
+        // 파일 input 초기화
+        const fileInput = document.getElementById('grammar-excel-file-input')
+        if (fileInput) fileInput.value = ''
+        // 문법 목록 새로고침
+        fetchAdminGrammar()
+      } else {
+        setGrammarUploadResult({ error: data.error || '업로드에 실패했습니다', hint: data.hint })
+      }
+    } catch (error) {
+      console.error('Grammar upload error:', error)
+      setGrammarUploadResult({ error: '서버 연결에 실패했습니다' })
+    } finally {
+      setIsGrammarUploading(false)
+    }
+  }
+
+  // 문법 분류 삭제
+  const handleDeleteGrammar = async (category1) => {
+    if (!confirm(`"${category1}" 분류를 삭제하시겠습니까?\n해당 분류의 모든 문법 문제가 삭제됩니다.`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/admin/grammar/${encodeURIComponent(category1)}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: userId })
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        fetchAdminGrammar()
+      } else {
+        alert(data.error || '삭제에 실패했습니다')
+      }
+    } catch (error) {
+      console.error('Delete grammar error:', error)
       alert('서버 오류가 발생했습니다')
     }
   }
@@ -1292,6 +1384,12 @@ function App() {
               단어장 관리
             </button>
             <button
+              className={`sub-tab-button ${adminSubTab === 'grammar' ? 'active' : ''}`}
+              onClick={() => setAdminSubTab('grammar')}
+            >
+              문법 관리
+            </button>
+            <button
               className={`sub-tab-button ${adminSubTab === 'stats' ? 'active' : ''}`}
               onClick={() => setAdminSubTab('stats')}
             >
@@ -1465,6 +1563,98 @@ function App() {
                             <button 
                               className="delete-btn"
                               onClick={() => handleDeleteBook(book.book_name)}
+                            >
+                              삭제
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          )}
+
+          {adminSubTab === 'grammar' && (
+            <div className="admin-grammar">
+              {/* 엑셀 파일 업로드 */}
+              <div className="upload-section">
+                <h3>엑셀 파일로 문법 문제 추가</h3>
+                <div className="upload-info">
+                  <p>엑셀 파일 형식: 첫 번째 행에 컬럼명이 있어야 합니다.</p>
+                  <p><strong>컬럼:</strong> 분류1, 분류2, 수준, 이미지파일, 분류 내 전체 문항 지시 사항, 단일 문항, 정답, 문장1, 문장2, 문장3, 해석1, 해석2, 해석3</p>
+                </div>
+                <div className="upload-form">
+                  <input
+                    id="grammar-excel-file-input"
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    onChange={(e) => setGrammarUploadFile(e.target.files[0])}
+                    className="file-input"
+                  />
+                  <button 
+                    className="upload-button"
+                    onClick={handleGrammarFileUpload}
+                    disabled={isGrammarUploading || !grammarUploadFile}
+                  >
+                    {isGrammarUploading ? '업로드 중...' : '업로드'}
+                  </button>
+                </div>
+                {grammarUploadResult && (
+                  <div className={`upload-result ${grammarUploadResult.success ? 'success' : 'error'}`}>
+                    {grammarUploadResult.success ? (
+                      <>
+                        <p>{grammarUploadResult.message}</p>
+                        {grammarUploadResult.skippedCount > 0 && (
+                          <p>건너뛴 항목: {grammarUploadResult.skippedCount}개</p>
+                        )}
+                        {grammarUploadResult.errors && grammarUploadResult.errors.length > 0 && (
+                          <div className="upload-errors">
+                            <p>오류 목록:</p>
+                            <ul>
+                              {grammarUploadResult.errors.map((err, idx) => (
+                                <li key={idx}>{err}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <p>{grammarUploadResult.error}</p>
+                        {grammarUploadResult.hint && <p className="hint">{grammarUploadResult.hint}</p>}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* 문법 목록 */}
+              <div className="grammar-list">
+                <h3>문법 분류 목록 ({adminGrammar.length}개)</h3>
+                {adminGrammar.length === 0 ? (
+                  <div className="no-records">등록된 문법 문제가 없습니다</div>
+                ) : (
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>분류1</th>
+                        <th>분류2 수</th>
+                        <th>문제 수</th>
+                        <th>작업</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {adminGrammar.map((item, index) => (
+                        <tr key={index}>
+                          <td>{item.category1 || '(없음)'}</td>
+                          <td>{item.category2_count}</td>
+                          <td>{item.question_count}</td>
+                          <td>
+                            <button 
+                              className="delete-btn"
+                              onClick={() => handleDeleteGrammar(item.category1)}
                             >
                               삭제
                             </button>
