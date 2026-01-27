@@ -1101,6 +1101,194 @@
   box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
 }
 
+/* 문법 문제 번호 */
+.grammar-question .question-number {
+  color: #5BA3B5;
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+/* 문법 문제 텍스트 */
+.grammar-question .question-text {
+  color: #E8F4FD;
+  font-size: 1.2rem;
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* 참고 문장 영역 */
+.grammar-sentences {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #1B3A4B;
+  border-radius: 8px;
+  border-left: 3px solid #3D7A8C;
+}
+
+.grammar-sentences p {
+  margin: 0;
+  color: #E8F4FD;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.grammar-sentences .translation {
+  color: #6B9AAD;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* 정답 입력 컨테이너 (버튼 포함) */
+.grammar-answer-container {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.grammar-answer-container .answer-input {
+  flex: 1;
+  text-align: left;
+  border-radius: 8px;
+}
+
+/* 확인 버튼 */
+.check-button {
+  padding: 18px 30px;
+  border: none;
+  border-radius: 8px;
+  background-color: #3D7A8C;
+  color: #E8F4FD;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.check-button:hover:not(:disabled) {
+  background-color: #4D8A9C;
+}
+
+.check-button:disabled {
+  background-color: #2E5A6B;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 지시사항 버튼 및 드롭다운 */
+.instruction-button {
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.instruction-dropdown {
+  min-width: 400px;
+  max-width: 600px;
+}
+
+.instruction-dropdown .dropdown-item {
+  white-space: normal;
+  line-height: 1.4;
+}
+
+/* 오답 모달 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #1B3A4B;
+  padding: 30px 40px;
+  border-radius: 12px;
+  min-width: 350px;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border: 2px solid #F87171;
+}
+
+.modal-content h3 {
+  color: #F87171;
+  font-size: 1.5rem;
+  margin: 0 0 25px 0;
+}
+
+.modal-answer {
+  background-color: #0D2535;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.modal-answer .label {
+  color: #6B9AAD;
+  font-size: 0.9rem;
+  margin: 0 0 10px 0;
+}
+
+.modal-answer .correct-answer {
+  color: #4ADE80;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 0;
+  word-break: break-word;
+}
+
+.modal-hint {
+  color: #6B9AAD;
+  font-size: 0.9rem;
+  margin: 0 0 20px 0;
+}
+
+.modal-button {
+  padding: 12px 40px;
+  border: none;
+  border-radius: 8px;
+  background-color: #3D7A8C;
+  color: #E8F4FD;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.modal-button:hover {
+  background-color: #4D8A9C;
+}
+
+/* 문법 관리 */
+.admin-grammar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.grammar-list {
+  background-color: #1B3A4B;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.grammar-list h3 {
+  color: #E8F4FD;
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .header {

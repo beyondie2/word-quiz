@@ -75,8 +75,35 @@ function App() {
   const [isGrammarUploading, setIsGrammarUploading] = useState(false)
   const [grammarUploadResult, setGrammarUploadResult] = useState(null)
 
+  // 문법 익히기 관련 상태
+  const [grammarCategory1List, setGrammarCategory1List] = useState([])
+  const [selectedGrammarCategory1, setSelectedGrammarCategory1] = useState('')
+  const [showGrammarCategory1Dropdown, setShowGrammarCategory1Dropdown] = useState(false)
+  
+  const [grammarCategory2List, setGrammarCategory2List] = useState([])
+  const [selectedGrammarCategory2, setSelectedGrammarCategory2] = useState('')
+  const [showGrammarCategory2Dropdown, setShowGrammarCategory2Dropdown] = useState(false)
+  
+  const [grammarLevelList, setGrammarLevelList] = useState([])
+  const [selectedGrammarLevel, setSelectedGrammarLevel] = useState('')
+  const [showGrammarLevelDropdown, setShowGrammarLevelDropdown] = useState(false)
+  
+  const [grammarInstructionList, setGrammarInstructionList] = useState([])
+  const [selectedGrammarInstruction, setSelectedGrammarInstruction] = useState('')
+  const [showGrammarInstructionDropdown, setShowGrammarInstructionDropdown] = useState(false)
+  
+  const [grammarQuestions, setGrammarQuestions] = useState([])
+  const [currentGrammarQuestionIndex, setCurrentGrammarQuestionIndex] = useState(0)
+  const [grammarAnswer, setGrammarAnswer] = useState('')
+  const [grammarFeedback, setGrammarFeedback] = useState(null)
+  const [isGrammarQuizStarted, setIsGrammarQuizStarted] = useState(false)
+  const [isGrammarQuizFinished, setIsGrammarQuizFinished] = useState(false)
+  const [showGrammarModal, setShowGrammarModal] = useState(false)
+  const [grammarModalContent, setGrammarModalContent] = useState({ correctAnswer: '' })
+
   // 정답 입력창 ref
   const answerInputRef = useRef(null)
+  const grammarAnswerInputRef = useRef(null)
 
   // feedback이 null로 바뀌면 (다음 문제로 넘어가면) 입력창에 자동 focus
   useEffect(() => {
@@ -716,6 +743,217 @@ function App() {
     })
   }
 
+  // ===== 문법 익히기 관련 =====
+
+  // 문법 익히기 탭 활성화 시 분류1 목록 조회
+  useEffect(() => {
+    if (activeTab === 'grammar' && isVerified) {
+      fetchGrammarCategory1()
+    }
+  }, [activeTab, isVerified])
+
+  // 문법 정답 입력창 자동 포커스
+  useEffect(() => {
+    if (grammarFeedback === null && isGrammarQuizStarted && !isGrammarQuizFinished) {
+      grammarAnswerInputRef.current?.focus()
+    }
+  }, [grammarFeedback, isGrammarQuizStarted, isGrammarQuizFinished])
+
+  // 오답 모달에서 Enter 키 처리
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Enter' && showGrammarModal) {
+        closeGrammarModal()
+      }
+    }
+
+    if (showGrammarModal) {
+      window.addEventListener('keydown', handleKeyDown)
+      return () => window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [showGrammarModal])
+
+  // 분류1 목록 조회
+  const fetchGrammarCategory1 = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/grammar/category1`)
+      const data = await response.json()
+      setGrammarCategory1List(data.category1List || [])
+    } catch (error) {
+      console.error('Error fetching category1:', error)
+    }
+  }
+
+  // 분류1 선택 시 분류2 목록 조회
+  const handleGrammarCategory1Select = async (category1) => {
+    setSelectedGrammarCategory1(category1)
+    setShowGrammarCategory1Dropdown(false)
+    // 하위 선택 초기화
+    setSelectedGrammarCategory2('')
+    setGrammarCategory2List([])
+    setSelectedGrammarLevel('')
+    setGrammarLevelList([])
+    setSelectedGrammarInstruction('')
+    setGrammarInstructionList([])
+    setGrammarQuestions([])
+    setIsGrammarQuizStarted(false)
+
+    try {
+      const response = await fetch(`${API_BASE}/grammar/category2?category1=${encodeURIComponent(category1)}`)
+      const data = await response.json()
+      setGrammarCategory2List(data.category2List || [])
+    } catch (error) {
+      console.error('Error fetching category2:', error)
+    }
+  }
+
+  // 분류2 선택 시 수준 목록 조회
+  const handleGrammarCategory2Select = async (category2) => {
+    setSelectedGrammarCategory2(category2)
+    setShowGrammarCategory2Dropdown(false)
+    // 하위 선택 초기화
+    setSelectedGrammarLevel('')
+    setGrammarLevelList([])
+    setSelectedGrammarInstruction('')
+    setGrammarInstructionList([])
+    setGrammarQuestions([])
+    setIsGrammarQuizStarted(false)
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/grammar/levels?category1=${encodeURIComponent(selectedGrammarCategory1)}&category2=${encodeURIComponent(category2)}`
+      )
+      const data = await response.json()
+      setGrammarLevelList(data.levelList || [])
+    } catch (error) {
+      console.error('Error fetching levels:', error)
+    }
+  }
+
+  // 수준 선택 시 지시사항 목록 조회
+  const handleGrammarLevelSelect = async (level) => {
+    setSelectedGrammarLevel(level)
+    setShowGrammarLevelDropdown(false)
+    // 하위 선택 초기화
+    setSelectedGrammarInstruction('')
+    setGrammarInstructionList([])
+    setGrammarQuestions([])
+    setIsGrammarQuizStarted(false)
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/grammar/instructions?category1=${encodeURIComponent(selectedGrammarCategory1)}&category2=${encodeURIComponent(selectedGrammarCategory2)}&level=${encodeURIComponent(level)}`
+      )
+      const data = await response.json()
+      setGrammarInstructionList(data.instructionList || [])
+    } catch (error) {
+      console.error('Error fetching instructions:', error)
+    }
+  }
+
+  // 지시사항 선택 시 문제 목록 조회 및 학습 시작
+  const handleGrammarInstructionSelect = async (instruction) => {
+    setSelectedGrammarInstruction(instruction)
+    setShowGrammarInstructionDropdown(false)
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/grammar/questions?category1=${encodeURIComponent(selectedGrammarCategory1)}&category2=${encodeURIComponent(selectedGrammarCategory2)}&level=${encodeURIComponent(selectedGrammarLevel)}&instruction=${encodeURIComponent(instruction)}`
+      )
+      const data = await response.json()
+      const questions = data.questions || []
+      setGrammarQuestions(questions)
+      setCurrentGrammarQuestionIndex(0)
+      setGrammarAnswer('')
+      setGrammarFeedback(null)
+      setIsGrammarQuizStarted(questions.length > 0)
+      setIsGrammarQuizFinished(false)
+    } catch (error) {
+      console.error('Error fetching questions:', error)
+    }
+  }
+
+  // 현재 문법 문제
+  const currentGrammarQuestion = grammarQuestions[currentGrammarQuestionIndex]
+
+  // 문법 정답 확인
+  const checkGrammarAnswer = async () => {
+    if (!grammarAnswer.trim() || !currentGrammarQuestion || grammarFeedback) return
+
+    try {
+      const response = await fetch(`${API_BASE}/grammar/check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          questionId: currentGrammarQuestion.id,
+          userAnswer: grammarAnswer.trim(),
+          category1: selectedGrammarCategory1,
+          category2: selectedGrammarCategory2,
+          level: selectedGrammarLevel
+        })
+      })
+      const data = await response.json()
+
+      // 정답/오답 상관없이 정답을 미국식 발음으로 읽어줌
+      speakEnglish(data.correctAnswer)
+
+      if (data.correct) {
+        setGrammarFeedback({ type: 'correct', message: '정답입니다!' })
+        // 정답일 경우 다음 문제로 이동
+        setTimeout(() => {
+          moveToNextGrammarQuestion()
+          grammarAnswerInputRef.current?.focus()
+        }, 0)
+      } else {
+        // 오답일 경우 모달로 정답 표시
+        setGrammarModalContent({ correctAnswer: data.correctAnswer })
+        setShowGrammarModal(true)
+        setGrammarFeedback({ type: 'incorrect', message: `오답입니다.` })
+      }
+    } catch (error) {
+      console.error('Error checking grammar answer:', error)
+      setGrammarFeedback({ type: 'incorrect', message: '서버 오류가 발생했습니다' })
+    }
+  }
+
+  // 다음 문법 문제로 이동
+  const moveToNextGrammarQuestion = () => {
+    setGrammarAnswer('')
+    setGrammarFeedback(null)
+
+    if (currentGrammarQuestionIndex < grammarQuestions.length - 1) {
+      setCurrentGrammarQuestionIndex(prev => prev + 1)
+    } else {
+      // 모든 문제 완료
+      setIsGrammarQuizFinished(true)
+    }
+  }
+
+  // 오답 모달 닫기 및 다음 문제로 이동
+  const closeGrammarModal = () => {
+    setShowGrammarModal(false)
+    moveToNextGrammarQuestion()
+    grammarAnswerInputRef.current?.focus()
+  }
+
+  // Enter 키로 문법 정답 제출
+  const handleGrammarAnswerKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      if (!grammarFeedback) {
+        checkGrammarAnswer()
+      }
+    }
+  }
+
+  // 문법 학습 처음부터 다시하기
+  const handleGrammarRestart = () => {
+    setCurrentGrammarQuestionIndex(0)
+    setGrammarAnswer('')
+    setGrammarFeedback(null)
+    setIsGrammarQuizFinished(false)
+  }
+
   // 관리자용 단어장 목록 조회
   const fetchAdminBooks = async () => {
     try {
@@ -1335,33 +1573,184 @@ function App() {
                 <div className="user-info">
                   <span className="user-name">{userName}</span>
                 </div>
-                <button className="select-button">분류1</button>
-                <button className="select-button">분류2</button>
-                <button className="select-button">분류3</button>
-                <button className="select-button">수준</button>
+                
+                {/* 분류1 드롭다운 */}
+                <div className="dropdown-container">
+                  <button 
+                    className="select-button"
+                    onClick={() => setShowGrammarCategory1Dropdown(!showGrammarCategory1Dropdown)}
+                  >
+                    {selectedGrammarCategory1 || '분류1'}
+                  </button>
+                  {showGrammarCategory1Dropdown && (
+                    <div className="dropdown-menu">
+                      {grammarCategory1List.map((item, index) => (
+                        <div 
+                          key={index}
+                          className="dropdown-item"
+                          onClick={() => handleGrammarCategory1Select(item)}
+                        >
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 분류2 드롭다운 */}
+                {selectedGrammarCategory1 && grammarCategory2List.length > 0 && (
+                  <div className="dropdown-container">
+                    <button 
+                      className="select-button"
+                      onClick={() => setShowGrammarCategory2Dropdown(!showGrammarCategory2Dropdown)}
+                    >
+                      {selectedGrammarCategory2 || '분류2'}
+                    </button>
+                    {showGrammarCategory2Dropdown && (
+                      <div className="dropdown-menu">
+                        {grammarCategory2List.map((item, index) => (
+                          <div 
+                            key={index}
+                            className="dropdown-item"
+                            onClick={() => handleGrammarCategory2Select(item)}
+                          >
+                            {item}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 수준 드롭다운 */}
+                {selectedGrammarCategory2 && grammarLevelList.length > 0 && (
+                  <div className="dropdown-container">
+                    <button 
+                      className="select-button"
+                      onClick={() => setShowGrammarLevelDropdown(!showGrammarLevelDropdown)}
+                    >
+                      {selectedGrammarLevel || '수준'}
+                    </button>
+                    {showGrammarLevelDropdown && (
+                      <div className="dropdown-menu">
+                        {grammarLevelList.map((item, index) => (
+                          <div 
+                            key={index}
+                            className="dropdown-item"
+                            onClick={() => handleGrammarLevelSelect(item)}
+                          >
+                            {item}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 지시사항 드롭다운 */}
+                {selectedGrammarLevel && grammarInstructionList.length > 0 && (
+                  <div className="dropdown-container">
+                    <button 
+                      className="select-button instruction-button"
+                      onClick={() => setShowGrammarInstructionDropdown(!showGrammarInstructionDropdown)}
+                    >
+                      {selectedGrammarInstruction ? (selectedGrammarInstruction.length > 20 ? selectedGrammarInstruction.substring(0, 20) + '...' : selectedGrammarInstruction) : '지시사항'}
+                    </button>
+                    {showGrammarInstructionDropdown && (
+                      <div className="dropdown-menu instruction-dropdown">
+                        {grammarInstructionList.map((item, index) => (
+                          <div 
+                            key={index}
+                            className="dropdown-item"
+                            onClick={() => handleGrammarInstructionSelect(item)}
+                          >
+                            {item}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* 문법 문제 영역 */}
               <div className="grammar-area">
-                {/* 지시문 영역 */}
-                <div className="grammar-instruction">
-                  <p>문제 전체에 대한 지시문 영역</p>
-                </div>
+                {!isGrammarQuizStarted ? (
+                  <div className="welcome-message">
+                    <h2>문법 학습을 시작하세요</h2>
+                    <p>분류1 → 분류2 → 수준 → 지시사항을 순서대로 선택해주세요.</p>
+                  </div>
+                ) : isGrammarQuizFinished ? (
+                  <div className="quiz-complete">
+                    <h2>학습 완료!</h2>
+                    <p>모든 문제를 완료했습니다.</p>
+                    <div className="complete-buttons">
+                      <button className="action-button primary" onClick={handleGrammarRestart}>
+                        처음부터 다시하기
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {/* 분류 내 전체 문항 지시 사항 영역 - instruction 필드만 표시 */}
+                    <div className="grammar-instruction">
+                      <p>{selectedGrammarInstruction}</p>
+                    </div>
 
-                {/* 문항 내용 영역 */}
-                <div className="grammar-question">
-                  <p>단일 문항 내용을 보여주는 영역</p>
-                </div>
+                    {/* 단일 문항 내용을 보여주는 영역 - question 필드만 표시 */}
+                    <div className="grammar-question">
+                      <p className="question-number">문제 {currentGrammarQuestionIndex + 1} / {grammarQuestions.length}</p>
+                      <p className="question-text">{currentGrammarQuestion?.question}</p>
+                    </div>
 
-                {/* 정답 입력 영역 */}
-                <div className="grammar-answer-container">
-                  <input
-                    type="text"
-                    className="answer-input"
-                    placeholder="정답 입력"
-                  />
-                </div>
+                    {/* 정답 입력 영역 */}
+                    <div className="grammar-answer-container">
+                      <input
+                        ref={grammarAnswerInputRef}
+                        type="text"
+                        className={`answer-input ${grammarFeedback?.type || ''}`}
+                        placeholder="정답 입력"
+                        value={grammarAnswer}
+                        onChange={(e) => setGrammarAnswer(e.target.value)}
+                        onKeyPress={handleGrammarAnswerKeyPress}
+                        disabled={grammarFeedback !== null}
+                        autoFocus
+                      />
+                      <button 
+                        className="check-button"
+                        onClick={checkGrammarAnswer}
+                        disabled={grammarFeedback !== null || !grammarAnswer.trim()}
+                      >
+                        확인
+                      </button>
+                    </div>
+
+                    {/* 피드백 메시지 */}
+                    {grammarFeedback && (
+                      <div className={`feedback ${grammarFeedback.type}`}>
+                        <div>{grammarFeedback.message}</div>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
+
+              {/* 오답 모달 */}
+              {showGrammarModal && (
+                <div className="modal-overlay" onClick={closeGrammarModal}>
+                  <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                    <h3>오답입니다</h3>
+                    <div className="modal-answer">
+                      <p className="label">정답:</p>
+                      <p className="correct-answer">{grammarModalContent.correctAnswer}</p>
+                    </div>
+                    <p className="modal-hint">Enter 키 또는 확인 버튼을 눌러 계속하세요</p>
+                    <button className="modal-button" onClick={closeGrammarModal}>
+                      확인
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
