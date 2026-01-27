@@ -237,6 +237,42 @@ router.get('/stats', async (req, res) => {
       LIMIT 10
     `);
 
+    // ===== 문법 익히기 통계 =====
+    // 전체 문법 문제 수
+    const grammarCount = await pool.query('SELECT COUNT(*) FROM grammar');
+
+    // 전체 문법 학습 기록 수
+    const grammarProgressCount = await pool.query('SELECT COUNT(*) FROM grammar_progress');
+
+    // 오늘 문법 학습 기록 수
+    const todayGrammarProgress = await pool.query(
+      "SELECT COUNT(*) FROM grammar_progress WHERE created_at >= CURRENT_DATE"
+    );
+
+    // 문법 전체 정답률
+    const grammarAccuracyResult = await pool.query(`
+      SELECT 
+        COUNT(*) as total,
+        SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct
+      FROM grammar_progress
+    `);
+
+    const grammarTotal = parseInt(grammarAccuracyResult.rows[0].total) || 0;
+    const grammarCorrect = parseInt(grammarAccuracyResult.rows[0].correct) || 0;
+    const grammarAccuracy = grammarTotal > 0 ? Math.round((grammarCorrect / grammarTotal) * 100) : 0;
+
+    // 문법 최근 7일간 일별 학습량
+    const grammarWeeklyStats = await pool.query(`
+      SELECT 
+        DATE(created_at) as date,
+        COUNT(*) as count,
+        SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct
+      FROM grammar_progress
+      WHERE created_at >= CURRENT_DATE - INTERVAL '6 days'
+      GROUP BY DATE(created_at)
+      ORDER BY date
+    `);
+
     res.json({
       userCount: parseInt(userCount.rows[0].count),
       wordCount: parseInt(wordCount.rows[0].count),
@@ -244,7 +280,13 @@ router.get('/stats', async (req, res) => {
       todayProgress: parseInt(todayProgress.rows[0].count),
       accuracy,
       weeklyStats: weeklyStats.rows,
-      topUsers: topUsers.rows
+      topUsers: topUsers.rows,
+      // 문법 통계
+      grammarCount: parseInt(grammarCount.rows[0].count),
+      grammarTotalProgress: parseInt(grammarProgressCount.rows[0].count),
+      grammarTodayProgress: parseInt(todayGrammarProgress.rows[0].count),
+      grammarAccuracy,
+      grammarWeeklyStats: grammarWeeklyStats.rows
     });
   } catch (error) {
     console.error('Error fetching stats:', error);

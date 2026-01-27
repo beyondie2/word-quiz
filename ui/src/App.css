@@ -1289,6 +1289,27 @@
   font-size: 1.1rem;
 }
 
+/* 통계 섹션 타이틀 */
+.stats-section-title {
+  color: #5BA3B5;
+  font-size: 1.2rem;
+  margin: 20px 0 15px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #2E5A6B;
+}
+
+.stats-section-title:first-child {
+  margin-top: 0;
+}
+
+/* 문제 셀 (긴 텍스트 처리) */
+.question-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .header {

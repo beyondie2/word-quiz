@@ -55,6 +55,23 @@ CREATE TABLE IF NOT EXISTS grammar (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- GrammarProgress 테이블: 사용자별 문법 학습 기록
+CREATE TABLE IF NOT EXISTS grammar_progress (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    grammar_id INTEGER NOT NULL REFERENCES grammar(id) ON DELETE CASCADE,
+    category1 VARCHAR(200),          -- 분류1
+    category2 VARCHAR(200),          -- 분류2
+    level VARCHAR(100),              -- 수준
+    instruction TEXT,                -- 지시사항
+    question TEXT,                   -- 문제
+    correct_answer TEXT,             -- 정답
+    wrong_answer TEXT,               -- 사용자가 입력한 오답
+    round INTEGER DEFAULT 1,         -- 라운드
+    is_correct BOOLEAN NOT NULL,     -- 정답 여부
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
 -- 인덱스 생성
 CREATE INDEX IF NOT EXISTS idx_books_book_name ON books(book_name);
 CREATE INDEX IF NOT EXISTS idx_books_unit ON books(unit);
@@ -64,6 +81,9 @@ CREATE INDEX IF NOT EXISTS idx_grammar_level ON grammar(level);
 CREATE INDEX IF NOT EXISTS idx_user_progress_user_id ON user_progress(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_progress_book_unit ON user_progress(book_name, unit);
 CREATE INDEX IF NOT EXISTS idx_user_progress_created_at ON user_progress(created_at);
+CREATE INDEX IF NOT EXISTS idx_grammar_progress_user_id ON grammar_progress(user_id);
+CREATE INDEX IF NOT EXISTS idx_grammar_progress_grammar_id ON grammar_progress(grammar_id);
+CREATE INDEX IF NOT EXISTS idx_grammar_progress_created_at ON grammar_progress(created_at);
 
 -- 샘플 데이터 (테스트용)
 INSERT INTO users (username, is_admin) VALUES 

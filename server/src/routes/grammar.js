@@ -111,16 +111,16 @@ router.get('/questions', async (req, res) => {
 
 // POST /api/grammar/check - 정답 확인
 router.post('/check', async (req, res) => {
-  const { userId, questionId, userAnswer, category1, category2, level } = req.body;
+  const { userId, questionId, userAnswer, category1, category2, level, instruction, round } = req.body;
 
   if (!questionId || userAnswer === undefined || userAnswer === null) {
     return res.status(400).json({ error: '필수 정보가 누락되었습니다' });
   }
 
   try {
-    // 정답 조회
+    // 정답 및 문제 조회
     const questionResult = await pool.query(
-      'SELECT answer FROM grammar WHERE id = $1',
+      'SELECT question, answer FROM grammar WHERE id = $1',
       [questionId]
     );
 
@@ -128,7 +128,7 @@ router.post('/check', async (req, res) => {
       return res.status(404).json({ error: '문제를 찾을 수 없습니다' });
     }
 
-    const correctAnswer = questionResult.rows[0].answer;
+    const { question, answer: correctAnswer } = questionResult.rows[0];
     
     // 정답 비교 (대소문자 무시, 앞뒤 공백 제거)
     const normalizedUserAnswer = userAnswer.trim().toLowerCase();
@@ -138,16 +138,28 @@ router.post('/check', async (req, res) => {
     const possibleAnswers = normalizedCorrectAnswer.split(',').map(a => a.trim().toLowerCase());
     const isCorrect = possibleAnswers.some(answer => answer === normalizedUserAnswer);
 
-    // 학습 기록 저장 (선택적 - userId가 있을 때만)
+    // 학습 기록 저장 (userId가 있을 때만)
     if (userId) {
       try {
         await pool.query(`
-          INSERT INTO grammar_progress (user_id, grammar_id, user_answer, is_correct, category1, category2, level)
-          VALUES ($1, $2, $3, $4, $5, $6, $7)
-        `, [userId, questionId, userAnswer.trim(), isCorrect, category1, category2, level]);
+          INSERT INTO grammar_progress 
+          (user_id, grammar_id, category1, category2, level, instruction, question, correct_answer, wrong_answer, round, is_correct)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        `, [
+          userId, 
+          questionId, 
+          category1, 
+          category2, 
+          level, 
+          instruction,
+          question,
+          correctAnswer,
+          isCorrect ? null : userAnswer.trim(),
+          round || 1,
+          isCorrect
+        ]);
       } catch (progressError) {
-        // grammar_progress 테이블이 없을 수 있음 - 무시
-        console.log('Grammar progress save skipped (table may not exist)');
+        console.error('Grammar progress save error:', progressError);
       }
     }
 
@@ -159,6 +171,84 @@ router.post('/check', async (req, res) => {
   } catch (error) {
     console.error('Error checking grammar answer:', error);
     res.status(500).json({ error: '정답 확인에 실패했습니다' });
+  }
+});
+
+// GET /api/grammar/progress - 문법 학습 기록 조회
+router.get('/progress', async (req, res) => {
+  const { requesterId, userId, date } = req.query;
+
+  try {
+    // 요청자 정보 확인
+    const requesterResult = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [requesterId]
+    );
+    
+    const isAdmin = requesterResult.rows[0]?.is_admin || false;
+
+    let query = `
+      SELECT gp.*, u.username
+      FROM grammar_progress gp
+      JOIN users u ON gp.user_id = u.id
+      WHERE 1=1
+    `;
+    const params = [];
+    let paramIndex = 1;
+
+    // 관리자가 아니면 자신의 기록만
+    if (!isAdmin) {
+      query += ` AND gp.user_id = $${paramIndex}`;
+      params.push(requesterId);
+      paramIndex++;
+    } else if (userId) {
+      query += ` AND gp.user_id = $${paramIndex}`;
+      params.push(userId);
+      paramIndex++;
+    }
+
+    if (date) {
+      query += ` AND DATE(gp.created_at) = $${paramIndex}`;
+      params.push(date);
+      paramIndex++;
+    }
+
+    query += ' ORDER BY gp.created_at DESC LIMIT 500';
+
+    const result = await pool.query(query, params);
+
+    // 통계 계산
+    const records = result.rows;
+    const totalQuestions = records.length;
+    const correctCount = records.filter(r => r.is_correct).length;
+    const wrongCount = totalQuestions - correctCount;
+    const accuracy = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+
+    res.json({
+      records,
+      stats: {
+        totalQuestions,
+        correctCount,
+        wrongCount,
+        accuracy
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching grammar progress:', error);
+    res.status(500).json({ error: '학습 기록 조회에 실패했습니다' });
+  }
+});
+
+// POST /api/grammar/next-round - 라운드 증가
+router.post('/next-round', async (req, res) => {
+  const { userId, category1, category2, level, instruction, currentRound } = req.body;
+
+  try {
+    const newRound = (currentRound || 1) + 1;
+    res.json({ success: true, newRound });
+  } catch (error) {
+    console.error('Error incrementing round:', error);
+    res.status(500).json({ error: '라운드 증가에 실패했습니다' });
   }
 });
 

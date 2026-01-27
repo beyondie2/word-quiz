@@ -53,6 +53,10 @@ function App() {
   const [progressRecords, setProgressRecords] = useState([])
   const [progressStats, setProgressStats] = useState(null)
   const [isLoadingProgress, setIsLoadingProgress] = useState(false)
+  const [reviewSubTab, setReviewSubTab] = useState('words') // 'words' or 'grammar'
+  const [grammarProgressRecords, setGrammarProgressRecords] = useState([])
+  const [grammarProgressStats, setGrammarProgressStats] = useState(null)
+  const [isLoadingGrammarProgress, setIsLoadingGrammarProgress] = useState(false)
 
   // 관리자 페이지 관련 상태
   const [adminUsers, setAdminUsers] = useState([])
@@ -100,6 +104,13 @@ function App() {
   const [isGrammarQuizFinished, setIsGrammarQuizFinished] = useState(false)
   const [showGrammarModal, setShowGrammarModal] = useState(false)
   const [grammarModalContent, setGrammarModalContent] = useState({ correctAnswer: '' })
+  
+  // 문법 라운드 관련 상태
+  const [grammarRound, setGrammarRound] = useState(1)
+  const [wrongGrammarQuestionsInRound, setWrongGrammarQuestionsInRound] = useState([])
+  const [isGrammarRetryMode, setIsGrammarRetryMode] = useState(false)
+  const [grammarRetryQuestions, setGrammarRetryQuestions] = useState([])
+  const [grammarRetryIndex, setGrammarRetryIndex] = useState(0)
 
   // 정답 입력창 ref
   const answerInputRef = useRef(null)
@@ -504,6 +515,31 @@ function App() {
     return korean.split('').map(char => /[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(char) ? '*' : char).join('')
   }
 
+  // 미국식 영어 음성 저장
+  const [usVoice, setUsVoice] = useState(null)
+
+  // 음성 목록 로드 및 미국식 음성 선택
+  useEffect(() => {
+    if ('speechSynthesis' in window) {
+      const loadVoices = () => {
+        const voices = window.speechSynthesis.getVoices()
+        // 미국식 영어 음성 찾기 (우선순위: en-US > en)
+        const usEnglishVoice = voices.find(voice => voice.lang === 'en-US') ||
+                               voices.find(voice => voice.lang.startsWith('en-US')) ||
+                               voices.find(voice => voice.lang === 'en-GB') ||
+                               voices.find(voice => voice.lang.startsWith('en'))
+        if (usEnglishVoice) {
+          setUsVoice(usEnglishVoice)
+        }
+      }
+      
+      // 음성 목록이 비동기로 로드되는 경우를 위해
+      window.speechSynthesis.onvoiceschanged = loadVoices
+      // 초기 로드
+      loadVoices()
+    }
+  }, [])
+
   // 영어 단어 미국식 발음으로 읽기 (TTS)
   const speakEnglish = (text) => {
     if ('speechSynthesis' in window) {
@@ -515,6 +551,20 @@ function App() {
       utterance.rate = 0.9 // 약간 느리게
       utterance.pitch = 1
       utterance.volume = 1
+      
+      // 미리 로드된 미국식 음성 사용
+      if (usVoice) {
+        utterance.voice = usVoice
+      } else {
+        // 음성이 아직 로드되지 않은 경우 다시 찾기
+        const voices = window.speechSynthesis.getVoices()
+        const englishVoice = voices.find(v => v.lang === 'en-US') ||
+                            voices.find(v => v.lang.startsWith('en-US')) ||
+                            voices.find(v => v.lang.startsWith('en'))
+        if (englishVoice) {
+          utterance.voice = englishVoice
+        }
+      }
       
       window.speechSynthesis.speak(utterance)
     }
@@ -599,9 +649,35 @@ function App() {
 
   useEffect(() => {
     if (activeTab === 'review' && userId) {
-      fetchProgress()
+      if (reviewSubTab === 'words') {
+        fetchProgress()
+      } else {
+        fetchGrammarProgress()
+      }
     }
-  }, [activeTab, selectedUserId, selectedDate, userId, isAdmin])
+  }, [activeTab, selectedUserId, selectedDate, userId, isAdmin, reviewSubTab])
+
+  // 문법 수행 기록 조회
+  const fetchGrammarProgress = async () => {
+    if (!userId) return
+    
+    setIsLoadingGrammarProgress(true)
+    try {
+      const params = new URLSearchParams()
+      params.append('requesterId', userId)
+      if (isAdmin && selectedUserId) params.append('userId', selectedUserId)
+      if (selectedDate) params.append('date', selectedDate)
+
+      const response = await fetch(`${API_BASE}/grammar/progress?${params}`)
+      const data = await response.json()
+      setGrammarProgressRecords(data.records || [])
+      setGrammarProgressStats(data.stats)
+    } catch (error) {
+      console.error('Fetch grammar progress error:', error)
+    } finally {
+      setIsLoadingGrammarProgress(false)
+    }
+  }
 
   // 날짜 포맷팅
   const formatDate = (dateString) => {
@@ -868,13 +944,21 @@ function App() {
       setGrammarFeedback(null)
       setIsGrammarQuizStarted(questions.length > 0)
       setIsGrammarQuizFinished(false)
+      // 라운드 및 틀린 문제 초기화
+      setGrammarRound(1)
+      setWrongGrammarQuestionsInRound([])
+      setIsGrammarRetryMode(false)
+      setGrammarRetryQuestions([])
+      setGrammarRetryIndex(0)
     } catch (error) {
       console.error('Error fetching questions:', error)
     }
   }
 
-  // 현재 문법 문제
-  const currentGrammarQuestion = grammarQuestions[currentGrammarQuestionIndex]
+  // 현재 문법 문제 (재시도 모드 지원)
+  const currentGrammarQuestions = isGrammarRetryMode ? grammarRetryQuestions : grammarQuestions
+  const currentGrammarIndex = isGrammarRetryMode ? grammarRetryIndex : currentGrammarQuestionIndex
+  const currentGrammarQuestion = currentGrammarQuestions[currentGrammarIndex]
 
   // 문법 정답 확인
   const checkGrammarAnswer = async () => {
@@ -890,7 +974,9 @@ function App() {
           userAnswer: grammarAnswer.trim(),
           category1: selectedGrammarCategory1,
           category2: selectedGrammarCategory2,
-          level: selectedGrammarLevel
+          level: selectedGrammarLevel,
+          instruction: selectedGrammarInstruction,
+          round: grammarRound
         })
       })
       const data = await response.json()
@@ -910,6 +996,10 @@ function App() {
         setGrammarModalContent({ correctAnswer: data.correctAnswer })
         setShowGrammarModal(true)
         setGrammarFeedback({ type: 'incorrect', message: `오답입니다.` })
+        // 현재 라운드의 틀린 문제 목록에 추가
+        if (!wrongGrammarQuestionsInRound.find(q => q.id === currentGrammarQuestion.id)) {
+          setWrongGrammarQuestionsInRound(prev => [...prev, currentGrammarQuestion])
+        }
       }
     } catch (error) {
       console.error('Error checking grammar answer:', error)
@@ -922,11 +1012,27 @@ function App() {
     setGrammarAnswer('')
     setGrammarFeedback(null)
 
-    if (currentGrammarQuestionIndex < grammarQuestions.length - 1) {
-      setCurrentGrammarQuestionIndex(prev => prev + 1)
+    if (isGrammarRetryMode) {
+      if (grammarRetryIndex < grammarRetryQuestions.length - 1) {
+        setGrammarRetryIndex(prev => prev + 1)
+      } else {
+        // 재시도 라운드 종료
+        if (wrongGrammarQuestionsInRound.length === 0) {
+          // 모두 맞춤
+          setIsGrammarQuizFinished(true)
+          setIsGrammarRetryMode(false)
+        } else {
+          // 아직 틀린 것이 있음
+          setIsGrammarQuizFinished(true)
+        }
+      }
     } else {
-      // 모든 문제 완료
-      setIsGrammarQuizFinished(true)
+      if (currentGrammarQuestionIndex < grammarQuestions.length - 1) {
+        setCurrentGrammarQuestionIndex(prev => prev + 1)
+      } else {
+        // 첫 라운드 종료
+        setIsGrammarQuizFinished(true)
+      }
     }
   }
 
@@ -952,6 +1058,32 @@ function App() {
     setGrammarAnswer('')
     setGrammarFeedback(null)
     setIsGrammarQuizFinished(false)
+    setGrammarRound(1)
+    setWrongGrammarQuestionsInRound([])
+    setIsGrammarRetryMode(false)
+    setGrammarRetryQuestions([])
+    setGrammarRetryIndex(0)
+  }
+
+  // 문법 틀린 것만 다시하기
+  const handleGrammarRetryWrong = async () => {
+    if (wrongGrammarQuestionsInRound.length === 0) {
+      alert('모든 문제를 맞추셨습니다!')
+      return
+    }
+
+    // 라운드 증가
+    const newRound = grammarRound + 1
+    setGrammarRound(newRound)
+
+    // 틀린 문제로 재시도 시작
+    setIsGrammarRetryMode(true)
+    setGrammarRetryQuestions([...wrongGrammarQuestionsInRound])
+    setGrammarRetryIndex(0)
+    setWrongGrammarQuestionsInRound([])
+    setIsGrammarQuizFinished(false)
+    setGrammarAnswer('')
+    setGrammarFeedback(null)
   }
 
   // 관리자용 단어장 목록 조회
@@ -1462,6 +1594,22 @@ function App() {
             </div>
           ) : (
             <>
+              {/* 수행 확인 서브 탭 */}
+              <div className="admin-sub-tabs">
+                <button
+                  className={`sub-tab-button ${reviewSubTab === 'words' ? 'active' : ''}`}
+                  onClick={() => setReviewSubTab('words')}
+                >
+                  단어 맞추기
+                </button>
+                <button
+                  className={`sub-tab-button ${reviewSubTab === 'grammar' ? 'active' : ''}`}
+                  onClick={() => setReviewSubTab('grammar')}
+                >
+                  문법 익히기
+                </button>
+              </div>
+
               {/* 필터 영역 */}
               <div className="filter-bar">
                 {isAdmin ? (
@@ -1487,73 +1635,153 @@ function App() {
                 />
               </div>
 
-              {/* 통계 영역 */}
-              {progressStats && progressStats.totalWords > 0 && (
-                <div className="stats-card">
-                  <div className="stat-item">
-                    <span className="stat-label">총 문제</span>
-                    <span className="stat-value">{progressStats.totalWords}</span>
+              {/* 단어 맞추기 수행 기록 */}
+              {reviewSubTab === 'words' && (
+                <>
+                  {/* 통계 영역 */}
+                  {progressStats && progressStats.totalWords > 0 && (
+                    <div className="stats-card">
+                      <div className="stat-item">
+                        <span className="stat-label">총 문제</span>
+                        <span className="stat-value">{progressStats.totalWords}</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-label">정답</span>
+                        <span className="stat-value correct">{progressStats.correctCount}</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-label">오답</span>
+                        <span className="stat-value incorrect">{progressStats.wrongCount}</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-label">정답률</span>
+                        <span className={`stat-value ${progressStats.accuracy >= 80 ? 'high' : progressStats.accuracy >= 50 ? 'medium' : 'low'}`}>
+                          {progressStats.accuracy}%
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 수행 기록 목록 */}
+                  <div className="records-container">
+                    {isLoadingProgress ? (
+                      <div className="loading">로딩 중...</div>
+                    ) : progressRecords.length === 0 ? (
+                      <div className="no-records">수행 기록이 없습니다</div>
+                    ) : (
+                      <table className="records-table">
+                        <thead>
+                          <tr>
+                            {isAdmin && <th>사용자</th>}
+                            <th>단어장</th>
+                            <th>단원</th>
+                            <th>영어</th>
+                            <th>한국어</th>
+                            <th>오답</th>
+                            <th>결과</th>
+                            <th>라운드</th>
+                            <th>일시</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {progressRecords.map(record => (
+                            <tr key={record.id} className={record.is_correct ? 'correct-row' : 'incorrect-row'}>
+                              {isAdmin && <td>{record.username}</td>}
+                              <td>{record.book_name}</td>
+                              <td>{record.unit}</td>
+                              <td>{record.english}</td>
+                              <td>{record.korean}</td>
+                              <td>{record.wrong_answer || '-'}</td>
+                              <td>
+                                <span className={`result-badge ${record.is_correct ? 'correct' : 'incorrect'}`}>
+                                  {record.is_correct ? '정답' : '오답'}
+                                </span>
+                              </td>
+                              <td>{record.round}</td>
+                              <td>{formatDate(record.created_at)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
                   </div>
-                  <div className="stat-item">
-                    <span className="stat-label">정답</span>
-                    <span className="stat-value correct">{progressStats.correctCount}</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">오답</span>
-                    <span className="stat-value incorrect">{progressStats.wrongCount}</span>
-                  </div>
-                  <div className="stat-item">
-                    <span className="stat-label">정답률</span>
-                    <span className={`stat-value ${progressStats.accuracy >= 80 ? 'high' : progressStats.accuracy >= 50 ? 'medium' : 'low'}`}>
-                      {progressStats.accuracy}%
-                    </span>
-                  </div>
-                </div>
+                </>
               )}
 
-              {/* 수행 기록 목록 */}
-              <div className="records-container">
-                {isLoadingProgress ? (
-                  <div className="loading">로딩 중...</div>
-                ) : progressRecords.length === 0 ? (
-                  <div className="no-records">수행 기록이 없습니다</div>
-                ) : (
-                  <table className="records-table">
-                    <thead>
-                      <tr>
-                        {isAdmin && <th>사용자</th>}
-                        <th>단어장</th>
-                        <th>단원</th>
-                        <th>영어</th>
-                        <th>한국어</th>
-                        <th>오답</th>
-                        <th>결과</th>
-                        <th>라운드</th>
-                        <th>일시</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {progressRecords.map(record => (
-                        <tr key={record.id} className={record.is_correct ? 'correct-row' : 'incorrect-row'}>
-                          {isAdmin && <td>{record.username}</td>}
-                          <td>{record.book_name}</td>
-                          <td>{record.unit}</td>
-                          <td>{record.english}</td>
-                          <td>{record.korean}</td>
-                          <td>{record.wrong_answer || '-'}</td>
-                          <td>
-                            <span className={`result-badge ${record.is_correct ? 'correct' : 'incorrect'}`}>
-                              {record.is_correct ? '정답' : '오답'}
-                            </span>
-                          </td>
-                          <td>{record.round}</td>
-                          <td>{formatDate(record.created_at)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
+              {/* 문법 익히기 수행 기록 */}
+              {reviewSubTab === 'grammar' && (
+                <>
+                  {/* 통계 영역 */}
+                  {grammarProgressStats && grammarProgressStats.totalQuestions > 0 && (
+                    <div className="stats-card">
+                      <div className="stat-item">
+                        <span className="stat-label">총 문제</span>
+                        <span className="stat-value">{grammarProgressStats.totalQuestions}</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-label">정답</span>
+                        <span className="stat-value correct">{grammarProgressStats.correctCount}</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-label">오답</span>
+                        <span className="stat-value incorrect">{grammarProgressStats.wrongCount}</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-label">정답률</span>
+                        <span className={`stat-value ${grammarProgressStats.accuracy >= 80 ? 'high' : grammarProgressStats.accuracy >= 50 ? 'medium' : 'low'}`}>
+                          {grammarProgressStats.accuracy}%
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 수행 기록 목록 */}
+                  <div className="records-container">
+                    {isLoadingGrammarProgress ? (
+                      <div className="loading">로딩 중...</div>
+                    ) : grammarProgressRecords.length === 0 ? (
+                      <div className="no-records">수행 기록이 없습니다</div>
+                    ) : (
+                      <table className="records-table">
+                        <thead>
+                          <tr>
+                            {isAdmin && <th>사용자</th>}
+                            <th>분류1</th>
+                            <th>분류2</th>
+                            <th>수준</th>
+                            <th>문제</th>
+                            <th>정답</th>
+                            <th>오답</th>
+                            <th>결과</th>
+                            <th>라운드</th>
+                            <th>일시</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {grammarProgressRecords.map(record => (
+                            <tr key={record.id} className={record.is_correct ? 'correct-row' : 'incorrect-row'}>
+                              {isAdmin && <td>{record.username}</td>}
+                              <td>{record.category1 || '-'}</td>
+                              <td>{record.category2 || '-'}</td>
+                              <td>{record.level || '-'}</td>
+                              <td className="question-cell">{record.question ? (record.question.length > 30 ? record.question.substring(0, 30) + '...' : record.question) : '-'}</td>
+                              <td>{record.correct_answer || '-'}</td>
+                              <td>{record.wrong_answer || '-'}</td>
+                              <td>
+                                <span className={`result-badge ${record.is_correct ? 'correct' : 'incorrect'}`}>
+                                  {record.is_correct ? '정답' : '오답'}
+                                </span>
+                              </td>
+                              <td>{record.round}</td>
+                              <td>{formatDate(record.created_at)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>
@@ -1682,10 +1910,21 @@ function App() {
                   </div>
                 ) : isGrammarQuizFinished ? (
                   <div className="quiz-complete">
-                    <h2>학습 완료!</h2>
-                    <p>모든 문제를 완료했습니다.</p>
+                    <h2>
+                      {wrongGrammarQuestionsInRound.length === 0 
+                        ? '모든 문제를 맞추셨습니다!' 
+                        : `라운드 ${grammarRound} 완료!`}
+                    </h2>
+                    {wrongGrammarQuestionsInRound.length > 0 && (
+                      <p className="wrong-count">틀린 문제: {wrongGrammarQuestionsInRound.length}개</p>
+                    )}
                     <div className="complete-buttons">
-                      <button className="action-button primary" onClick={handleGrammarRestart}>
+                      {wrongGrammarQuestionsInRound.length > 0 && (
+                        <button className="action-button primary" onClick={handleGrammarRetryWrong}>
+                          틀린 것만 다시하기
+                        </button>
+                      )}
+                      <button className="action-button" onClick={handleGrammarRestart}>
                         처음부터 다시하기
                       </button>
                     </div>
@@ -1699,7 +1938,11 @@ function App() {
 
                     {/* 단일 문항 내용을 보여주는 영역 - question 필드만 표시 */}
                     <div className="grammar-question">
-                      <p className="question-number">문제 {currentGrammarQuestionIndex + 1} / {grammarQuestions.length}</p>
+                      <p className="question-number">
+                        {isGrammarRetryMode 
+                          ? `복습 라운드 ${grammarRound}: ${grammarRetryIndex + 1} / ${grammarRetryQuestions.length}`
+                          : `문제 ${currentGrammarQuestionIndex + 1} / ${grammarQuestions.length}`}
+                      </p>
                       <p className="question-text">{currentGrammarQuestion?.question}</p>
                     </div>
 
@@ -1731,6 +1974,18 @@ function App() {
                         <div>{grammarFeedback.message}</div>
                       </div>
                     )}
+
+                    {/* 진행 상황 표시 */}
+                    <div className="progress-info">
+                      {isGrammarRetryMode ? (
+                        <span>복습 라운드 {grammarRound}: {grammarRetryIndex + 1} / {grammarRetryQuestions.length}</span>
+                      ) : (
+                        <span>
+                          라운드 {grammarRound}: {currentGrammarQuestionIndex + 1} / {grammarQuestions.length}
+                          {wrongGrammarQuestionsInRound.length > 0 && ` | 틀린 문제: ${wrongGrammarQuestionsInRound.length}개`}
+                        </span>
+                      )}
+                    </div>
                   </>
                 )}
               </div>
@@ -2059,7 +2314,8 @@ function App() {
 
           {adminSubTab === 'stats' && adminStats && (
             <div className="admin-stats">
-              {/* 전체 통계 카드 */}
+              {/* 단어 맞추기 통계 카드 */}
+              <h3 className="stats-section-title">단어 맞추기 통계</h3>
               <div className="stats-overview">
                 <div className="stat-card">
                   <div className="stat-card-value">{adminStats.userCount}</div>
@@ -2083,9 +2339,30 @@ function App() {
                 </div>
               </div>
 
-              {/* 최근 7일 학습량 */}
+              {/* 문법 익히기 통계 카드 */}
+              <h3 className="stats-section-title">문법 익히기 통계</h3>
+              <div className="stats-overview">
+                <div className="stat-card">
+                  <div className="stat-card-value">{adminStats.grammarCount || 0}</div>
+                  <div className="stat-card-label">등록된 문법 문제</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-card-value">{adminStats.grammarTotalProgress || 0}</div>
+                  <div className="stat-card-label">총 학습 기록</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-card-value">{adminStats.grammarTodayProgress || 0}</div>
+                  <div className="stat-card-label">오늘 학습</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-card-value">{adminStats.grammarAccuracy || 0}%</div>
+                  <div className="stat-card-label">전체 정답률</div>
+                </div>
+              </div>
+
+              {/* 최근 7일 단어 학습량 */}
               <div className="weekly-stats">
-                <h3>최근 7일 학습 현황</h3>
+                <h3>단어 맞추기 - 최근 7일 학습 현황</h3>
                 {adminStats.weeklyStats && adminStats.weeklyStats.length > 0 ? (
                   <table className="admin-table">
                     <thead>
@@ -2144,6 +2421,35 @@ function App() {
                   </table>
                 ) : (
                   <div className="no-records">학습 기록이 없습니다</div>
+                )}
+              </div>
+
+              {/* 문법 익히기 최근 7일 학습량 */}
+              <div className="weekly-stats">
+                <h3>문법 익히기 - 최근 7일 학습 현황</h3>
+                {adminStats.grammarWeeklyStats && adminStats.grammarWeeklyStats.length > 0 ? (
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>날짜</th>
+                        <th>학습 수</th>
+                        <th>정답 수</th>
+                        <th>정답률</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {adminStats.grammarWeeklyStats.map((stat, index) => (
+                        <tr key={index}>
+                          <td>{formatDateOnly(stat.date)}</td>
+                          <td>{stat.count}</td>
+                          <td>{stat.correct}</td>
+                          <td>{Math.round((stat.correct / stat.count) * 100)}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="no-records">최근 7일간 문법 학습 기록이 없습니다</div>
                 )}
               </div>
             </div>
