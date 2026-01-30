@@ -1555,6 +1555,7 @@ function App() {
                     value={userAnswer}
                     onChange={(e) => setUserAnswer(e.target.value)}
                     onKeyPress={handleAnswerKeyPress}
+                    onPaste={(e) => e.preventDefault()}
                     disabled={feedback !== null}
                     autoFocus
                   />
@@ -1956,6 +1957,7 @@ function App() {
                         value={grammarAnswer}
                         onChange={(e) => setGrammarAnswer(e.target.value)}
                         onKeyPress={handleGrammarAnswerKeyPress}
+                        onPaste={(e) => e.preventDefault()}
                         disabled={grammarFeedback !== null}
                         autoFocus
                       />
