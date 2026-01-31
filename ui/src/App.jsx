@@ -1946,7 +1946,9 @@ function App() {
                           ? `복습 라운드 ${grammarRound}: ${grammarRetryIndex + 1} / ${grammarRetryQuestions.length}`
                           : `문제 ${currentGrammarQuestionIndex + 1} / ${grammarQuestions.length}`}
                       </p>
-                      <p className="question-text">{currentGrammarQuestion?.question}</p>
+                      <p className="question-text" style={{ whiteSpace: 'pre-line' }}>
+                        {currentGrammarQuestion?.question?.replace(/\\n/g, '\n')}
+                      </p>
                     </div>
 
                     {/* 정답 입력 영역 */}
