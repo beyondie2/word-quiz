@@ -1934,7 +1934,9 @@ function App() {
                   <>
                     {/* 분류 내 전체 문항 지시 사항 영역 - instruction 필드만 표시 */}
                     <div className="grammar-instruction">
-                      <p>{selectedGrammarInstruction}</p>
+                      <p style={{ whiteSpace: 'pre-line' }}>
+                        {selectedGrammarInstruction?.replace(/\\n/g, '\n')}
+                      </p>
                     </div>
 
                     {/* 단일 문항 내용을 보여주는 영역 - question 필드만 표시 */}
