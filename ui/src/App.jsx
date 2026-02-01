@@ -65,7 +65,7 @@ function App() {
   const [newUserIsAdmin, setNewUserIsAdmin] = useState(false)
   const [isLoadingAdmin, setIsLoadingAdmin] = useState(false)
   const [adminError, setAdminError] = useState('')
-  const [adminSubTab, setAdminSubTab] = useState('users') // 'users', 'stats', 'books', or 'grammar'
+  const [adminSubTab, setAdminSubTab] = useState('users') // 'users', 'stats', 'books', 'grammar', or 'blockwriting'
 
   // 단어장 관리 관련 상태
   const [adminBooks, setAdminBooks] = useState([])
@@ -78,6 +78,12 @@ function App() {
   const [grammarUploadFile, setGrammarUploadFile] = useState(null)
   const [isGrammarUploading, setIsGrammarUploading] = useState(false)
   const [grammarUploadResult, setGrammarUploadResult] = useState(null)
+
+  // 블럭영작 관리 관련 상태
+  const [adminBlockwriting, setAdminBlockwriting] = useState([])
+  const [blockwritingUploadFile, setBlockwritingUploadFile] = useState(null)
+  const [isBlockwritingUploading, setIsBlockwritingUploading] = useState(false)
+  const [blockwritingUploadResult, setBlockwritingUploadResult] = useState(null)
 
   // 문법 익히기 관련 상태
   const [grammarCategory1List, setGrammarCategory1List] = useState([])
@@ -2040,6 +2046,12 @@ function App() {
               문법 관리
             </button>
             <button
+              className={`sub-tab-button ${adminSubTab === 'blockwriting' ? 'active' : ''}`}
+              onClick={() => setAdminSubTab('blockwriting')}
+            >
+              블럭영작 관리
+            </button>
+            <button
               className={`sub-tab-button ${adminSubTab === 'stats' ? 'active' : ''}`}
               onClick={() => setAdminSubTab('stats')}
             >
@@ -2305,6 +2317,82 @@ function App() {
                             <button 
                               className="delete-btn"
                               onClick={() => handleDeleteGrammar(item.category1)}
+                            >
+                              삭제
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          )}
+
+          {adminSubTab === 'blockwriting' && (
+            <div className="admin-blockwriting">
+              {/* 엑셀 파일 업로드 */}
+              <div className="upload-section">
+                <h3>엑셀 파일로 블럭영작 문제 추가</h3>
+                <div className="upload-info">
+                  <p>엑셀 파일 형식: category1, category2, level, instruction, question, answer 컬럼 필요</p>
+                </div>
+                <div className="upload-controls">
+                  <input
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={(e) => setBlockwritingUploadFile(e.target.files[0])}
+                    className="file-input"
+                  />
+                  <button
+                    className="upload-button"
+                    onClick={() => {/* TODO: 업로드 기능 구현 */}}
+                    disabled={!blockwritingUploadFile || isBlockwritingUploading}
+                  >
+                    {isBlockwritingUploading ? '업로드 중...' : '업로드'}
+                  </button>
+                </div>
+                {blockwritingUploadResult && (
+                  <div className={`upload-result ${blockwritingUploadResult.success ? 'success' : 'error'}`}>
+                    {blockwritingUploadResult.message}
+                  </div>
+                )}
+              </div>
+
+              {/* 블럭영작 문제 목록 */}
+              <div className="blockwriting-list">
+                <h3>블럭영작 문제 목록 ({adminBlockwriting.length}개)</h3>
+                {adminBlockwriting.length === 0 ? (
+                  <div className="empty-message">등록된 블럭영작 문제가 없습니다.</div>
+                ) : (
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>분류1</th>
+                        <th>분류2</th>
+                        <th>수준</th>
+                        <th>지시사항</th>
+                        <th>문제</th>
+                        <th>정답</th>
+                        <th>관리</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {adminBlockwriting.map(item => (
+                        <tr key={item.id}>
+                          <td>{item.id}</td>
+                          <td>{item.category1}</td>
+                          <td>{item.category2}</td>
+                          <td>{item.level}</td>
+                          <td className="instruction-cell">{item.instruction}</td>
+                          <td className="question-cell">{item.question}</td>
+                          <td>{item.answer}</td>
+                          <td>
+                            <button
+                              className="delete-button"
+                              onClick={() => {/* TODO: 삭제 기능 구현 */}}
                             >
                               삭제
                             </button>
