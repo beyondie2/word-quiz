@@ -706,6 +706,7 @@ function App() {
       fetchAdminStats()
       fetchAdminBooks()
       fetchAdminGrammar()
+      fetchAdminBlockwriting()
     }
   }, [activeTab, isAdmin, userId])
 
@@ -1266,6 +1267,132 @@ function App() {
       }
     } catch (error) {
       console.error('Delete grammar error:', error)
+      alert('서버 오류가 발생했습니다')
+    }
+  }
+
+  // 관리자용 블럭영작 목록 조회
+  const fetchAdminBlockwriting = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/blocks`)
+      const data = await response.json()
+      if (data.blocks) {
+        setAdminBlockwriting(data.blocks)
+      }
+    } catch (error) {
+      console.error('Fetch admin blockwriting error:', error)
+    }
+  }
+
+  // 블럭영작 엑셀 파일 업로드
+  const handleBlockwritingFileUpload = async () => {
+    if (!blockwritingUploadFile) {
+      setBlockwritingUploadResult({ error: '파일을 선택해주세요' })
+      return
+    }
+
+    setIsBlockwritingUploading(true)
+    setBlockwritingUploadResult(null)
+
+    try {
+      // 엑셀 파일 읽기
+      const reader = new FileReader()
+      reader.onload = async (e) => {
+        try {
+          const XLSX = await import('xlsx')
+          const data = new Uint8Array(e.target.result)
+          const workbook = XLSX.read(data, { type: 'array' })
+          const sheetName = workbook.SheetNames[0]
+          const worksheet = workbook.Sheets[sheetName]
+          const jsonData = XLSX.utils.sheet_to_json(worksheet)
+
+          // 컬럼명 매핑
+          const mappedData = jsonData.map(row => ({
+            book: row.book || row.Book || row['교재'] || '',
+            lesson: row.lesson || row.Lesson || row['레슨'] || '',
+            sentence_number: row.sentence_number || row['sentence_number'] || row['문장번호'] || null,
+            english: row.english || row.English || row['영어'] || '',
+            korean_blocks: row.korean_blocks || row['korean_blocks'] || row['한글블럭'] || '',
+            korean_full: row.korean_full || row['korean_full'] || row['한글전체'] || ''
+          }))
+
+          // 서버로 전송
+          const response = await fetch(`${API_BASE}/blocks/upload`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: mappedData })
+          })
+
+          const result = await response.json()
+
+          if (response.ok) {
+            setBlockwritingUploadResult({
+              success: true,
+              message: result.message
+            })
+            setBlockwritingUploadFile(null)
+            const fileInput = document.querySelector('.admin-blockwriting .file-input')
+            if (fileInput) fileInput.value = ''
+            fetchAdminBlockwriting()
+          } else {
+            setBlockwritingUploadResult({ error: result.error || '업로드에 실패했습니다' })
+          }
+        } catch (parseError) {
+          console.error('Excel parse error:', parseError)
+          setBlockwritingUploadResult({ error: '엑셀 파일 파싱에 실패했습니다' })
+        }
+        setIsBlockwritingUploading(false)
+      }
+      reader.readAsArrayBuffer(blockwritingUploadFile)
+    } catch (error) {
+      console.error('Blockwriting upload error:', error)
+      setBlockwritingUploadResult({ error: '서버 연결에 실패했습니다' })
+      setIsBlockwritingUploading(false)
+    }
+  }
+
+  // 블럭영작 문제 삭제
+  const handleDeleteBlockwriting = async (id) => {
+    if (!confirm('이 블럭영작 문제를 삭제하시겠습니까?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/blocks/${id}`, {
+        method: 'DELETE'
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        fetchAdminBlockwriting()
+      } else {
+        alert(data.error || '삭제에 실패했습니다')
+      }
+    } catch (error) {
+      console.error('Delete blockwriting error:', error)
+      alert('서버 오류가 발생했습니다')
+    }
+  }
+
+  // 블럭영작 전체 삭제
+  const handleDeleteAllBlockwriting = async () => {
+    if (!confirm('모든 블럭영작 문제를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/blocks`, {
+        method: 'DELETE'
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        fetchAdminBlockwriting()
+      } else {
+        alert(data.error || '삭제에 실패했습니다')
+      }
+    } catch (error) {
+      console.error('Delete all blockwriting error:', error)
       alert('서버 오류가 발생했습니다')
     }
   }
@@ -2336,7 +2463,7 @@ function App() {
               <div className="upload-section">
                 <h3>엑셀 파일로 블럭영작 문제 추가</h3>
                 <div className="upload-info">
-                  <p>엑셀 파일 형식: category1, category2, level, instruction, question, answer 컬럼 필요</p>
+                  <p>엑셀 파일 형식: book, lesson, sentence_number, english, korean_blocks, korean_full 컬럼 필요</p>
                 </div>
                 <div className="upload-controls">
                   <input
@@ -2347,15 +2474,23 @@ function App() {
                   />
                   <button
                     className="upload-button"
-                    onClick={() => {/* TODO: 업로드 기능 구현 */}}
+                    onClick={handleBlockwritingFileUpload}
                     disabled={!blockwritingUploadFile || isBlockwritingUploading}
                   >
                     {isBlockwritingUploading ? '업로드 중...' : '업로드'}
                   </button>
+                  {adminBlockwriting.length > 0 && (
+                    <button
+                      className="delete-all-button"
+                      onClick={handleDeleteAllBlockwriting}
+                    >
+                      전체 삭제
+                    </button>
+                  )}
                 </div>
                 {blockwritingUploadResult && (
                   <div className={`upload-result ${blockwritingUploadResult.success ? 'success' : 'error'}`}>
-                    {blockwritingUploadResult.message}
+                    {blockwritingUploadResult.message || blockwritingUploadResult.error}
                   </div>
                 )}
               </div>
@@ -2370,12 +2505,12 @@ function App() {
                     <thead>
                       <tr>
                         <th>ID</th>
-                        <th>분류1</th>
-                        <th>분류2</th>
-                        <th>수준</th>
-                        <th>지시사항</th>
-                        <th>문제</th>
-                        <th>정답</th>
+                        <th>교재</th>
+                        <th>레슨</th>
+                        <th>번호</th>
+                        <th>영어</th>
+                        <th>한글 블럭</th>
+                        <th>한글 전체</th>
                         <th>관리</th>
                       </tr>
                     </thead>
@@ -2383,16 +2518,16 @@ function App() {
                       {adminBlockwriting.map(item => (
                         <tr key={item.id}>
                           <td>{item.id}</td>
-                          <td>{item.category1}</td>
-                          <td>{item.category2}</td>
-                          <td>{item.level}</td>
-                          <td className="instruction-cell">{item.instruction}</td>
-                          <td className="question-cell">{item.question}</td>
-                          <td>{item.answer}</td>
+                          <td>{item.book}</td>
+                          <td>{item.lesson}</td>
+                          <td>{item.sentence_number}</td>
+                          <td className="english-cell">{item.english}</td>
+                          <td className="korean-blocks-cell">{item.korean_blocks}</td>
+                          <td className="korean-full-cell">{item.korean_full}</td>
                           <td>
                             <button
                               className="delete-button"
-                              onClick={() => {/* TODO: 삭제 기능 구현 */}}
+                              onClick={() => handleDeleteBlockwriting(item.id)}
                             >
                               삭제
                             </button>

@@ -72,7 +72,22 @@ CREATE TABLE IF NOT EXISTS grammar_progress (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Blocks 테이블: 블럭영작 문제 정보
+CREATE TABLE IF NOT EXISTS blocks (
+    id SERIAL PRIMARY KEY,
+    book VARCHAR(200),                    -- 교재명
+    lesson VARCHAR(100),                  -- 레슨
+    sentence_number INTEGER,              -- 문장 번호
+    english TEXT NOT NULL,                -- 영어 문장
+    korean_blocks TEXT NOT NULL,          -- 한글 블럭들 (쉼표로 구분)
+    korean_full TEXT NOT NULL,            -- 한글 전체 문장
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
 -- 인덱스 생성
+CREATE INDEX IF NOT EXISTS idx_blocks_id ON blocks(id);
+CREATE INDEX IF NOT EXISTS idx_blocks_book ON blocks(book);
+CREATE INDEX IF NOT EXISTS idx_blocks_lesson ON blocks(lesson);
 CREATE INDEX IF NOT EXISTS idx_books_book_name ON books(book_name);
 CREATE INDEX IF NOT EXISTS idx_books_unit ON books(unit);
 CREATE INDEX IF NOT EXISTS idx_grammar_category1 ON grammar(category1);
