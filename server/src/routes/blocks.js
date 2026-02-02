@@ -18,6 +18,104 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/blocks/books - 책 목록 조회
+router.get('/books', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT DISTINCT book 
+      FROM blocks 
+      WHERE book IS NOT NULL AND book != ''
+      ORDER BY book
+    `);
+    res.json({ books: result.rows.map(row => row.book) });
+  } catch (error) {
+    console.error('Error fetching blockwriting books:', error);
+    res.status(500).json({ error: '책 목록 조회에 실패했습니다' });
+  }
+});
+
+// GET /api/blocks/lessons - 레슨 목록 조회
+router.get('/lessons', async (req, res) => {
+  const { book } = req.query;
+
+  if (!book) {
+    return res.status(400).json({ error: '책을 선택해주세요' });
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT DISTINCT lesson 
+      FROM blocks 
+      WHERE book = $1 AND lesson IS NOT NULL AND lesson != ''
+      ORDER BY lesson
+    `, [book]);
+    res.json({ lessons: result.rows.map(row => row.lesson) });
+  } catch (error) {
+    console.error('Error fetching blockwriting lessons:', error);
+    res.status(500).json({ error: '레슨 목록 조회에 실패했습니다' });
+  }
+});
+
+// GET /api/blocks/sentence-numbers - 문장번호 목록 조회
+router.get('/sentence-numbers', async (req, res) => {
+  const { book, lesson } = req.query;
+
+  if (!book || !lesson) {
+    return res.status(400).json({ error: '책과 레슨을 선택해주세요' });
+  }
+
+  try {
+    const result = await pool.query(`
+      SELECT DISTINCT sentence_number 
+      FROM blocks 
+      WHERE book = $1 AND lesson = $2 AND sentence_number IS NOT NULL
+      ORDER BY sentence_number
+    `, [book, lesson]);
+    res.json({ sentenceNumbers: result.rows.map(row => row.sentence_number) });
+  } catch (error) {
+    console.error('Error fetching sentence numbers:', error);
+    res.status(500).json({ error: '문장번호 목록 조회에 실패했습니다' });
+  }
+});
+
+// GET /api/blocks/questions - 문제 목록 조회
+router.get('/questions', async (req, res) => {
+  const { book, lesson, sentenceNumber } = req.query;
+
+  try {
+    let query = `
+      SELECT id, book, lesson, sentence_number, english, korean_blocks, korean_full
+      FROM blocks 
+      WHERE 1=1
+    `;
+    const params = [];
+    let paramIndex = 1;
+
+    if (book) {
+      query += ` AND book = $${paramIndex++}`;
+      params.push(book);
+    }
+
+    if (lesson) {
+      query += ` AND lesson = $${paramIndex++}`;
+      params.push(lesson);
+    }
+
+    if (sentenceNumber) {
+      query += ` AND sentence_number = $${paramIndex++}`;
+      params.push(sentenceNumber);
+    }
+
+    query += ` ORDER BY sentence_number, id`;
+
+    const result = await pool.query(query, params);
+    res.json({ questions: result.rows });
+  } catch (error) {
+    console.error('Error fetching blockwriting questions:', error);
+    res.status(500).json({ error: '문제 목록 조회에 실패했습니다' });
+  }
+});
+
 // POST /api/blocks/upload - 엑셀 파일로 블럭영작 문제 업로드
 router.post('/upload', async (req, res) => {
   const { data } = req.body;

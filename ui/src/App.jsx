@@ -85,6 +85,23 @@ function App() {
   const [isBlockwritingUploading, setIsBlockwritingUploading] = useState(false)
   const [blockwritingUploadResult, setBlockwritingUploadResult] = useState(null)
 
+  // 블럭 영작 학습 관련 상태
+  const [blockwritingBooks, setBlockwritingBooks] = useState([])
+  const [selectedBlockwritingBook, setSelectedBlockwritingBook] = useState('')
+  const [showBlockwritingBookDropdown, setShowBlockwritingBookDropdown] = useState(false)
+  const [blockwritingLessons, setBlockwritingLessons] = useState([])
+  const [selectedBlockwritingLesson, setSelectedBlockwritingLesson] = useState('')
+  const [showBlockwritingLessonDropdown, setShowBlockwritingLessonDropdown] = useState(false)
+  const [blockwritingSentenceNumbers, setBlockwritingSentenceNumbers] = useState([])
+  const [selectedBlockwritingSentenceNumber, setSelectedBlockwritingSentenceNumber] = useState('')
+  const [showBlockwritingSentenceNumberDropdown, setShowBlockwritingSentenceNumberDropdown] = useState(false)
+  const [blockwritingQuestions, setBlockwritingQuestions] = useState([])
+  const [currentBlockwritingIndex, setCurrentBlockwritingIndex] = useState(0)
+  const [blockwritingAnswer, setBlockwritingAnswer] = useState('')
+  const [blockwritingFeedback, setBlockwritingFeedback] = useState(null)
+  const [isBlockwritingStarted, setIsBlockwritingStarted] = useState(false)
+  const [isBlockwritingFinished, setIsBlockwritingFinished] = useState(false)
+
   // 문법 익히기 관련 상태
   const [grammarCategory1List, setGrammarCategory1List] = useState([])
   const [selectedGrammarCategory1, setSelectedGrammarCategory1] = useState('')
@@ -1397,6 +1414,178 @@ function App() {
     }
   }
 
+  // ===== 블럭 영작 학습 관련 =====
+
+  // 블럭 영작 탭 활성화 시 책 목록 조회
+  useEffect(() => {
+    if (activeTab === 'blockwriting' && isVerified) {
+      fetchBlockwritingBooks()
+    }
+  }, [activeTab, isVerified])
+
+  // 블럭영작 책 목록 조회
+  const fetchBlockwritingBooks = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/blocks/books`)
+      const data = await response.json()
+      setBlockwritingBooks(data.books || [])
+    } catch (error) {
+      console.error('Error fetching blockwriting books:', error)
+    }
+  }
+
+  // 블럭영작 책 선택 시 레슨 목록 조회
+  const handleBlockwritingBookSelect = async (book) => {
+    setSelectedBlockwritingBook(book)
+    setShowBlockwritingBookDropdown(false)
+    // 하위 선택 초기화
+    setSelectedBlockwritingLesson('')
+    setBlockwritingLessons([])
+    setSelectedBlockwritingSentenceNumber('')
+    setBlockwritingSentenceNumbers([])
+    setBlockwritingQuestions([])
+    setIsBlockwritingStarted(false)
+
+    try {
+      const response = await fetch(`${API_BASE}/blocks/lessons?book=${encodeURIComponent(book)}`)
+      const data = await response.json()
+      setBlockwritingLessons(data.lessons || [])
+    } catch (error) {
+      console.error('Error fetching blockwriting lessons:', error)
+    }
+  }
+
+  // 블럭영작 레슨 선택 시 문장번호 목록 조회
+  const handleBlockwritingLessonSelect = async (lesson) => {
+    setSelectedBlockwritingLesson(lesson)
+    setShowBlockwritingLessonDropdown(false)
+    // 하위 선택 초기화
+    setSelectedBlockwritingSentenceNumber('')
+    setBlockwritingSentenceNumbers([])
+    setBlockwritingQuestions([])
+    setIsBlockwritingStarted(false)
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/blocks/sentence-numbers?book=${encodeURIComponent(selectedBlockwritingBook)}&lesson=${encodeURIComponent(lesson)}`
+      )
+      const data = await response.json()
+      setBlockwritingSentenceNumbers(data.sentenceNumbers || [])
+    } catch (error) {
+      console.error('Error fetching sentence numbers:', error)
+    }
+  }
+
+  // 블럭영작 문장번호 선택 시 문제 목록 조회 및 학습 시작
+  const handleBlockwritingSentenceNumberSelect = async (sentenceNumber) => {
+    setSelectedBlockwritingSentenceNumber(sentenceNumber)
+    setShowBlockwritingSentenceNumberDropdown(false)
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/blocks/questions?book=${encodeURIComponent(selectedBlockwritingBook)}&lesson=${encodeURIComponent(selectedBlockwritingLesson)}&sentenceNumber=${encodeURIComponent(sentenceNumber)}`
+      )
+      const data = await response.json()
+      const questions = data.questions || []
+      setBlockwritingQuestions(questions)
+      setCurrentBlockwritingIndex(0)
+      setBlockwritingAnswer('')
+      setBlockwritingFeedback(null)
+      setIsBlockwritingStarted(questions.length > 0)
+      setIsBlockwritingFinished(false)
+    } catch (error) {
+      console.error('Error fetching blockwriting questions:', error)
+    }
+  }
+
+  // 전체 레슨 문제 불러오기 (문장번호 선택 없이)
+  const handleBlockwritingStartAll = async () => {
+    if (!selectedBlockwritingBook || !selectedBlockwritingLesson) return
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/blocks/questions?book=${encodeURIComponent(selectedBlockwritingBook)}&lesson=${encodeURIComponent(selectedBlockwritingLesson)}`
+      )
+      const data = await response.json()
+      const questions = data.questions || []
+      setBlockwritingQuestions(questions)
+      setCurrentBlockwritingIndex(0)
+      setBlockwritingAnswer('')
+      setBlockwritingFeedback(null)
+      setIsBlockwritingStarted(questions.length > 0)
+      setIsBlockwritingFinished(false)
+      setSelectedBlockwritingSentenceNumber('')
+    } catch (error) {
+      console.error('Error fetching all blockwriting questions:', error)
+    }
+  }
+
+  // 현재 블럭영작 문제
+  const currentBlockwritingQuestion = blockwritingQuestions[currentBlockwritingIndex]
+
+  // 블럭영작 정답 확인
+  const checkBlockwritingAnswer = async () => {
+    if (!blockwritingAnswer.trim() || !currentBlockwritingQuestion || blockwritingFeedback) return
+
+    const userAnswer = blockwritingAnswer.trim()
+    const correctAnswer = currentBlockwritingQuestion.english.trim()
+    
+    // 정답 비교 (대소문자 무시, 공백 정규화)
+    const normalizedUserAnswer = userAnswer.toLowerCase().replace(/\s+/g, ' ')
+    const normalizedCorrectAnswer = correctAnswer.toLowerCase().replace(/\s+/g, ' ')
+    
+    const isCorrect = normalizedUserAnswer === normalizedCorrectAnswer
+
+    // TTS로 정답 읽어주기
+    speakEnglish(correctAnswer)
+
+    if (isCorrect) {
+      setBlockwritingFeedback({ type: 'correct', message: '정답입니다!' })
+      // 정답일 경우 자동으로 다음 문제로 이동
+      setTimeout(() => {
+        moveToNextBlockwritingQuestion()
+      }, 500)
+    } else {
+      setBlockwritingFeedback({ 
+        type: 'incorrect', 
+        message: '오답입니다.',
+        correctAnswer: correctAnswer
+      })
+    }
+  }
+
+  // 다음 블럭영작 문제로 이동
+  const moveToNextBlockwritingQuestion = () => {
+    setBlockwritingAnswer('')
+    setBlockwritingFeedback(null)
+
+    if (currentBlockwritingIndex < blockwritingQuestions.length - 1) {
+      setCurrentBlockwritingIndex(prev => prev + 1)
+    } else {
+      setIsBlockwritingFinished(true)
+    }
+  }
+
+  // 블럭영작 Enter 키 처리
+  const handleBlockwritingAnswerKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      if (blockwritingFeedback && blockwritingFeedback.type === 'incorrect') {
+        moveToNextBlockwritingQuestion()
+      } else if (!blockwritingFeedback) {
+        checkBlockwritingAnswer()
+      }
+    }
+  }
+
+  // 블럭영작 학습 다시하기
+  const handleBlockwritingRestart = () => {
+    setCurrentBlockwritingIndex(0)
+    setBlockwritingAnswer('')
+    setBlockwritingFeedback(null)
+    setIsBlockwritingFinished(false)
+  }
+
   return (
     <div className="app-container">
       {/* 헤더 영역 */}
@@ -1449,6 +1638,12 @@ function App() {
             onClick={() => setActiveTab('grammar')}
           >
             문법 익히기
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'blockwriting' ? 'active' : ''}`}
+            onClick={() => setActiveTab('blockwriting')}
+          >
+            블럭 영작
           </button>
           <button
             className={`tab-button ${activeTab === 'review' ? 'active' : ''}`}
@@ -2145,6 +2340,183 @@ function App() {
                   </div>
                 </div>
               )}
+            </>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'blockwriting' && (
+        <div className="blockwriting-container">
+          {!isVerified ? (
+            <div className="welcome-message">
+              <h2>로그인이 필요합니다</h2>
+              <p>"단어 맞추기" 탭에서 로그인해주세요.</p>
+            </div>
+          ) : (
+            <>
+              {/* 설정 바 영역 */}
+              <div className="settings-bar blockwriting-settings">
+                <div className="user-info">
+                  <span className="user-name">{userName}</span>
+                </div>
+                
+                {/* 책 드롭다운 */}
+                <div className="dropdown-container">
+                  <button 
+                    className="select-button"
+                    onClick={() => setShowBlockwritingBookDropdown(!showBlockwritingBookDropdown)}
+                  >
+                    {selectedBlockwritingBook || '책'}
+                  </button>
+                  {showBlockwritingBookDropdown && (
+                    <div className="dropdown-menu">
+                      {blockwritingBooks.map((item, index) => (
+                        <div 
+                          key={index}
+                          className="dropdown-item"
+                          onClick={() => handleBlockwritingBookSelect(item)}
+                        >
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 과 드롭다운 */}
+                {selectedBlockwritingBook && blockwritingLessons.length > 0 && (
+                  <div className="dropdown-container">
+                    <button 
+                      className="select-button"
+                      onClick={() => setShowBlockwritingLessonDropdown(!showBlockwritingLessonDropdown)}
+                    >
+                      {selectedBlockwritingLesson || '과'}
+                    </button>
+                    {showBlockwritingLessonDropdown && (
+                      <div className="dropdown-menu">
+                        {blockwritingLessons.map((item, index) => (
+                          <div 
+                            key={index}
+                            className="dropdown-item"
+                            onClick={() => handleBlockwritingLessonSelect(item)}
+                          >
+                            {item}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 문장번호 드롭다운 */}
+                {selectedBlockwritingLesson && blockwritingSentenceNumbers.length > 0 && (
+                  <div className="dropdown-container">
+                    <button 
+                      className="select-button"
+                      onClick={() => setShowBlockwritingSentenceNumberDropdown(!showBlockwritingSentenceNumberDropdown)}
+                    >
+                      {selectedBlockwritingSentenceNumber || '문장번호'}
+                    </button>
+                    {showBlockwritingSentenceNumberDropdown && (
+                      <div className="dropdown-menu">
+                        <div 
+                          className="dropdown-item"
+                          onClick={() => handleBlockwritingStartAll()}
+                        >
+                          전체
+                        </div>
+                        {blockwritingSentenceNumbers.map((item, index) => (
+                          <div 
+                            key={index}
+                            className="dropdown-item"
+                            onClick={() => handleBlockwritingSentenceNumberSelect(item)}
+                          >
+                            {item}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* 블럭 영작 문제 영역 */}
+              <div className="blockwriting-area">
+                {!isBlockwritingStarted ? (
+                  <div className="welcome-message">
+                    <h2>블럭 영작을 시작하세요</h2>
+                    <p>책 → 과 → 문장번호를 순서대로 선택해주세요.</p>
+                  </div>
+                ) : isBlockwritingFinished ? (
+                  <div className="quiz-complete">
+                    <h2>학습을 완료했습니다!</h2>
+                    <div className="complete-buttons">
+                      <button className="action-button primary" onClick={handleBlockwritingRestart}>
+                        다시하기
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {/* 한글 블럭 표시 (빨간색 이탤릭) */}
+                    <div className="blockwriting-korean-blocks">
+                      {currentBlockwritingQuestion?.korean_blocks}
+                    </div>
+
+                    {/* 한글 전체 문장 표시 (볼드) */}
+                    <div className="blockwriting-korean-full">
+                      {currentBlockwritingQuestion?.korean_full}
+                    </div>
+
+                    {/* 진행 상황 */}
+                    <div className="blockwriting-progress">
+                      {currentBlockwritingIndex + 1} / {blockwritingQuestions.length}
+                    </div>
+
+                    {/* 정답 입력 영역 */}
+                    <div className="blockwriting-answer-container">
+                      <textarea
+                        className={`blockwriting-answer-input ${blockwritingFeedback?.type || ''}`}
+                        placeholder="정답 입력"
+                        value={blockwritingAnswer}
+                        onChange={(e) => setBlockwritingAnswer(e.target.value)}
+                        onKeyPress={handleBlockwritingAnswerKeyPress}
+                        disabled={blockwritingFeedback !== null}
+                        rows={5}
+                      />
+                    </div>
+
+                    {/* 확인 버튼 */}
+                    {!blockwritingFeedback && (
+                      <div className="blockwriting-button-container">
+                        <button 
+                          className="check-button"
+                          onClick={checkBlockwritingAnswer}
+                          disabled={!blockwritingAnswer.trim()}
+                        >
+                          확인
+                        </button>
+                      </div>
+                    )}
+
+                    {/* 피드백 표시 */}
+                    {blockwritingFeedback && (
+                      <div className={`blockwriting-feedback ${blockwritingFeedback.type}`}>
+                        <p>{blockwritingFeedback.message}</p>
+                        {blockwritingFeedback.correctAnswer && (
+                          <div className="blockwriting-correct-answer">
+                            <p className="label">정답:</p>
+                            <p className="answer">{blockwritingFeedback.correctAnswer}</p>
+                          </div>
+                        )}
+                        {blockwritingFeedback.type === 'incorrect' && (
+                          <p className="hint">Enter 키를 눌러 계속하세요</p>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </>
           )}
         </div>
