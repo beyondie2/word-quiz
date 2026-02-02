@@ -1331,15 +1331,31 @@
   border: 3px solid #4ADE80;
 }
 
-/* 한글 블럭 표시 - 빨간색 이탤릭 */
+/* 한글 블럭 표시 */
 .blockwriting-korean-blocks {
-  color: #F87171;
   font-style: italic;
   font-size: 1.3rem;
-  line-height: 1.8;
+  line-height: 2;
   padding: 15px 20px;
   background-color: #0D2535;
   border-radius: 8px;
+}
+
+/* 단위 블럭 스타일 */
+.unit-block {
+  color: #6B9AAD; /* 기본 색상 (회색) */
+  transition: color 0.3s ease;
+}
+
+/* 현재 단위 블럭 - 빨간색 */
+.unit-block.current {
+  color: #F87171;
+  font-weight: 600;
+}
+
+/* 완료된 단위 블럭 - 파란색 */
+.unit-block.completed {
+  color: #60A5FA;
 }
 
 /* 한글 전체 문장 - 볼드 */
@@ -1361,6 +1377,10 @@
   padding-left: 5px;
 }
 
+.blockwriting-progress .sentence-progress {
+  color: #5BA3B5;
+}
+
 /* 정답 입력 영역 */
 .blockwriting-answer-container {
   width: 100%;
@@ -1368,38 +1388,26 @@
 
 .blockwriting-answer-input {
   width: 100%;
-  padding: 20px;
+  padding: 18px 20px;
   border: 2px solid #3D7A8C;
   border-radius: 8px;
   font-size: 1.1rem;
   outline: none;
   background-color: #0D2535;
   color: #E8F4FD;
-  resize: vertical;
-  min-height: 120px;
   transition: all 0.2s ease;
   font-family: inherit;
-  line-height: 1.6;
 }
 
 .blockwriting-answer-input::placeholder {
   color: #6B9AAD;
+  font-size: 0.95rem;
 }
 
 .blockwriting-answer-input:focus {
   border-color: #FF69B4;
   background-color: #153045;
   box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
-}
-
-.blockwriting-answer-input.correct {
-  border-color: #4ADE80;
-  background-color: #134E3A;
-}
-
-.blockwriting-answer-input.incorrect {
-  border-color: #F87171;
-  background-color: #4C1D1D;
 }
 
 .blockwriting-answer-input:disabled {
@@ -1411,58 +1419,45 @@
 .blockwriting-button-container {
   display: flex;
   justify-content: center;
+  gap: 15px;
   margin-top: 10px;
 }
 
-/* 피드백 표시 */
-.blockwriting-feedback {
-  padding: 20px;
-  border-radius: 8px;
-  text-align: center;
-}
-
-.blockwriting-feedback.correct {
-  background-color: #134E3A;
-  border: 1px solid #4ADE80;
-  color: #A7F3D0;
-}
-
-.blockwriting-feedback.incorrect {
-  background-color: #4C1D1D;
-  border: 1px solid #F87171;
-  color: #FCA5A5;
-}
-
-.blockwriting-feedback p {
-  margin: 0;
-  font-size: 1.1rem;
-}
-
-.blockwriting-correct-answer {
-  margin-top: 15px;
-  padding: 15px;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
-}
-
-.blockwriting-correct-answer .label {
-  color: #6B9AAD;
-  font-size: 0.9rem;
-  margin-bottom: 8px;
-}
-
-.blockwriting-correct-answer .answer {
+/* 모달 성공 스타일 */
+.modal-content h3.success-title {
   color: #4ADE80;
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin: 0;
-  word-break: break-word;
 }
 
-.blockwriting-feedback .hint {
-  margin-top: 15px;
-  font-size: 0.9rem;
-  color: #6B9AAD;
+.modal-answer.success {
+  border: 1px solid #4ADE80;
+}
+
+.modal-button.success {
+  background-color: #10B981;
+}
+
+.modal-button.success:hover {
+  background-color: #059669;
+}
+
+.modal-button.primary {
+  background-color: #3D7A8C;
+}
+
+.modal-button.primary:hover {
+  background-color: #4D8A9C;
+}
+
+/* 모달 버튼 그룹 */
+.modal-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.modal-buttons .modal-button {
+  min-width: 100px;
 }
 
 /* 관리자 블럭영작 */

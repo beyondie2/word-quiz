@@ -98,9 +98,20 @@ function App() {
   const [blockwritingQuestions, setBlockwritingQuestions] = useState([])
   const [currentBlockwritingIndex, setCurrentBlockwritingIndex] = useState(0)
   const [blockwritingAnswer, setBlockwritingAnswer] = useState('')
-  const [blockwritingFeedback, setBlockwritingFeedback] = useState(null)
   const [isBlockwritingStarted, setIsBlockwritingStarted] = useState(false)
-  const [isBlockwritingFinished, setIsBlockwritingFinished] = useState(false)
+  
+  // 블럭 영작 단위 블럭 관련 상태
+  const [koreanBlocks, setKoreanBlocks] = useState([]) // 한글 단위 블럭 배열
+  const [englishBlocks, setEnglishBlocks] = useState([]) // 영어 단위 블럭 배열
+  const [currentUnitBlockIndex, setCurrentUnitBlockIndex] = useState(0) // 현재 단위 블럭 인덱스
+  const [completedBlocks, setCompletedBlocks] = useState([]) // 완료된 블럭 인덱스 배열
+  const [blockwritingPhase, setBlockwritingPhase] = useState('block') // 'block' | 'full' - 단위블럭 모드 또는 전체문장 모드
+  const [showKoreanBlocks, setShowKoreanBlocks] = useState(true) // 한글 블럭 표시 여부
+  
+  // 블럭 영작 모달 관련 상태
+  const [showBlockwritingModal, setShowBlockwritingModal] = useState(false)
+  const [blockwritingModalType, setBlockwritingModalType] = useState('') // 'incorrect' | 'success' | 'next'
+  const [blockwritingModalContent, setBlockwritingModalContent] = useState({ correctAnswer: '' })
 
   // 문법 익히기 관련 상태
   const [grammarCategory1List, setGrammarCategory1List] = useState([])
@@ -1416,6 +1427,9 @@ function App() {
 
   // ===== 블럭 영작 학습 관련 =====
 
+  // 블럭영작 정답 입력창 ref
+  const blockwritingAnswerInputRef = useRef(null)
+
   // 블럭 영작 탭 활성화 시 책 목록 조회
   useEffect(() => {
     if (activeTab === 'blockwriting' && isVerified) {
@@ -1445,6 +1459,7 @@ function App() {
     setBlockwritingSentenceNumbers([])
     setBlockwritingQuestions([])
     setIsBlockwritingStarted(false)
+    resetBlockwritingState()
 
     try {
       const response = await fetch(`${API_BASE}/blocks/lessons?book=${encodeURIComponent(book)}`)
@@ -1464,6 +1479,7 @@ function App() {
     setBlockwritingSentenceNumbers([])
     setBlockwritingQuestions([])
     setIsBlockwritingStarted(false)
+    resetBlockwritingState()
 
     try {
       const response = await fetch(
@@ -1487,12 +1503,7 @@ function App() {
       )
       const data = await response.json()
       const questions = data.questions || []
-      setBlockwritingQuestions(questions)
-      setCurrentBlockwritingIndex(0)
-      setBlockwritingAnswer('')
-      setBlockwritingFeedback(null)
-      setIsBlockwritingStarted(questions.length > 0)
-      setIsBlockwritingFinished(false)
+      initializeBlockwritingQuestion(questions, 0)
     } catch (error) {
       console.error('Error fetching blockwriting questions:', error)
     }
@@ -1508,71 +1519,171 @@ function App() {
       )
       const data = await response.json()
       const questions = data.questions || []
-      setBlockwritingQuestions(questions)
-      setCurrentBlockwritingIndex(0)
-      setBlockwritingAnswer('')
-      setBlockwritingFeedback(null)
-      setIsBlockwritingStarted(questions.length > 0)
-      setIsBlockwritingFinished(false)
       setSelectedBlockwritingSentenceNumber('')
+      initializeBlockwritingQuestion(questions, 0)
     } catch (error) {
       console.error('Error fetching all blockwriting questions:', error)
+    }
+  }
+
+  // 블럭영작 상태 초기화
+  const resetBlockwritingState = () => {
+    setKoreanBlocks([])
+    setEnglishBlocks([])
+    setCurrentUnitBlockIndex(0)
+    setCompletedBlocks([])
+    setBlockwritingPhase('block')
+    setShowKoreanBlocks(true)
+    setBlockwritingAnswer('')
+    setShowBlockwritingModal(false)
+    setBlockwritingModalType('')
+    setBlockwritingModalContent({ correctAnswer: '' })
+  }
+
+  // 블럭영작 문제 초기화 (⑨ 과정)
+  const initializeBlockwritingQuestion = (questions, index) => {
+    setBlockwritingQuestions(questions)
+    setCurrentBlockwritingIndex(index)
+    
+    if (questions.length > 0 && questions[index]) {
+      const question = questions[index]
+      // ⑨-3: korean_blocks를 "/" 기준으로 분리하여 배열로 저장
+      const kBlocks = question.korean_blocks ? question.korean_blocks.split('/').map(b => b.trim()) : []
+      // ⑨-4: english를 "/" 기준으로 분리하여 배열로 저장
+      const eBlocks = question.english ? question.english.split('/').map(b => b.trim()) : []
+      
+      setKoreanBlocks(kBlocks)
+      setEnglishBlocks(eBlocks)
+      setCurrentUnitBlockIndex(0)
+      setCompletedBlocks([])
+      setBlockwritingPhase('block')
+      setShowKoreanBlocks(true)
+      setBlockwritingAnswer('')
+      setIsBlockwritingStarted(true)
+      setShowBlockwritingModal(false)
+      
+      // 입력창에 포커스
+      setTimeout(() => {
+        blockwritingAnswerInputRef.current?.focus()
+      }, 100)
     }
   }
 
   // 현재 블럭영작 문제
   const currentBlockwritingQuestion = blockwritingQuestions[currentBlockwritingIndex]
 
-  // 블럭영작 정답 확인
-  const checkBlockwritingAnswer = async () => {
-    if (!blockwritingAnswer.trim() || !currentBlockwritingQuestion || blockwritingFeedback) return
+  // 블럭영작 정답 확인 (⑩, ⑪ 과정)
+  const checkBlockwritingAnswer = () => {
+    if (!blockwritingAnswer.trim()) return
 
     const userAnswer = blockwritingAnswer.trim()
-    const correctAnswer = currentBlockwritingQuestion.english.trim()
     
-    // 정답 비교 (대소문자 무시, 공백 정규화)
-    const normalizedUserAnswer = userAnswer.toLowerCase().replace(/\s+/g, ' ')
-    const normalizedCorrectAnswer = correctAnswer.toLowerCase().replace(/\s+/g, ' ')
-    
-    const isCorrect = normalizedUserAnswer === normalizedCorrectAnswer
-
-    // TTS로 정답 읽어주기
-    speakEnglish(correctAnswer)
-
-    if (isCorrect) {
-      setBlockwritingFeedback({ type: 'correct', message: '정답입니다!' })
-      // 정답일 경우 자동으로 다음 문제로 이동
-      setTimeout(() => {
-        moveToNextBlockwritingQuestion()
-      }, 500)
+    if (blockwritingPhase === 'block') {
+      // 단위 블럭 모드 (⑪ 과정)
+      const correctAnswer = englishBlocks[currentUnitBlockIndex]?.trim() || ''
+      
+      // 정답 비교 (대소문자 무시, 공백 정규화)
+      const normalizedUserAnswer = userAnswer.toLowerCase().replace(/\s+/g, ' ')
+      const normalizedCorrectAnswer = correctAnswer.toLowerCase().replace(/\s+/g, ' ')
+      
+      if (normalizedUserAnswer === normalizedCorrectAnswer) {
+        // ⑪-1: 정답인 경우
+        speakEnglish(correctAnswer)
+        
+        // 현재 블럭을 완료 처리
+        const newCompletedBlocks = [...completedBlocks, currentUnitBlockIndex]
+        setCompletedBlocks(newCompletedBlocks)
+        setBlockwritingAnswer('')
+        
+        // 마지막 단위 블럭인지 확인
+        if (currentUnitBlockIndex >= koreanBlocks.length - 1) {
+          // ⑫: 모든 단위 블럭 완료 - 한글 블럭 숨기고 전체 문장 모드로 전환
+          setShowKoreanBlocks(false)
+          setBlockwritingPhase('full')
+        } else {
+          // 다음 단위 블럭으로 이동
+          setCurrentUnitBlockIndex(prev => prev + 1)
+        }
+        
+        // 입력창에 포커스
+        setTimeout(() => {
+          blockwritingAnswerInputRef.current?.focus()
+        }, 100)
+      } else {
+        // ⑪-2: 오답인 경우 - 모달로 정답 표시
+        speakEnglish(correctAnswer)
+        setBlockwritingModalType('incorrect')
+        setBlockwritingModalContent({ correctAnswer })
+        setShowBlockwritingModal(true)
+        // 다음 블럭으로 넘어가지 않음 - 사용자가 수정 후 다시 시도
+      }
     } else {
-      setBlockwritingFeedback({ 
-        type: 'incorrect', 
-        message: '오답입니다.',
-        correctAnswer: correctAnswer
-      })
+      // 전체 문장 모드 (⑬, ⑭ 과정)
+      const fullEnglish = currentBlockwritingQuestion?.english?.replace(/\//g, '').replace(/\s+/g, ' ').trim() || ''
+      
+      // 정답 비교 (대소문자 무시, 공백 정규화)
+      const normalizedUserAnswer = userAnswer.toLowerCase().replace(/\s+/g, ' ')
+      const normalizedCorrectAnswer = fullEnglish.toLowerCase().replace(/\s+/g, ' ')
+      
+      if (normalizedUserAnswer === normalizedCorrectAnswer) {
+        // ⑭-1: 정답인 경우
+        speakEnglish(fullEnglish)
+        setBlockwritingModalType('success')
+        setBlockwritingModalContent({ correctAnswer: fullEnglish })
+        setShowBlockwritingModal(true)
+      } else {
+        // ⑭-2: 오답인 경우
+        speakEnglish(fullEnglish)
+        setBlockwritingModalType('incorrect')
+        setBlockwritingModalContent({ correctAnswer: fullEnglish })
+        setShowBlockwritingModal(true)
+      }
     }
   }
 
-  // 다음 블럭영작 문제로 이동
-  const moveToNextBlockwritingQuestion = () => {
-    setBlockwritingAnswer('')
-    setBlockwritingFeedback(null)
-
-    if (currentBlockwritingIndex < blockwritingQuestions.length - 1) {
-      setCurrentBlockwritingIndex(prev => prev + 1)
-    } else {
-      setIsBlockwritingFinished(true)
+  // 블럭영작 모달 닫기
+  const closeBlockwritingModal = () => {
+    setShowBlockwritingModal(false)
+    
+    if (blockwritingModalType === 'success') {
+      // ⑮: 성공 후 다음 문장 여부 확인
+      setBlockwritingModalType('next')
+      setShowBlockwritingModal(true)
+    } else if (blockwritingModalType === 'incorrect') {
+      // 오답 모달 닫은 후 입력창에 포커스
+      setTimeout(() => {
+        blockwritingAnswerInputRef.current?.focus()
+      }, 100)
     }
+  }
+
+  // 다음 문장으로 이동 (⑮ - "예" 선택)
+  const goToNextBlockwritingSentence = () => {
+    setShowBlockwritingModal(false)
+    
+    if (currentBlockwritingIndex < blockwritingQuestions.length - 1) {
+      // 다음 문장으로 이동
+      initializeBlockwritingQuestion(blockwritingQuestions, currentBlockwritingIndex + 1)
+    } else {
+      // 모든 문장 완료
+      alert('모든 문장을 완료했습니다!')
+      setIsBlockwritingStarted(false)
+      resetBlockwritingState()
+    }
+  }
+
+  // 선택 화면으로 돌아가기 (⑮ - "아니오" 선택)
+  const returnToBlockwritingSelection = () => {
+    setShowBlockwritingModal(false)
+    setIsBlockwritingStarted(false)
+    resetBlockwritingState()
   }
 
   // 블럭영작 Enter 키 처리
   const handleBlockwritingAnswerKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      if (blockwritingFeedback && blockwritingFeedback.type === 'incorrect') {
-        moveToNextBlockwritingQuestion()
-      } else if (!blockwritingFeedback) {
+      if (!showBlockwritingModal) {
         checkBlockwritingAnswer()
       }
     }
@@ -1580,10 +1691,9 @@ function App() {
 
   // 블럭영작 학습 다시하기
   const handleBlockwritingRestart = () => {
-    setCurrentBlockwritingIndex(0)
-    setBlockwritingAnswer('')
-    setBlockwritingFeedback(null)
-    setIsBlockwritingFinished(false)
+    if (blockwritingQuestions.length > 0) {
+      initializeBlockwritingQuestion(blockwritingQuestions, currentBlockwritingIndex)
+    }
   }
 
   return (
@@ -2447,76 +2557,132 @@ function App() {
                     <h2>블럭 영작을 시작하세요</h2>
                     <p>책 → 과 → 문장번호를 순서대로 선택해주세요.</p>
                   </div>
-                ) : isBlockwritingFinished ? (
-                  <div className="quiz-complete">
-                    <h2>학습을 완료했습니다!</h2>
-                    <div className="complete-buttons">
-                      <button className="action-button primary" onClick={handleBlockwritingRestart}>
-                        다시하기
-                      </button>
-                    </div>
-                  </div>
                 ) : (
                   <>
-                    {/* 한글 블럭 표시 (빨간색 이탤릭) */}
-                    <div className="blockwriting-korean-blocks">
-                      {currentBlockwritingQuestion?.korean_blocks}
-                    </div>
+                    {/* ⑨-1, ⑨-5: 한글 블럭 표시 - 현재 블럭은 빨간색, 완료된 블럭은 파란색 */}
+                    {showKoreanBlocks && (
+                      <div className="blockwriting-korean-blocks">
+                        {koreanBlocks.map((block, index) => (
+                          <span 
+                            key={index}
+                            className={`unit-block ${
+                              completedBlocks.includes(index) 
+                                ? 'completed' 
+                                : index === currentUnitBlockIndex 
+                                  ? 'current' 
+                                  : ''
+                            }`}
+                          >
+                            {block}
+                            {index < koreanBlocks.length - 1 && ' / '}
+                          </span>
+                        ))}
+                      </div>
+                    )}
 
-                    {/* 한글 전체 문장 표시 (볼드) */}
+                    {/* ⑨-2: 한글 전체 문장 표시 (볼드) */}
                     <div className="blockwriting-korean-full">
                       {currentBlockwritingQuestion?.korean_full}
                     </div>
 
                     {/* 진행 상황 */}
                     <div className="blockwriting-progress">
-                      {currentBlockwritingIndex + 1} / {blockwritingQuestions.length}
+                      {blockwritingPhase === 'block' ? (
+                        <span>단위 블럭: {currentUnitBlockIndex + 1} / {koreanBlocks.length}</span>
+                      ) : (
+                        <span>전체 문장 영작</span>
+                      )}
+                      <span className="sentence-progress"> | 문장: {currentBlockwritingIndex + 1} / {blockwritingQuestions.length}</span>
                     </div>
 
                     {/* 정답 입력 영역 */}
                     <div className="blockwriting-answer-container">
-                      <textarea
-                        className={`blockwriting-answer-input ${blockwritingFeedback?.type || ''}`}
-                        placeholder="정답 입력"
+                      <input
+                        ref={blockwritingAnswerInputRef}
+                        type="text"
+                        className="blockwriting-answer-input"
+                        placeholder={blockwritingPhase === 'block' 
+                          ? `"${koreanBlocks[currentUnitBlockIndex] || ''}" 에 해당하는 영어를 입력하세요`
+                          : '전체 영어 문장을 입력하세요'
+                        }
                         value={blockwritingAnswer}
                         onChange={(e) => setBlockwritingAnswer(e.target.value)}
                         onKeyPress={handleBlockwritingAnswerKeyPress}
-                        disabled={blockwritingFeedback !== null}
-                        rows={5}
+                        disabled={showBlockwritingModal}
+                        autoFocus
                       />
                     </div>
 
                     {/* 확인 버튼 */}
-                    {!blockwritingFeedback && (
-                      <div className="blockwriting-button-container">
-                        <button 
-                          className="check-button"
-                          onClick={checkBlockwritingAnswer}
-                          disabled={!blockwritingAnswer.trim()}
-                        >
-                          확인
-                        </button>
-                      </div>
-                    )}
-
-                    {/* 피드백 표시 */}
-                    {blockwritingFeedback && (
-                      <div className={`blockwriting-feedback ${blockwritingFeedback.type}`}>
-                        <p>{blockwritingFeedback.message}</p>
-                        {blockwritingFeedback.correctAnswer && (
-                          <div className="blockwriting-correct-answer">
-                            <p className="label">정답:</p>
-                            <p className="answer">{blockwritingFeedback.correctAnswer}</p>
-                          </div>
-                        )}
-                        {blockwritingFeedback.type === 'incorrect' && (
-                          <p className="hint">Enter 키를 눌러 계속하세요</p>
-                        )}
-                      </div>
-                    )}
+                    <div className="blockwriting-button-container">
+                      <button 
+                        className="check-button"
+                        onClick={checkBlockwritingAnswer}
+                        disabled={!blockwritingAnswer.trim() || showBlockwritingModal}
+                      >
+                        확인
+                      </button>
+                      <button 
+                        className="action-button"
+                        onClick={handleBlockwritingRestart}
+                      >
+                        다시하기
+                      </button>
+                    </div>
                   </>
                 )}
               </div>
+
+              {/* 블럭영작 모달 */}
+              {showBlockwritingModal && (
+                <div className="modal-overlay">
+                  <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                    {/* 오답 모달 */}
+                    {blockwritingModalType === 'incorrect' && (
+                      <>
+                        <h3>오답입니다</h3>
+                        <div className="modal-answer">
+                          <p className="label">정답:</p>
+                          <p className="correct-answer">{blockwritingModalContent.correctAnswer}</p>
+                        </div>
+                        <p className="modal-hint">정답을 확인하고 다시 입력해주세요</p>
+                        <button className="modal-button" onClick={closeBlockwritingModal}>
+                          확인
+                        </button>
+                      </>
+                    )}
+
+                    {/* 성공 모달 */}
+                    {blockwritingModalType === 'success' && (
+                      <>
+                        <h3 className="success-title">정답입니다!</h3>
+                        <div className="modal-answer success">
+                          <p className="label">완성된 문장:</p>
+                          <p className="correct-answer">{blockwritingModalContent.correctAnswer}</p>
+                        </div>
+                        <button className="modal-button success" onClick={closeBlockwritingModal}>
+                          확인
+                        </button>
+                      </>
+                    )}
+
+                    {/* 다음 문장 확인 모달 */}
+                    {blockwritingModalType === 'next' && (
+                      <>
+                        <h3>다음 문장으로 이동하시겠습니까?</h3>
+                        <div className="modal-buttons">
+                          <button className="modal-button primary" onClick={goToNextBlockwritingSentence}>
+                            예
+                          </button>
+                          <button className="modal-button" onClick={returnToBlockwritingSelection}>
+                            아니오
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
