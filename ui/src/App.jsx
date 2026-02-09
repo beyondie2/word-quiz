@@ -1513,6 +1513,8 @@ function App() {
   const handleBlockwritingStartAll = async () => {
     if (!selectedBlockwritingBook || !selectedBlockwritingLesson) return
 
+    setShowBlockwritingSentenceNumberDropdown(false)
+
     try {
       const response = await fetch(
         `${API_BASE}/blocks/questions?book=${encodeURIComponent(selectedBlockwritingBook)}&lesson=${encodeURIComponent(selectedBlockwritingLesson)}`
