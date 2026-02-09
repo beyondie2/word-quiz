@@ -3,6 +3,11 @@ import pool from '../config/database.js';
 
 const router = express.Router();
 
+// 정답 비교용 정규화: 앞뒤 공백 제거 + 연속 공백을 하나로
+function normalizeAnswer(str) {
+  return (str || '').trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
 // POST /api/quiz/check - 정답 확인
 router.post('/check', async (req, res) => {
   const {
@@ -32,26 +37,26 @@ router.post('/check', async (req, res) => {
     let isCorrect = false;
     let correctAnswer = '';
 
-    // 연습 모드에 따라 정답 확인
+    // 연습 모드에 따라 정답 확인 (trim + 연속 공백 정규화 적용)
     if (practiceMode === 'english') {
       // 영어를 보고 한국어로 답하는 경우
       correctAnswer = word.korean;
-      const koreanAnswers = word.korean.split(',').map(s => s.trim().toLowerCase());
-      const userAnswerTrimmed = userAnswer.trim().toLowerCase();
+      const koreanAnswers = word.korean.split(',').map(s => normalizeAnswer(s));
+      const userAnswerNormalized = normalizeAnswer(userAnswer);
 
       if (koreanAnswerType === 'one') {
         // 하나만 맞아도 정답
-        isCorrect = koreanAnswers.some(answer => answer === userAnswerTrimmed);
+        isCorrect = koreanAnswers.some(answer => answer === userAnswerNormalized);
       } else {
         // 전부 맞아야 정답
-        const userAnswers = userAnswerTrimmed.split(',').map(s => s.trim()).sort();
-        const sortedCorrect = koreanAnswers.sort();
+        const userAnswers = userAnswerNormalized.split(',').map(s => s.trim().replace(/\s+/g, ' ')).filter(Boolean).sort();
+        const sortedCorrect = koreanAnswers.filter(Boolean).sort();
         isCorrect = JSON.stringify(userAnswers) === JSON.stringify(sortedCorrect);
       }
     } else {
       // 한국어를 보고 영어로 답하는 경우
       correctAnswer = word.english;
-      isCorrect = userAnswer.trim().toLowerCase() === word.english.trim().toLowerCase();
+      isCorrect = normalizeAnswer(userAnswer) === normalizeAnswer(word.english);
     }
 
     // 학습 기록 저장

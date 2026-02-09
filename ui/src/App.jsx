@@ -1574,19 +1574,22 @@ function App() {
   // 현재 블럭영작 문제
   const currentBlockwritingQuestion = blockwritingQuestions[currentBlockwritingIndex]
 
+  // 정답 비교용 정규화: 앞뒤 공백 제거 + 연속 공백을 하나로
+  const normalizeBlockwritingAnswer = (str) => (str || '').trim().replace(/\s+/g, ' ')
+
   // 블럭영작 정답 확인 (⑩, ⑪ 과정)
   const checkBlockwritingAnswer = () => {
     if (!blockwritingAnswer.trim()) return
 
-    const userAnswer = blockwritingAnswer.trim()
+    const userAnswer = normalizeBlockwritingAnswer(blockwritingAnswer)
     
     if (blockwritingPhase === 'block') {
       // 단위 블럭 모드 (⑪ 과정)
-      const correctAnswer = englishBlocks[currentUnitBlockIndex]?.trim() || ''
+      const correctAnswer = normalizeBlockwritingAnswer(englishBlocks[currentUnitBlockIndex] || '')
       
       // 정답 비교 (대소문자 무시, 공백 정규화)
-      const normalizedUserAnswer = userAnswer.toLowerCase().replace(/\s+/g, ' ')
-      const normalizedCorrectAnswer = correctAnswer.toLowerCase().replace(/\s+/g, ' ')
+      const normalizedUserAnswer = userAnswer.toLowerCase()
+      const normalizedCorrectAnswer = correctAnswer.toLowerCase()
       
       if (normalizedUserAnswer === normalizedCorrectAnswer) {
         // ⑪-1: 정답인 경우
@@ -1621,11 +1624,11 @@ function App() {
       }
     } else {
       // 전체 문장 모드 (⑬, ⑭ 과정)
-      const fullEnglish = currentBlockwritingQuestion?.english?.replace(/\//g, '').replace(/\s+/g, ' ').trim() || ''
+      const fullEnglish = normalizeBlockwritingAnswer((currentBlockwritingQuestion?.english || '').replace(/\//g, ''))
       
       // 정답 비교 (대소문자 무시, 공백 정규화)
-      const normalizedUserAnswer = userAnswer.toLowerCase().replace(/\s+/g, ' ')
-      const normalizedCorrectAnswer = fullEnglish.toLowerCase().replace(/\s+/g, ' ')
+      const normalizedUserAnswer = userAnswer.toLowerCase()
+      const normalizedCorrectAnswer = fullEnglish.toLowerCase()
       
       if (normalizedUserAnswer === normalizedCorrectAnswer) {
         // ⑭-1: 정답인 경우

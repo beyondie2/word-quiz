@@ -130,12 +130,11 @@ router.post('/check', async (req, res) => {
 
     const { question, answer: correctAnswer } = questionResult.rows[0];
     
-    // 정답 비교 (대소문자 무시, 앞뒤 공백 제거)
-    const normalizedUserAnswer = userAnswer.trim().toLowerCase();
-    const normalizedCorrectAnswer = correctAnswer.trim().toLowerCase();
+    // 정답 비교용 정규화: 앞뒤 공백 제거 + 연속 공백을 하나로
+    const normalizeAnswer = (str) => (str || '').trim().replace(/\s+/g, ' ').toLowerCase();
     
-    // 정답이 여러 개일 수 있음 (쉼표로 구분)
-    const possibleAnswers = normalizedCorrectAnswer.split(',').map(a => a.trim().toLowerCase());
+    const normalizedUserAnswer = normalizeAnswer(userAnswer);
+    const possibleAnswers = (correctAnswer || '').split(',').map(a => normalizeAnswer(a)).filter(Boolean);
     const isCorrect = possibleAnswers.some(answer => answer === normalizedUserAnswer);
 
     // 학습 기록 저장 (userId가 있을 때만)
