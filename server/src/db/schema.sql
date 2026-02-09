@@ -84,6 +84,23 @@ CREATE TABLE IF NOT EXISTS blocks (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- BlocksProgress 테이블: 사용자별 블럭영작 학습 기록
+CREATE TABLE IF NOT EXISTS blocks_progress (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    blocks_id INTEGER REFERENCES blocks(id) ON DELETE SET NULL,
+    book VARCHAR(200),                    -- blocks.book
+    lesson VARCHAR(100),                  -- blocks.lesson
+    sentence_number INTEGER,              -- blocks.sentence_number
+    english TEXT,                         -- blocks.english (정답)
+    correct_answer TEXT,                  -- 정답 (단위 블럭 또는 전체 문장)
+    wrong_answer TEXT,                    -- 사용자가 입력한 오답
+    phase VARCHAR(20) DEFAULT 'block',    -- 'block'(단위 블럭) | 'full'(전체 문장)
+    round INTEGER DEFAULT 1,
+    is_correct BOOLEAN NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
 -- 인덱스 생성
 CREATE INDEX IF NOT EXISTS idx_blocks_id ON blocks(id);
 CREATE INDEX IF NOT EXISTS idx_blocks_book ON blocks(book);
@@ -99,6 +116,9 @@ CREATE INDEX IF NOT EXISTS idx_user_progress_created_at ON user_progress(created
 CREATE INDEX IF NOT EXISTS idx_grammar_progress_user_id ON grammar_progress(user_id);
 CREATE INDEX IF NOT EXISTS idx_grammar_progress_grammar_id ON grammar_progress(grammar_id);
 CREATE INDEX IF NOT EXISTS idx_grammar_progress_created_at ON grammar_progress(created_at);
+CREATE INDEX IF NOT EXISTS idx_blocks_progress_user_id ON blocks_progress(user_id);
+CREATE INDEX IF NOT EXISTS idx_blocks_progress_blocks_id ON blocks_progress(blocks_id);
+CREATE INDEX IF NOT EXISTS idx_blocks_progress_created_at ON blocks_progress(created_at);
 
 -- 샘플 데이터 (테스트용)
 INSERT INTO users (username, is_admin) VALUES 
