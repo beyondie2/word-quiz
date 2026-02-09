@@ -36,6 +36,64 @@ router.post('/progress', async (req, res) => {
   }
 });
 
+// GET /api/blocks/progress - 블럭영작 수행 기록 조회
+router.get('/progress', async (req, res) => {
+  const { requesterId, userId, date } = req.query;
+
+  try {
+    const requesterResult = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [requesterId]
+    );
+    const isAdmin = requesterResult.rows[0]?.is_admin || false;
+
+    let query = `
+      SELECT bp.id, bp.user_id, bp.blocks_id, bp.book, bp.lesson, bp.sentence_number,
+             bp.english, bp.correct_answer, bp.wrong_answer, bp.phase, bp.round,
+             bp.is_correct, bp.created_at, u.username
+      FROM blocks_progress bp
+      JOIN users u ON bp.user_id = u.id
+      WHERE bp.phase = 'full'
+    `;
+    const params = [];
+    let paramIndex = 1;
+
+    if (!isAdmin) {
+      query += ` AND bp.user_id = $${paramIndex}`;
+      params.push(requesterId);
+      paramIndex++;
+    } else if (userId) {
+      query += ` AND bp.user_id = $${paramIndex}`;
+      params.push(userId);
+      paramIndex++;
+    }
+
+    if (date) {
+      query += ` AND DATE(bp.created_at) = $${paramIndex}`;
+      params.push(date);
+      paramIndex++;
+    }
+
+    query += ' ORDER BY bp.created_at DESC LIMIT 500';
+
+    const result = await pool.query(query, params);
+    const records = result.rows;
+
+    const totalQuestions = records.length;
+    const correctCount = records.filter(r => r.is_correct).length;
+    const wrongCount = totalQuestions - correctCount;
+    const accuracy = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+
+    res.json({
+      records,
+      stats: { totalQuestions, correctCount, wrongCount, accuracy }
+    });
+  } catch (error) {
+    console.error('Error fetching blocks progress:', error);
+    res.status(500).json({ error: '블럭영작 수행 기록 조회에 실패했습니다' });
+  }
+});
+
 // GET /api/blocks - 블럭영작 문제 전체 목록 조회
 router.get('/', async (req, res) => {
   try {

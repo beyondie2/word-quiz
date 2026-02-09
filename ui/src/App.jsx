@@ -53,10 +53,13 @@ function App() {
   const [progressRecords, setProgressRecords] = useState([])
   const [progressStats, setProgressStats] = useState(null)
   const [isLoadingProgress, setIsLoadingProgress] = useState(false)
-  const [reviewSubTab, setReviewSubTab] = useState('words') // 'words' or 'grammar'
+  const [reviewSubTab, setReviewSubTab] = useState('words') // 'words' | 'grammar' | 'blocks'
   const [grammarProgressRecords, setGrammarProgressRecords] = useState([])
   const [grammarProgressStats, setGrammarProgressStats] = useState(null)
   const [isLoadingGrammarProgress, setIsLoadingGrammarProgress] = useState(false)
+  const [blocksProgressRecords, setBlocksProgressRecords] = useState([])
+  const [blocksProgressStats, setBlocksProgressStats] = useState(null)
+  const [isLoadingBlocksProgress, setIsLoadingBlocksProgress] = useState(false)
 
   // 관리자 페이지 관련 상태
   const [adminUsers, setAdminUsers] = useState([])
@@ -685,11 +688,35 @@ function App() {
     if (activeTab === 'review' && userId) {
       if (reviewSubTab === 'words') {
         fetchProgress()
-      } else {
+      } else if (reviewSubTab === 'grammar') {
         fetchGrammarProgress()
+      } else if (reviewSubTab === 'blocks') {
+        fetchBlocksProgress()
       }
     }
   }, [activeTab, selectedUserId, selectedDate, userId, isAdmin, reviewSubTab])
+
+  // 블럭영작 수행 기록 조회
+  const fetchBlocksProgress = async () => {
+    if (!userId) return
+
+    setIsLoadingBlocksProgress(true)
+    try {
+      const params = new URLSearchParams()
+      params.append('requesterId', userId)
+      if (isAdmin && selectedUserId) params.append('userId', selectedUserId)
+      if (selectedDate) params.append('date', selectedDate)
+
+      const response = await fetch(`${API_BASE}/blocks/progress?${params}`)
+      const data = await response.json()
+      setBlocksProgressRecords(data.records || [])
+      setBlocksProgressStats(data.stats)
+    } catch (error) {
+      console.error('Fetch blocks progress error:', error)
+    } finally {
+      setIsLoadingBlocksProgress(false)
+    }
+  }
 
   // 문법 수행 기록 조회
   const fetchGrammarProgress = async () => {
@@ -2072,6 +2099,12 @@ function App() {
                 >
                   문법 익히기
                 </button>
+                <button
+                  className={`sub-tab-button ${reviewSubTab === 'blocks' ? 'active' : ''}`}
+                  onClick={() => setReviewSubTab('blocks')}
+                >
+                  블럭 영작
+                </button>
               </div>
 
               {/* 필터 영역 */}
@@ -2237,6 +2270,77 @@ function App() {
                                 </span>
                               </td>
                               <td>{record.round}</td>
+                              <td>{formatDate(record.created_at)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* 블럭 영작 수행 기록 */}
+              {reviewSubTab === 'blocks' && (
+                <>
+                  {/* 통계 영역 */}
+                  {blocksProgressStats && blocksProgressStats.totalQuestions > 0 && (
+                    <div className="stats-card">
+                      <div className="stat-item">
+                        <span className="stat-label">총 문제</span>
+                        <span className="stat-value">{blocksProgressStats.totalQuestions}</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-label">정답</span>
+                        <span className="stat-value correct">{blocksProgressStats.correctCount}</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-label">오답</span>
+                        <span className="stat-value incorrect">{blocksProgressStats.wrongCount}</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-label">정답률</span>
+                        <span className={`stat-value ${blocksProgressStats.accuracy >= 80 ? 'high' : blocksProgressStats.accuracy >= 50 ? 'medium' : 'low'}`}>
+                          {blocksProgressStats.accuracy}%
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 수행 기록 목록 */}
+                  <div className="records-container">
+                    {isLoadingBlocksProgress ? (
+                      <div className="loading">로딩 중...</div>
+                    ) : blocksProgressRecords.length === 0 ? (
+                      <div className="no-records">수행 기록이 없습니다</div>
+                    ) : (
+                      <table className="records-table">
+                        <thead>
+                          <tr>
+                            {isAdmin && <th>사용자</th>}
+                            <th>책</th>
+                            <th>과</th>
+                            <th>영어문장</th>
+                            <th>문장번호</th>
+                            <th>오답</th>
+                            <th>결과</th>
+                            <th>일시</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {blocksProgressRecords.map(record => (
+                            <tr key={record.id} className={record.is_correct ? 'correct-row' : 'incorrect-row'}>
+                              {isAdmin && <td>{record.username}</td>}
+                              <td>{record.book || '-'}</td>
+                              <td>{record.lesson || '-'}</td>
+                              <td className="question-cell">{record.english ? (record.english.length > 50 ? record.english.substring(0, 50) + '...' : record.english) : '-'}</td>
+                              <td>{record.sentence_number ?? '-'}</td>
+                              <td>{record.wrong_answer || '-'}</td>
+                              <td>
+                                <span className={`result-badge ${record.is_correct ? 'correct' : 'incorrect'}`}>
+                                  {record.is_correct ? '정답' : '오답'}
+                                </span>
+                              </td>
                               <td>{formatDate(record.created_at)}</td>
                             </tr>
                           ))}
