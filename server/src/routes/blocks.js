@@ -3,6 +3,39 @@ import pool from '../config/database.js';
 
 const router = express.Router();
 
+// POST /api/blocks/progress - 블럭영작 수행 기록 저장 (전체 문장 모드)
+router.post('/progress', async (req, res) => {
+  const { userId, blocksId, book, lesson, sentenceNumber, english, correctAnswer, wrongAnswer, isCorrect } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ error: '사용자 정보가 필요합니다' });
+  }
+
+  try {
+    await pool.query(`
+      INSERT INTO blocks_progress 
+      (user_id, blocks_id, book, lesson, sentence_number, english, correct_answer, wrong_answer, phase, round, is_correct)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'full', $9, $10)
+    `, [
+      userId,
+      blocksId || null,
+      book || null,
+      lesson || null,
+      sentenceNumber ?? null,
+      english || null,
+      correctAnswer || null,
+      isCorrect ? null : (wrongAnswer || null),
+      1, // round
+      !!isCorrect
+    ]);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error saving blocks progress:', error);
+    res.status(500).json({ error: '블럭영작 수행 기록 저장에 실패했습니다' });
+  }
+});
+
 // GET /api/blocks - 블럭영작 문제 전체 목록 조회
 router.get('/', async (req, res) => {
   try {

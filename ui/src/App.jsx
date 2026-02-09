@@ -1629,8 +1629,28 @@ function App() {
       // 정답 비교 (대소문자 무시, 공백 정규화)
       const normalizedUserAnswer = userAnswer.toLowerCase()
       const normalizedCorrectAnswer = fullEnglish.toLowerCase()
+      const isCorrect = normalizedUserAnswer === normalizedCorrectAnswer
+
+      // blocks_progress에 수행 기록 저장 (로그인 사용자만)
+      if (userId) {
+        fetch(`${API_BASE}/blocks/progress`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            blocksId: currentBlockwritingQuestion?.id,
+            book: currentBlockwritingQuestion?.book,
+            lesson: currentBlockwritingQuestion?.lesson,
+            sentenceNumber: currentBlockwritingQuestion?.sentence_number,
+            english: currentBlockwritingQuestion?.english,
+            correctAnswer: fullEnglish,
+            wrongAnswer: blockwritingAnswer.trim(),
+            isCorrect
+          })
+        }).catch(err => console.error('blocks_progress save error:', err))
+      }
       
-      if (normalizedUserAnswer === normalizedCorrectAnswer) {
+      if (isCorrect) {
         // ⑭-1: 정답인 경우
         speakEnglish(fullEnglish)
         setBlockwritingModalType('success')
