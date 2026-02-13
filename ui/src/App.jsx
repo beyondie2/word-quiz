@@ -1705,14 +1705,40 @@ function App() {
     }
   }
 
-  // 정답 모달에서 확인 클릭 시 - 다음 문장으로 자동 이동 또는 과 완료 모달 표시
-  const handleBlockwritingSuccessConfirm = () => {
+  // 정답 모달에서 확인 클릭 시 - lesson 내 다음 sentence_number로 이동 또는 과 완료 모달 표시
+  const handleBlockwritingSuccessConfirm = async () => {
     setShowBlockwritingModal(false)
     setBlockwritingModalType('')
     
-    if (currentBlockwritingIndex < blockwritingQuestions.length - 1) {
-      // 다음 문장으로 자동 이동
-      initializeBlockwritingQuestion(blockwritingQuestions, currentBlockwritingIndex + 1)
+    const currentSentenceNumber = currentBlockwritingQuestion?.sentence_number
+    const currentIdx = blockwritingSentenceNumbers.findIndex(
+      sn => String(sn) === String(currentSentenceNumber)
+    )
+    const nextSentenceNumber = currentIdx >= 0 && currentIdx < blockwritingSentenceNumbers.length - 1
+      ? blockwritingSentenceNumbers[currentIdx + 1]
+      : null
+
+    if (nextSentenceNumber != null) {
+      // 다음 sentence_number의 문제 조회 후 이동
+      try {
+        const response = await fetch(
+          `${API_BASE}/blocks/questions?book=${encodeURIComponent(selectedBlockwritingBook)}&lesson=${encodeURIComponent(selectedBlockwritingLesson)}&sentenceNumber=${encodeURIComponent(nextSentenceNumber)}`
+        )
+        const data = await response.json()
+        const questions = data.questions || []
+        if (questions.length > 0) {
+          setSelectedBlockwritingSentenceNumber(nextSentenceNumber)
+          initializeBlockwritingQuestion(questions, 0)
+        } else {
+          // 다음 문장 데이터 없음 - 과 완료로 처리
+          setBlockwritingModalType('lessonComplete')
+          setShowBlockwritingModal(true)
+        }
+      } catch (error) {
+        console.error('Error fetching next blockwriting question:', error)
+        setBlockwritingModalType('lessonComplete')
+        setShowBlockwritingModal(true)
+      }
     } else {
       // 과의 마지막 문장 완료 - 완료 모달 표시
       setBlockwritingModalType('lessonComplete')
