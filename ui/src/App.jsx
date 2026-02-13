@@ -1786,7 +1786,7 @@ function App() {
               strokeLinecap="round"
             />
           </svg>
-          WORD TEST
+          미닝블럭스
         </div>
         <nav className="tab-menu">
           <button
