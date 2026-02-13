@@ -113,7 +113,7 @@ function App() {
   
   // 블럭 영작 모달 관련 상태
   const [showBlockwritingModal, setShowBlockwritingModal] = useState(false)
-  const [blockwritingModalType, setBlockwritingModalType] = useState('') // 'incorrect' | 'success' | 'next'
+  const [blockwritingModalType, setBlockwritingModalType] = useState('') // 'incorrect' | 'success' | 'lessonComplete'
   const [blockwritingModalContent, setBlockwritingModalContent] = useState({ correctAnswer: '' })
 
   // 문법 익히기 관련 상태
@@ -1697,11 +1697,7 @@ function App() {
   const closeBlockwritingModal = () => {
     setShowBlockwritingModal(false)
     
-    if (blockwritingModalType === 'success') {
-      // ⑮: 성공 후 다음 문장 여부 확인
-      setBlockwritingModalType('next')
-      setShowBlockwritingModal(true)
-    } else if (blockwritingModalType === 'incorrect') {
+    if (blockwritingModalType === 'incorrect') {
       // 오답 모달 닫은 후 입력창에 포커스
       setTimeout(() => {
         blockwritingAnswerInputRef.current?.focus()
@@ -1709,24 +1705,25 @@ function App() {
     }
   }
 
-  // 다음 문장으로 이동 (⑮ - "예" 선택)
-  const goToNextBlockwritingSentence = () => {
+  // 정답 모달에서 확인 클릭 시 - 다음 문장으로 자동 이동 또는 과 완료 모달 표시
+  const handleBlockwritingSuccessConfirm = () => {
     setShowBlockwritingModal(false)
+    setBlockwritingModalType('')
     
     if (currentBlockwritingIndex < blockwritingQuestions.length - 1) {
-      // 다음 문장으로 이동
+      // 다음 문장으로 자동 이동
       initializeBlockwritingQuestion(blockwritingQuestions, currentBlockwritingIndex + 1)
     } else {
-      // 모든 문장 완료
-      alert('모든 문장을 완료했습니다!')
-      setIsBlockwritingStarted(false)
-      resetBlockwritingState()
+      // 과의 마지막 문장 완료 - 완료 모달 표시
+      setBlockwritingModalType('lessonComplete')
+      setShowBlockwritingModal(true)
     }
   }
 
-  // 선택 화면으로 돌아가기 (⑮ - "아니오" 선택)
+  // 과 완료 모달에서 확인 클릭 시 - 선택 화면으로 돌아가기
   const returnToBlockwritingSelection = () => {
     setShowBlockwritingModal(false)
+    setBlockwritingModalType('')
     setIsBlockwritingStarted(false)
     resetBlockwritingState()
   }
@@ -2789,24 +2786,19 @@ function App() {
                           <p className="label">완성된 문장:</p>
                           <p className="correct-answer">{blockwritingModalContent.correctAnswer}</p>
                         </div>
-                        <button className="modal-button success" onClick={closeBlockwritingModal}>
+                        <button className="modal-button success" onClick={handleBlockwritingSuccessConfirm}>
                           확인
                         </button>
                       </>
                     )}
 
-                    {/* 다음 문장 확인 모달 */}
-                    {blockwritingModalType === 'next' && (
+                    {/* 과 완료 모달 */}
+                    {blockwritingModalType === 'lessonComplete' && (
                       <>
-                        <h3>다음 문장으로 이동하시겠습니까?</h3>
-                        <div className="modal-buttons">
-                          <button className="modal-button primary" onClick={goToNextBlockwritingSentence}>
-                            예
-                          </button>
-                          <button className="modal-button" onClick={returnToBlockwritingSelection}>
-                            아니오
-                          </button>
-                        </div>
+                        <h3>{selectedBlockwritingLesson ? `${selectedBlockwritingLesson}의 마지막 문장을 끝냈습니다.` : '과의 마지막 문장을 끝냈습니다.'}</h3>
+                        <button className="modal-button success" onClick={returnToBlockwritingSelection}>
+                          확인
+                        </button>
                       </>
                     )}
                   </div>
