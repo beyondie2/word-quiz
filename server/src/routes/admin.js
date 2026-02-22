@@ -2,6 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import XLSX from 'xlsx';
 import pool from '../config/database.js';
+import { trimStringFields } from '../utils/trimHelper.js';
 
 // 파일 업로드 설정 (메모리 저장)
 const upload = multer({ 
@@ -67,7 +68,7 @@ router.get('/users', async (req, res) => {
     const result = await pool.query(
       'SELECT id, username, is_admin, created_at FROM users ORDER BY created_at DESC'
     );
-    res.json({ users: result.rows });
+    res.json({ users: trimStringFields(result.rows) });
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({ error: 'Failed to fetch users' });
@@ -98,7 +99,7 @@ router.post('/users', checkAdmin, async (req, res) => {
       [username.trim(), isAdmin || false]
     );
 
-    res.json({ success: true, user: result.rows[0] });
+    res.json({ success: true, user: trimStringFields(result.rows[0]) });
   } catch (error) {
     console.error('Error creating user:', error);
     res.status(500).json({ error: '사용자 추가에 실패했습니다' });
@@ -164,7 +165,7 @@ router.patch('/users/:userId/toggle-admin', async (req, res) => {
       return res.status(404).json({ error: '사용자를 찾을 수 없습니다' });
     }
 
-    res.json({ success: true, user: result.rows[0] });
+    res.json({ success: true, user: trimStringFields(result.rows[0]) });
   } catch (error) {
     console.error('Error toggling admin:', error);
     res.status(500).json({ error: '권한 변경에 실패했습니다' });
@@ -225,7 +226,7 @@ router.get('/stats', async (req, res) => {
     `);
 
     // 사용자별 학습량 (상위 10명)
-    const topUsers = await pool.query(`
+    const topUsersResult = await pool.query(`
       SELECT 
         u.username,
         COUNT(up.id) as total_attempts,
@@ -236,6 +237,7 @@ router.get('/stats', async (req, res) => {
       ORDER BY total_attempts DESC
       LIMIT 10
     `);
+    const topUsers = trimStringFields(topUsersResult.rows);
 
     // ===== 문법 익히기 통계 =====
     // 전체 문법 문제 수
@@ -280,7 +282,7 @@ router.get('/stats', async (req, res) => {
       todayProgress: parseInt(todayProgress.rows[0].count),
       accuracy,
       weeklyStats: weeklyStats.rows,
-      topUsers: topUsers.rows,
+      topUsers,
       // 문법 통계
       grammarCount: parseInt(grammarCount.rows[0].count),
       grammarTotalProgress: parseInt(grammarProgressCount.rows[0].count),
@@ -410,7 +412,7 @@ router.get('/books', async (req, res) => {
       ORDER BY book_name
     `);
 
-    res.json({ books: result.rows });
+    res.json({ books: trimStringFields(result.rows) });
   } catch (error) {
     console.error('Error fetching books:', error);
     res.status(500).json({ error: '단어장 목록 조회에 실패했습니다' });
@@ -554,7 +556,7 @@ router.get('/grammar', async (req, res) => {
       ORDER BY category1
     `);
 
-    res.json({ grammar: result.rows });
+    res.json({ grammar: trimStringFields(result.rows) });
   } catch (error) {
     console.error('Error fetching grammar:', error);
     res.status(500).json({ error: '문법 목록 조회에 실패했습니다' });

@@ -8,6 +8,7 @@ import {
   verifyToken,
   authenticateToken 
 } from '../middleware/auth.js';
+import { trimStringFields } from '../utils/trimHelper.js';
 
 const router = express.Router();
 
@@ -61,7 +62,7 @@ router.post('/register', async (req, res) => {
       [username, email, passwordHash]
     );
 
-    const user = result.rows[0];
+    const user = trimStringFields(result.rows[0]);
 
     // 토큰 생성
     const accessToken = generateAccessToken(user);
@@ -111,7 +112,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: '이메일 또는 비밀번호가 올바르지 않습니다' });
     }
 
-    const user = result.rows[0];
+    const user = trimStringFields(result.rows[0]);
 
     // 비밀번호가 설정되지 않은 기존 사용자 처리
     if (!user.password_hash) {
@@ -181,7 +182,7 @@ router.post('/refresh', async (req, res) => {
       return res.status(403).json({ error: '사용자를 찾을 수 없습니다' });
     }
 
-    const user = result.rows[0];
+    const user = trimStringFields(result.rows[0]);
 
     // Refresh Token 일치 여부 확인
     if (user.refresh_token !== refreshToken) {
@@ -222,7 +223,7 @@ router.get('/me', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: '사용자를 찾을 수 없습니다' });
     }
 
-    const user = result.rows[0];
+    const user = trimStringFields(result.rows[0]);
     res.json({
       success: true,
       user: {

@@ -1,5 +1,6 @@
 import express from 'express';
 import pool from '../config/database.js';
+import { trimStringFields } from '../utils/trimHelper.js';
 
 const router = express.Router();
 
@@ -33,7 +34,7 @@ router.post('/check', async (req, res) => {
       return res.status(404).json({ error: '단어를 찾을 수 없습니다' });
     }
 
-    const word = wordResult.rows[0];
+    const word = trimStringFields(wordResult.rows[0]);
     let isCorrect = false;
     let correctAnswer = '';
 

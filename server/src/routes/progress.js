@@ -1,5 +1,6 @@
 import express from 'express';
 import pool from '../config/database.js';
+import { trimStringFields } from '../utils/trimHelper.js';
 
 const router = express.Router();
 
@@ -61,7 +62,7 @@ router.get('/', async (req, res) => {
     const result = await pool.query(query, params);
 
     // 통계 계산
-    const records = result.rows;
+    const records = trimStringFields(result.rows);
     const stats = calculateStats(records);
 
     res.json({ records, stats });
@@ -129,7 +130,7 @@ router.get('/:userId/wrong-words', async (req, res) => {
       });
     }
 
-    res.json({ wrongWords: result.rows });
+    res.json({ wrongWords: trimStringFields(result.rows) });
   } catch (error) {
     console.error('Error fetching wrong words:', error);
     res.status(500).json({ error: 'Failed to fetch wrong words' });

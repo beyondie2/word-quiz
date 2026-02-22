@@ -1,5 +1,6 @@
 import express from 'express';
 import pool from '../config/database.js';
+import { trimStringFields } from '../utils/trimHelper.js';
 
 const router = express.Router();
 
@@ -12,7 +13,8 @@ router.get('/category1', async (req, res) => {
       WHERE category1 IS NOT NULL AND category1 != ''
       ORDER BY category1
     `);
-    res.json({ category1List: result.rows.map(row => row.category1) });
+    const rows = trimStringFields(result.rows);
+    res.json({ category1List: rows.map(row => row.category1) });
   } catch (error) {
     console.error('Error fetching category1:', error);
     res.status(500).json({ error: '분류1 목록 조회에 실패했습니다' });
@@ -34,7 +36,8 @@ router.get('/category2', async (req, res) => {
       WHERE category1 = $1 AND category2 IS NOT NULL AND category2 != ''
       ORDER BY category2
     `, [category1]);
-    res.json({ category2List: result.rows.map(row => row.category2) });
+    const rows = trimStringFields(result.rows);
+    res.json({ category2List: rows.map(row => row.category2) });
   } catch (error) {
     console.error('Error fetching category2:', error);
     res.status(500).json({ error: '분류2 목록 조회에 실패했습니다' });
@@ -56,7 +59,8 @@ router.get('/levels', async (req, res) => {
       WHERE category1 = $1 AND category2 = $2 AND level IS NOT NULL AND level != ''
       ORDER BY level
     `, [category1, category2]);
-    res.json({ levelList: result.rows.map(row => row.level) });
+    const rows = trimStringFields(result.rows);
+    res.json({ levelList: rows.map(row => row.level) });
   } catch (error) {
     console.error('Error fetching levels:', error);
     res.status(500).json({ error: '수준 목록 조회에 실패했습니다' });
@@ -79,7 +83,8 @@ router.get('/instructions', async (req, res) => {
         AND instruction IS NOT NULL AND instruction != ''
       ORDER BY instruction
     `, [category1, category2, level]);
-    res.json({ instructionList: result.rows.map(row => row.instruction) });
+    const rows = trimStringFields(result.rows);
+    res.json({ instructionList: rows.map(row => row.instruction) });
   } catch (error) {
     console.error('Error fetching instructions:', error);
     res.status(500).json({ error: '지시사항 목록 조회에 실패했습니다' });
@@ -102,7 +107,7 @@ router.get('/questions', async (req, res) => {
       WHERE category1 = $1 AND category2 = $2 AND level = $3 AND instruction = $4
       ORDER BY id
     `, [category1, category2, level, instruction]);
-    res.json({ questions: result.rows });
+    res.json({ questions: trimStringFields(result.rows) });
   } catch (error) {
     console.error('Error fetching questions:', error);
     res.status(500).json({ error: '문제 목록 조회에 실패했습니다' });
@@ -217,7 +222,7 @@ router.get('/progress', async (req, res) => {
     const result = await pool.query(query, params);
 
     // 통계 계산
-    const records = result.rows;
+    const records = trimStringFields(result.rows);
     const totalQuestions = records.length;
     const correctCount = records.filter(r => r.is_correct).length;
     const wrongCount = totalQuestions - correctCount;

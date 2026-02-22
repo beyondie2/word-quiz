@@ -1,5 +1,6 @@
 import express from 'express';
 import pool from '../config/database.js';
+import { trimStringFields } from '../utils/trimHelper.js';
 
 const router = express.Router();
 
@@ -77,7 +78,7 @@ router.get('/progress', async (req, res) => {
     query += ' ORDER BY bp.created_at DESC LIMIT 500';
 
     const result = await pool.query(query, params);
-    const records = result.rows;
+    const records = trimStringFields(result.rows);
 
     const totalQuestions = records.length;
     const correctCount = records.filter(r => r.is_correct).length;
@@ -102,7 +103,7 @@ router.get('/', async (req, res) => {
       FROM blocks 
       ORDER BY book, lesson, sentence_number, id
     `);
-    res.json({ blocks: result.rows });
+    res.json({ blocks: trimStringFields(result.rows) });
   } catch (error) {
     console.error('Error fetching blocks:', error);
     res.status(500).json({ error: '블럭영작 목록 조회에 실패했습니다' });
@@ -118,7 +119,8 @@ router.get('/books', async (req, res) => {
       WHERE book IS NOT NULL AND book != ''
       ORDER BY book
     `);
-    res.json({ books: result.rows.map(row => row.book) });
+    const rows = trimStringFields(result.rows);
+    res.json({ books: rows.map(row => row.book) });
   } catch (error) {
     console.error('Error fetching blockwriting books:', error);
     res.status(500).json({ error: '책 목록 조회에 실패했습니다' });
@@ -140,7 +142,8 @@ router.get('/lessons', async (req, res) => {
       WHERE book = $1 AND lesson IS NOT NULL AND lesson != ''
       ORDER BY lesson
     `, [book]);
-    res.json({ lessons: result.rows.map(row => row.lesson) });
+    const rows = trimStringFields(result.rows);
+    res.json({ lessons: rows.map(row => row.lesson) });
   } catch (error) {
     console.error('Error fetching blockwriting lessons:', error);
     res.status(500).json({ error: '레슨 목록 조회에 실패했습니다' });
@@ -162,7 +165,8 @@ router.get('/sentence-numbers', async (req, res) => {
       WHERE book = $1 AND lesson = $2 AND sentence_number IS NOT NULL
       ORDER BY sentence_number
     `, [book, lesson]);
-    res.json({ sentenceNumbers: result.rows.map(row => row.sentence_number) });
+    const rows = trimStringFields(result.rows);
+    res.json({ sentenceNumbers: rows.map(row => row.sentence_number) });
   } catch (error) {
     console.error('Error fetching sentence numbers:', error);
     res.status(500).json({ error: '문장번호 목록 조회에 실패했습니다' });
@@ -200,7 +204,7 @@ router.get('/questions', async (req, res) => {
     query += ` ORDER BY sentence_number, id`;
 
     const result = await pool.query(query, params);
-    res.json({ questions: result.rows });
+    res.json({ questions: trimStringFields(result.rows) });
   } catch (error) {
     console.error('Error fetching blockwriting questions:', error);
     res.status(500).json({ error: '문제 목록 조회에 실패했습니다' });

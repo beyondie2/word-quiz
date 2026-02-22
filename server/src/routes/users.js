@@ -1,5 +1,6 @@
 import express from 'express';
 import pool from '../config/database.js';
+import { trimStringFields } from '../utils/trimHelper.js';
 
 const router = express.Router();
 
@@ -9,7 +10,7 @@ router.get('/', async (req, res) => {
     const result = await pool.query(
       'SELECT id, username FROM users ORDER BY username'
     );
-    res.json({ users: result.rows });
+    res.json({ users: trimStringFields(result.rows) });
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({ error: 'Failed to fetch users' });
@@ -35,14 +36,15 @@ router.post('/verify', async (req, res) => {
       return res.json({ success: false, message: '등록되지 않은 사용자입니다' });
     }
 
-    const user = userResult.rows[0];
+    const user = trimStringFields(userResult.rows[0]);
 
     // 책 목록 조회
     const booksResult = await pool.query(
       'SELECT DISTINCT book_name FROM books ORDER BY book_name'
     );
 
-    const books = booksResult.rows.map(row => row.book_name);
+    const booksRows = trimStringFields(booksResult.rows);
+    const books = booksRows.map(row => row.book_name);
 
     res.json({
       success: true,

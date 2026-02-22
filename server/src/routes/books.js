@@ -1,5 +1,6 @@
 import express from 'express';
 import pool from '../config/database.js';
+import { trimStringFields } from '../utils/trimHelper.js';
 
 const router = express.Router();
 
@@ -9,7 +10,8 @@ router.get('/', async (req, res) => {
     const result = await pool.query(
       'SELECT DISTINCT book_name FROM books ORDER BY book_name'
     );
-    res.json({ books: result.rows.map(row => row.book_name) });
+    const rows = trimStringFields(result.rows);
+    res.json({ books: rows.map(row => row.book_name) });
   } catch (error) {
     console.error('Error fetching books:', error);
     res.status(500).json({ error: 'Failed to fetch books' });
@@ -25,7 +27,8 @@ router.get('/:bookName/units', async (req, res) => {
       'SELECT DISTINCT unit FROM books WHERE book_name = $1 ORDER BY unit',
       [bookName]
     );
-    res.json({ units: result.rows.map(row => row.unit) });
+    const rows = trimStringFields(result.rows);
+    res.json({ units: rows.map(row => row.unit) });
   } catch (error) {
     console.error('Error fetching units:', error);
     res.status(500).json({ error: 'Failed to fetch units' });
@@ -41,7 +44,7 @@ router.get('/:bookName/units/:unit/words', async (req, res) => {
       'SELECT id, english, korean, example FROM books WHERE book_name = $1 AND unit = $2 ORDER BY id',
       [bookName, unit]
     );
-    res.json({ words: result.rows });
+    res.json({ words: trimStringFields(result.rows) });
   } catch (error) {
     console.error('Error fetching words:', error);
     res.status(500).json({ error: 'Failed to fetch words' });
