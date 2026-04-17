@@ -332,6 +332,35 @@
   font-weight: normal;
 }
 
+.feedback-actions {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.feedback-actions .feedback-hint {
+  margin-top: 0;
+}
+
+.feedback-next-button {
+  padding: 6px 12px;
+  border: 1px solid #F87171;
+  border-radius: 16px;
+  background-color: #7F1D1D;
+  color: #FEE2E2;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.feedback-next-button:hover {
+  background-color: #991B1B;
+  border-color: #FCA5A5;
+}
+
 /* 진행 상황 표시 */
 .progress-info {
   text-align: center;
@@ -1555,6 +1584,12 @@
   .answer-input {
     font-size: 1.1rem;
     padding: 15px 20px;
+  }
+
+  .feedback-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .stats-card {

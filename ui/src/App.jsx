@@ -2078,7 +2078,23 @@ function App() {
                 {feedback && (
                   <div className={`feedback ${feedback.type}`}>
                     <div>{feedback.message}</div>
-                    {feedback.hint && <div className="feedback-hint">{feedback.hint}</div>}
+                    {feedback.hint && feedback.type === 'incorrect' ? (
+                      <div className="feedback-actions">
+                        <div className="feedback-hint">{feedback.hint}</div>
+                        <button
+                          type="button"
+                          className="feedback-next-button"
+                          onClick={() => {
+                            moveToNextWord()
+                            answerInputRef.current?.focus()
+                          }}
+                        >
+                          다음
+                        </button>
+                      </div>
+                    ) : (
+                      feedback.hint && <div className="feedback-hint">{feedback.hint}</div>
+                    )}
                   </div>
                 )}
 
