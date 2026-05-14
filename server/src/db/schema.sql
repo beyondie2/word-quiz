@@ -101,7 +101,20 @@ CREATE TABLE IF NOT EXISTS blocks_progress (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- SpokenSentence 테이블: 말하기/문장 연습용 문장
+CREATE TABLE IF NOT EXISTS spoken_sentence (
+    id SERIAL PRIMARY KEY,
+    book VARCHAR(200),
+    section VARCHAR(100),
+    unit VARCHAR(100),
+    kor_sen TEXT,
+    eng_sen TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
 -- 인덱스 생성
+CREATE INDEX IF NOT EXISTS idx_spoken_sentence_book ON spoken_sentence(book);
+CREATE INDEX IF NOT EXISTS idx_spoken_sentence_book_section_unit ON spoken_sentence(book, section, unit);
 CREATE INDEX IF NOT EXISTS idx_blocks_id ON blocks(id);
 CREATE INDEX IF NOT EXISTS idx_blocks_book ON blocks(book);
 CREATE INDEX IF NOT EXISTS idx_blocks_lesson ON blocks(lesson);
