@@ -68,7 +68,7 @@ function App() {
   const [newUserIsAdmin, setNewUserIsAdmin] = useState(false)
   const [isLoadingAdmin, setIsLoadingAdmin] = useState(false)
   const [adminError, setAdminError] = useState('')
-  const [adminSubTab, setAdminSubTab] = useState('users') // 'users', 'stats', 'books', 'grammar', or 'blockwriting'
+  const [adminSubTab, setAdminSubTab] = useState('users') // 'users', 'stats', 'books', 'grammar', 'blockwriting', 'webbook'
 
   // 단어장 관리 관련 상태
   const [adminBooks, setAdminBooks] = useState([])
@@ -87,6 +87,12 @@ function App() {
   const [blockwritingUploadFile, setBlockwritingUploadFile] = useState(null)
   const [isBlockwritingUploading, setIsBlockwritingUploading] = useState(false)
   const [blockwritingUploadResult, setBlockwritingUploadResult] = useState(null)
+
+  // webbook 관리 (spoken_sentence) 관련 상태
+  const [adminWebbooks, setAdminWebbooks] = useState([])
+  const [webbookUploadFile, setWebbookUploadFile] = useState(null)
+  const [isWebbookUploading, setIsWebbookUploading] = useState(false)
+  const [webbookUploadResult, setWebbookUploadResult] = useState(null)
 
   // 블럭 영작 학습 관련 상태
   const [blockwritingBooks, setBlockwritingBooks] = useState([])
@@ -762,6 +768,7 @@ function App() {
       fetchAdminBooks()
       fetchAdminGrammar()
       fetchAdminBlockwriting()
+      fetchAdminWebbooks()
     }
   }, [activeTab, isAdmin, userId])
 
@@ -1448,6 +1455,89 @@ function App() {
       }
     } catch (error) {
       console.error('Delete all blockwriting error:', error)
+      alert('서버 오류가 발생했습니다')
+    }
+  }
+
+  // 관리자용 webbook(spoken_sentence) 목록
+  const fetchAdminWebbooks = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/admin/spoken-sentences?adminId=${userId}`)
+      const data = await response.json()
+      if (data.webbooks) {
+        setAdminWebbooks(data.webbooks)
+      }
+    } catch (error) {
+      console.error('Fetch admin webbooks error:', error)
+    }
+  }
+
+  // webbook 엑셀 업로드
+  const handleWebbookFileUpload = async () => {
+    if (!webbookUploadFile) {
+      setWebbookUploadResult({ error: '파일을 선택해주세요' })
+      return
+    }
+
+    setIsWebbookUploading(true)
+    setWebbookUploadResult(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', webbookUploadFile)
+      formData.append('adminId', userId)
+
+      const response = await fetch(`${API_BASE}/admin/spoken-sentences/upload`, {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setWebbookUploadResult({
+          success: true,
+          message: data.message,
+          insertedCount: data.insertedCount,
+          skippedCount: data.skippedCount,
+          errors: data.errors
+        })
+        setWebbookUploadFile(null)
+        const fileInput = document.getElementById('webbook-excel-file-input')
+        if (fileInput) fileInput.value = ''
+        fetchAdminWebbooks()
+      } else {
+        setWebbookUploadResult({ error: data.error || '업로드에 실패했습니다', hint: data.hint })
+      }
+    } catch (error) {
+      console.error('Webbook upload error:', error)
+      setWebbookUploadResult({ error: '서버 연결에 실패했습니다' })
+    } finally {
+      setIsWebbookUploading(false)
+    }
+  }
+
+  // webbook(교재) 삭제
+  const handleDeleteWebbook = async (bookName) => {
+    if (!confirm(`"${bookName}" 웹북 데이터를 삭제하시겠습니까?\n해당 교재의 모든 문장이 삭제됩니다.`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/admin/spoken-sentences/${encodeURIComponent(bookName)}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: userId })
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        fetchAdminWebbooks()
+      } else {
+        alert(data.error || '삭제에 실패했습니다')
+      }
+    } catch (error) {
+      console.error('Delete webbook error:', error)
       alert('서버 오류가 발생했습니다')
     }
   }
@@ -2880,6 +2970,12 @@ function App() {
               블럭영작 관리
             </button>
             <button
+              className={`sub-tab-button ${adminSubTab === 'webbook' ? 'active' : ''}`}
+              onClick={() => setAdminSubTab('webbook')}
+            >
+              webbook 관리
+            </button>
+            <button
               className={`sub-tab-button ${adminSubTab === 'stats' ? 'active' : ''}`}
               onClick={() => setAdminSubTab('stats')}
             >
@@ -3229,6 +3325,99 @@ function App() {
                             <button
                               className="delete-button"
                               onClick={() => handleDeleteBlockwriting(item.id)}
+                            >
+                              삭제
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          )}
+
+          {adminSubTab === 'webbook' && (
+            <div className="admin-books">
+              <div className="upload-section">
+                <h3>엑셀 파일로 webbook 문장 추가</h3>
+                <div className="upload-info">
+                  <p>엑셀 파일 형식: 첫 번째 행에 컬럼명이 있어야 합니다.</p>
+                  <p><strong>필수 컬럼:</strong> book, section, unit, kor_sen, eng_sen</p>
+                  <p>각 행에서 <strong>book</strong>, <strong>kor_sen</strong>, <strong>eng_sen</strong>은 반드시 값이 있어야 합니다. section, unit은 비워 둘 수 있습니다.</p>
+                </div>
+                <div className="upload-form">
+                  <input
+                    id="webbook-excel-file-input"
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    onChange={(e) => setWebbookUploadFile(e.target.files[0])}
+                    className="file-input"
+                  />
+                  <button
+                    className="upload-button"
+                    onClick={handleWebbookFileUpload}
+                    disabled={isWebbookUploading || !webbookUploadFile}
+                  >
+                    {isWebbookUploading ? '업로드 중...' : '업로드'}
+                  </button>
+                </div>
+                {webbookUploadResult && (
+                  <div className={`upload-result ${webbookUploadResult.success ? 'success' : 'error'}`}>
+                    {webbookUploadResult.success ? (
+                      <>
+                        <p>{webbookUploadResult.message}</p>
+                        {webbookUploadResult.skippedCount > 0 && (
+                          <p>건너뛴 항목: {webbookUploadResult.skippedCount}개</p>
+                        )}
+                        {webbookUploadResult.errors && webbookUploadResult.errors.length > 0 && (
+                          <div className="upload-errors">
+                            <p>오류 목록:</p>
+                            <ul>
+                              {webbookUploadResult.errors.map((err, idx) => (
+                                <li key={idx}>{err}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <p>{webbookUploadResult.error}</p>
+                        {webbookUploadResult.hint && <p className="hint">{webbookUploadResult.hint}</p>}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="books-list">
+                <h3>webbook 목록 ({adminWebbooks.length}개)</h3>
+                {adminWebbooks.length === 0 ? (
+                  <div className="no-records">등록된 webbook 데이터가 없습니다</div>
+                ) : (
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>교재(book)</th>
+                        <th>섹션 수</th>
+                        <th>단원 수</th>
+                        <th>문장 수</th>
+                        <th>작업</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {adminWebbooks.map((item, index) => (
+                        <tr key={index}>
+                          <td>{item.book}</td>
+                          <td>{item.section_count}</td>
+                          <td>{item.unit_count}</td>
+                          <td>{item.sentence_count}</td>
+                          <td>
+                            <button
+                              className="delete-btn"
+                              onClick={() => handleDeleteWebbook(item.book)}
                             >
                               삭제
                             </button>

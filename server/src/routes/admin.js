@@ -593,4 +593,160 @@ router.delete('/grammar/:category1', async (req, res) => {
   }
 });
 
+// ==================== webbook (spoken_sentence) 관리 API ====================
+
+// POST /api/admin/spoken-sentences/upload - 엑셀로 spoken_sentence 일괄 추가
+router.post('/spoken-sentences/upload', upload.single('file'), async (req, res) => {
+  const { adminId } = req.body;
+
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: '파일이 업로드되지 않았습니다' });
+    }
+
+    const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet);
+
+    if (data.length === 0) {
+      return res.status(400).json({ error: '엑셀 파일에 데이터가 없습니다' });
+    }
+
+    const requiredColumns = ['book', 'section', 'unit', 'kor_sen', 'eng_sen'];
+    const firstRow = data[0];
+    const missingColumns = requiredColumns.filter((col) => !(col in firstRow));
+
+    if (missingColumns.length > 0) {
+      return res.status(400).json({
+        error: `필수 컬럼이 누락되었습니다: ${missingColumns.join(', ')}`,
+        hint: '첫 번째 행에 book, section, unit, kor_sen, eng_sen 컬럼명이 있어야 합니다',
+      });
+    }
+
+    let insertedCount = 0;
+    let skippedCount = 0;
+    const errors = [];
+
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      const rowNum = i + 2;
+
+      const book = row.book != null ? String(row.book).trim() : '';
+      const section = row.section != null ? String(row.section).trim() : '';
+      const unit = row.unit != null ? String(row.unit).trim() : '';
+      const kor_sen = row.kor_sen != null ? String(row.kor_sen).trim() : '';
+      const eng_sen = row.eng_sen != null ? String(row.eng_sen).trim() : '';
+
+      if (!book || !kor_sen || !eng_sen) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: book, kor_sen, eng_sen은 비울 수 없습니다`);
+        continue;
+      }
+
+      try {
+        await pool.query(
+          `INSERT INTO spoken_sentence (book, section, unit, kor_sen, eng_sen)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [
+            book,
+            section || null,
+            unit || null,
+            kor_sen,
+            eng_sen,
+          ]
+        );
+        insertedCount++;
+      } catch (dbError) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: ${dbError.message}`);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `${insertedCount}개의 문장이 추가되었습니다`,
+      insertedCount,
+      skippedCount,
+      totalRows: data.length,
+      errors: errors.length > 0 ? errors.slice(0, 10) : undefined,
+    });
+  } catch (error) {
+    console.error('Spoken sentence upload error:', error);
+    res.status(500).json({ error: error.message || '파일 업로드에 실패했습니다' });
+  }
+});
+
+// GET /api/admin/spoken-sentences - 교재별 문장 수 (관리자용)
+router.get('/spoken-sentences', async (req, res) => {
+  const { adminId } = req.query;
+
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    const result = await pool.query(`
+      SELECT
+        book,
+        COUNT(DISTINCT section) AS section_count,
+        COUNT(DISTINCT unit) AS unit_count,
+        COUNT(*)::int AS sentence_count
+      FROM spoken_sentence
+      WHERE book IS NOT NULL AND BTRIM(book) <> ''
+      GROUP BY book
+      ORDER BY book
+    `);
+
+    res.json({ webbooks: trimStringFields(result.rows) });
+  } catch (error) {
+    console.error('Error fetching spoken sentences:', error);
+    res.status(500).json({ error: '웹북 목록 조회에 실패했습니다' });
+  }
+});
+
+// DELETE /api/admin/spoken-sentences/:bookName - 교재별 spoken_sentence 전체 삭제
+router.delete('/spoken-sentences/:bookName', async (req, res) => {
+  const { bookName } = req.params;
+  const { adminId } = req.body;
+
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    const result = await pool.query(
+      'DELETE FROM spoken_sentence WHERE book = $1',
+      [bookName]
+    );
+
+    res.json({
+      success: true,
+      deletedCount: result.rowCount,
+    });
+  } catch (error) {
+    console.error('Error deleting spoken sentences:', error);
+    res.status(500).json({ error: '웹북 삭제에 실패했습니다' });
+  }
+});
+
 export default router;
