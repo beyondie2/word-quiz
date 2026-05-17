@@ -1566,6 +1566,7 @@ function App() {
   // 블럭영작 정답 입력창 ref
   const blockwritingAnswerInputRef = useRef(null)
   const webbookRecognitionRef = useRef(null)
+  const webbookWrongAttemptsRef = useRef([])
 
   // 블럭 영작 탭 활성화 시 책 목록 조회
   useEffect(() => {
@@ -1912,6 +1913,7 @@ function App() {
     setShowWebbookModal(false)
     setWebbookModalType('')
     setWebbookModalContent({ correctAnswer: '', userAnswer: '' })
+    resetWebbookWrongAttempts()
     if (webbookRecognitionRef.current) {
       try {
         webbookRecognitionRef.current.stop()
@@ -1957,6 +1959,10 @@ function App() {
     }
   }
 
+  const resetWebbookWrongAttempts = () => {
+    webbookWrongAttemptsRef.current = []
+  }
+
   const initializeWebbookSentences = (sentences, index = 0) => {
     setWebbookSentences(sentences)
     setCurrentWebbookIndex(index)
@@ -1964,6 +1970,7 @@ function App() {
     setShowWebbookModal(false)
     setWebbookModalType('')
     setWebbookModalContent({ correctAnswer: '', userAnswer: '' })
+    resetWebbookWrongAttempts()
   }
 
   const handleWebbookUnitSelect = async (unit) => {
@@ -1989,25 +1996,27 @@ function App() {
   const compareSpokenAnswer = (userText, correctText) =>
     normalizeSpokenEnglish(userText) === normalizeSpokenEnglish(correctText)
 
+  // user_progress: book→book_name, unit→unit, eng_sen→english, kor_sen→korean, is_correct, wrong_answer
   const saveWebbookProgress = async (sentence, spokenText, isCorrect) => {
     if (!userId || !sentence) return
 
+    const trimmedAnswer = (spokenText || '').trim()
+    if (!isCorrect && trimmedAnswer) {
+      webbookWrongAttemptsRef.current.push(trimmedAnswer)
+    }
+
     try {
-      await fetch(`${API_BASE}/progress`, {
+      await fetch(`${API_BASE}/spoken/progress`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId,
-          bookName: sentence.book,
+          book: sentence.book,
           unit: sentence.unit,
-          english: sentence.eng_sen,
-          korean: sentence.kor_sen,
-          wrongAnswer: isCorrect ? null : spokenText,
-          practiceMode: 'english',
-          koreanAnswerType: 'one',
-          round: 1,
-          unitReviewCount: 0,
-          isCorrect
+          engSen: sentence.eng_sen,
+          korSen: sentence.kor_sen,
+          wrongAnswer: isCorrect ? null : trimmedAnswer,
+          isCorrect: !!isCorrect
         })
       })
     } catch (error) {
@@ -2100,6 +2109,7 @@ function App() {
   const handleWebbookSuccessConfirm = () => {
     setShowWebbookModal(false)
     setWebbookModalType('')
+    resetWebbookWrongAttempts()
 
     if (currentWebbookIndex < webbookSentences.length - 1) {
       setCurrentWebbookIndex((prev) => prev + 1)

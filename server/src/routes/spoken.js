@@ -89,4 +89,40 @@ router.get('/sentences', async (req, res) => {
   }
 });
 
+// POST /api/spoken/progress - web book 수행 기록 (user_progress)
+router.post('/progress', async (req, res) => {
+  const { userId, book, unit, engSen, korSen, wrongAnswer, isCorrect } = req.body;
+
+  if (!userId || !book || !unit || !engSen || !korSen) {
+    return res.status(400).json({ error: '필수 필드가 누락되었습니다' });
+  }
+
+  if (typeof isCorrect !== 'boolean') {
+    return res.status(400).json({ error: 'isCorrect 값이 필요합니다' });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO user_progress
+       (user_id, book_name, unit, english, korean, wrong_answer, practice_mode, korean_answer_type, round, unit_review_count, is_correct)
+       VALUES ($1, $2, $3, $4, $5, $6, 'english', 'one', 1, 0, $7)
+       RETURNING id`,
+      [
+        userId,
+        book,
+        unit,
+        engSen,
+        korSen,
+        isCorrect ? null : (wrongAnswer || null),
+        isCorrect
+      ]
+    );
+
+    res.json({ success: true, progressId: result.rows[0].id });
+  } catch (error) {
+    console.error('Error saving spoken progress:', error);
+    res.status(500).json({ success: false, error: '수행 기록 저장에 실패했습니다' });
+  }
+});
+
 export default router;
