@@ -10,6 +10,7 @@ import adminRouter from './routes/admin.js';
 import authRouter from './routes/auth.js';
 import grammarRouter from './routes/grammar.js';
 import blocksRouter from './routes/blocks.js';
+import spokenRouter from './routes/spoken.js';
 
 // 환경 변수 로드
 dotenv.config();
@@ -30,6 +31,7 @@ app.use('/api/progress', progressRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/grammar', grammarRouter);
 app.use('/api/blocks', blocksRouter);
+app.use('/api/spoken', spokenRouter);
 
 // 헬스 체크
 app.get('/api/health', (req, res) => {

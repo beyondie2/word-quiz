@@ -122,6 +122,25 @@ function App() {
   const [blockwritingModalType, setBlockwritingModalType] = useState('') // 'incorrect' | 'success' | 'lessonComplete'
   const [blockwritingModalContent, setBlockwritingModalContent] = useState({ correctAnswer: '' })
 
+  // web book 학습 관련 상태
+  const [webbookBooks, setWebbookBooks] = useState([])
+  const [selectedWebbookBook, setSelectedWebbookBook] = useState('')
+  const [showWebbookBookDropdown, setShowWebbookBookDropdown] = useState(false)
+  const [webbookSections, setWebbookSections] = useState([])
+  const [selectedWebbookSection, setSelectedWebbookSection] = useState('')
+  const [showWebbookSectionDropdown, setShowWebbookSectionDropdown] = useState(false)
+  const [webbookUnits, setWebbookUnits] = useState([])
+  const [selectedWebbookUnit, setSelectedWebbookUnit] = useState('')
+  const [showWebbookUnitDropdown, setShowWebbookUnitDropdown] = useState(false)
+  const [webbookSentences, setWebbookSentences] = useState([])
+  const [currentWebbookIndex, setCurrentWebbookIndex] = useState(0)
+  const [isWebbookStarted, setIsWebbookStarted] = useState(false)
+  const [isWebbookListening, setIsWebbookListening] = useState(false)
+  const [webbookSpeechSupported, setWebbookSpeechSupported] = useState(true)
+  const [showWebbookModal, setShowWebbookModal] = useState(false)
+  const [webbookModalType, setWebbookModalType] = useState('') // 'incorrect' | 'success' | 'unitComplete'
+  const [webbookModalContent, setWebbookModalContent] = useState({ correctAnswer: '', userAnswer: '' })
+
   // 문법 익히기 관련 상태
   const [grammarCategory1List, setGrammarCategory1List] = useState([])
   const [selectedGrammarCategory1, setSelectedGrammarCategory1] = useState('')
@@ -1546,6 +1565,7 @@ function App() {
 
   // 블럭영작 정답 입력창 ref
   const blockwritingAnswerInputRef = useRef(null)
+  const webbookRecognitionRef = useRef(null)
 
   // 블럭 영작 탭 활성화 시 책 목록 조회
   useEffect(() => {
@@ -1861,6 +1881,240 @@ function App() {
     }
   }
 
+  // ===== web book 학습 관련 =====
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    setWebbookSpeechSupported(!!SpeechRecognition)
+  }, [])
+
+  useEffect(() => {
+    if (activeTab === 'webbook' && isVerified) {
+      fetchWebbookBooks()
+    }
+  }, [activeTab, isVerified])
+
+  const fetchWebbookBooks = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/spoken/books`)
+      const data = await response.json()
+      setWebbookBooks(data.books || [])
+    } catch (error) {
+      console.error('Error fetching webbook books:', error)
+    }
+  }
+
+  const resetWebbookPracticeState = () => {
+    setWebbookSentences([])
+    setCurrentWebbookIndex(0)
+    setIsWebbookStarted(false)
+    setIsWebbookListening(false)
+    setShowWebbookModal(false)
+    setWebbookModalType('')
+    setWebbookModalContent({ correctAnswer: '', userAnswer: '' })
+    if (webbookRecognitionRef.current) {
+      try {
+        webbookRecognitionRef.current.stop()
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  const handleWebbookBookSelect = async (book) => {
+    setSelectedWebbookBook(book)
+    setShowWebbookBookDropdown(false)
+    setSelectedWebbookSection('')
+    setWebbookSections([])
+    setSelectedWebbookUnit('')
+    setWebbookUnits([])
+    resetWebbookPracticeState()
+
+    try {
+      const response = await fetch(`${API_BASE}/spoken/sections?book=${encodeURIComponent(book)}`)
+      const data = await response.json()
+      setWebbookSections(data.sections || [])
+    } catch (error) {
+      console.error('Error fetching webbook sections:', error)
+    }
+  }
+
+  const handleWebbookSectionSelect = async (section) => {
+    setSelectedWebbookSection(section)
+    setShowWebbookSectionDropdown(false)
+    setSelectedWebbookUnit('')
+    setWebbookUnits([])
+    resetWebbookPracticeState()
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/spoken/units?book=${encodeURIComponent(selectedWebbookBook)}&section=${encodeURIComponent(section)}`
+      )
+      const data = await response.json()
+      setWebbookUnits(data.units || [])
+    } catch (error) {
+      console.error('Error fetching webbook units:', error)
+    }
+  }
+
+  const initializeWebbookSentences = (sentences, index = 0) => {
+    setWebbookSentences(sentences)
+    setCurrentWebbookIndex(index)
+    setIsWebbookStarted(sentences.length > 0)
+    setShowWebbookModal(false)
+    setWebbookModalType('')
+    setWebbookModalContent({ correctAnswer: '', userAnswer: '' })
+  }
+
+  const handleWebbookUnitSelect = async (unit) => {
+    setSelectedWebbookUnit(unit)
+    setShowWebbookUnitDropdown(false)
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/spoken/sentences?book=${encodeURIComponent(selectedWebbookBook)}&section=${encodeURIComponent(selectedWebbookSection)}&unit=${encodeURIComponent(unit)}`
+      )
+      const data = await response.json()
+      initializeWebbookSentences(data.sentences || [], 0)
+    } catch (error) {
+      console.error('Error fetching webbook sentences:', error)
+    }
+  }
+
+  const currentWebbookSentence = webbookSentences[currentWebbookIndex]
+
+  const normalizeSpokenEnglish = (str) =>
+    (str || '').trim().replace(/\s+/g, ' ').replace(/[^\w\s']/g, '').toLowerCase()
+
+  const compareSpokenAnswer = (userText, correctText) =>
+    normalizeSpokenEnglish(userText) === normalizeSpokenEnglish(correctText)
+
+  const saveWebbookProgress = async (sentence, spokenText, isCorrect) => {
+    if (!userId || !sentence) return
+
+    try {
+      await fetch(`${API_BASE}/progress`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          bookName: sentence.book,
+          unit: sentence.unit,
+          english: sentence.eng_sen,
+          korean: sentence.kor_sen,
+          wrongAnswer: isCorrect ? null : spokenText,
+          practiceMode: 'english',
+          koreanAnswerType: 'one',
+          round: 1,
+          unitReviewCount: 0,
+          isCorrect
+        })
+      })
+    } catch (error) {
+      console.error('webbook progress save error:', error)
+    }
+  }
+
+  const handleWebbookSpeak = () => {
+    if (currentWebbookSentence?.eng_sen) {
+      speakEnglish(currentWebbookSentence.eng_sen)
+    }
+  }
+
+  const processWebbookSpeechResult = async (spokenText) => {
+    if (!currentWebbookSentence || showWebbookModal) return
+
+    const correctAnswer = (currentWebbookSentence.eng_sen || '').trim()
+    const isCorrect = compareSpokenAnswer(spokenText, correctAnswer)
+
+    await saveWebbookProgress(currentWebbookSentence, spokenText.trim(), isCorrect)
+    speakEnglish(correctAnswer)
+
+    if (isCorrect) {
+      setWebbookModalType('success')
+      setWebbookModalContent({ correctAnswer, userAnswer: spokenText.trim() })
+    } else {
+      setWebbookModalType('incorrect')
+      setWebbookModalContent({ correctAnswer, userAnswer: spokenText.trim() })
+    }
+    setShowWebbookModal(true)
+  }
+
+  const handleWebbookMicClick = () => {
+    if (!currentWebbookSentence || showWebbookModal || isWebbookListening) return
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      alert('이 브라우저에서는 음성 인식을 지원하지 않습니다. Chrome을 사용해주세요.')
+      return
+    }
+
+    if (webbookRecognitionRef.current) {
+      try {
+        webbookRecognitionRef.current.stop()
+      } catch {
+        // ignore
+      }
+    }
+
+    const recognition = new SpeechRecognition()
+    recognition.lang = 'en-US'
+    recognition.interimResults = false
+    recognition.maxAlternatives = 1
+    webbookRecognitionRef.current = recognition
+
+    recognition.onstart = () => setIsWebbookListening(true)
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript
+      setIsWebbookListening(false)
+      processWebbookSpeechResult(transcript)
+    }
+
+    recognition.onerror = (event) => {
+      setIsWebbookListening(false)
+      if (event.error !== 'aborted' && event.error !== 'no-speech') {
+        console.error('Speech recognition error:', event.error)
+        alert('음성 인식에 실패했습니다. 마이크 권한을 확인하고 다시 시도해주세요.')
+      }
+    }
+
+    recognition.onend = () => {
+      setIsWebbookListening(false)
+    }
+
+    try {
+      recognition.start()
+    } catch (error) {
+      setIsWebbookListening(false)
+      console.error('Speech recognition start error:', error)
+    }
+  }
+
+  const closeWebbookModal = () => {
+    setShowWebbookModal(false)
+    setWebbookModalType('')
+    setWebbookModalContent({ correctAnswer: '', userAnswer: '' })
+  }
+
+  const handleWebbookSuccessConfirm = () => {
+    setShowWebbookModal(false)
+    setWebbookModalType('')
+
+    if (currentWebbookIndex < webbookSentences.length - 1) {
+      setCurrentWebbookIndex((prev) => prev + 1)
+    } else {
+      setWebbookModalType('unitComplete')
+      setShowWebbookModal(true)
+    }
+  }
+
+  const returnToWebbookSelection = () => {
+    setShowWebbookModal(false)
+    setWebbookModalType('')
+    resetWebbookPracticeState()
+  }
+
   return (
     <div className="app-container">
       {/* 헤더 영역 */}
@@ -1919,6 +2173,12 @@ function App() {
             onClick={() => setActiveTab('blockwriting')}
           >
             블럭 영작
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'webbook' ? 'active' : ''}`}
+            onClick={() => setActiveTab('webbook')}
+          >
+            web book
           </button>
           <button
             className={`tab-button ${activeTab === 'review' ? 'active' : ''}`}
@@ -2929,6 +3189,186 @@ function App() {
                       <>
                         <h3>{selectedBlockwritingLesson ? `${selectedBlockwritingLesson}의 마지막 문장을 끝냈습니다.` : '과의 마지막 문장을 끝냈습니다.'}</h3>
                         <button className="modal-button success" onClick={returnToBlockwritingSelection}>
+                          확인
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'webbook' && (
+        <div className="webbook-container">
+          {!isVerified ? (
+            <div className="welcome-message">
+              <h2>로그인이 필요합니다</h2>
+              <p>"단어 맞추기" 탭에서 로그인해주세요.</p>
+            </div>
+          ) : (
+            <>
+              <div className="settings-bar webbook-settings">
+                <div className="user-info">
+                  <span className="user-name">{userName}</span>
+                </div>
+
+                <div className="dropdown-container">
+                  <button
+                    className="select-button"
+                    onClick={() => setShowWebbookBookDropdown(!showWebbookBookDropdown)}
+                  >
+                    {selectedWebbookBook || '책'}
+                  </button>
+                  {showWebbookBookDropdown && (
+                    <div className="dropdown-menu">
+                      {webbookBooks.map((item, index) => (
+                        <div
+                          key={index}
+                          className="dropdown-item"
+                          onClick={() => handleWebbookBookSelect(item)}
+                        >
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {selectedWebbookBook && webbookSections.length > 0 && (
+                  <div className="dropdown-container">
+                    <button
+                      className="select-button"
+                      onClick={() => setShowWebbookSectionDropdown(!showWebbookSectionDropdown)}
+                    >
+                      {selectedWebbookSection || '장'}
+                    </button>
+                    {showWebbookSectionDropdown && (
+                      <div className="dropdown-menu">
+                        {webbookSections.map((item, index) => (
+                          <div
+                            key={index}
+                            className="dropdown-item"
+                            onClick={() => handleWebbookSectionSelect(item)}
+                          >
+                            {item}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {selectedWebbookSection && webbookUnits.length > 0 && (
+                  <div className="dropdown-container">
+                    <button
+                      className="select-button"
+                      onClick={() => setShowWebbookUnitDropdown(!showWebbookUnitDropdown)}
+                    >
+                      {selectedWebbookUnit || '단원'}
+                    </button>
+                    {showWebbookUnitDropdown && (
+                      <div className="dropdown-menu">
+                        {webbookUnits.map((item, index) => (
+                          <div
+                            key={index}
+                            className="dropdown-item"
+                            onClick={() => handleWebbookUnitSelect(item)}
+                          >
+                            {item}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="webbook-area">
+                {!isWebbookStarted ? (
+                  <div className="welcome-message">
+                    <h2>web book을 시작하세요</h2>
+                    <p>책 → 장 → 단원을 순서대로 선택해주세요.</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="webbook-card">
+                      <p className="webbook-korean">{currentWebbookSentence?.kor_sen}</p>
+                    </div>
+
+                    <div className="webbook-progress">
+                      문장: {currentWebbookIndex + 1} / {webbookSentences.length}
+                    </div>
+
+                    <div className="webbook-controls">
+                      <button
+                        type="button"
+                        className="webbook-control-button speaker"
+                        onClick={handleWebbookSpeak}
+                        disabled={showWebbookModal}
+                        title="영어 문장 듣기"
+                      >
+                        🔊
+                      </button>
+                      <button
+                        type="button"
+                        className={`webbook-control-button mic ${isWebbookListening ? 'listening' : ''}`}
+                        onClick={handleWebbookMicClick}
+                        disabled={showWebbookModal || !webbookSpeechSupported}
+                        title={webbookSpeechSupported ? '영어로 따라 말하기' : '음성 인식 미지원'}
+                      >
+                        {isWebbookListening ? '...' : '🎤'}
+                      </button>
+                    </div>
+
+                    {!webbookSpeechSupported && (
+                      <p className="webbook-hint">음성 인식은 Chrome 브라우저에서 사용할 수 있습니다.</p>
+                    )}
+                    {isWebbookListening && (
+                      <p className="webbook-hint listening">듣고 있습니다. 영어로 말해주세요...</p>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {showWebbookModal && (
+                <div className="modal-overlay">
+                  <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                    {webbookModalType === 'incorrect' && (
+                      <>
+                        <h3>오답입니다</h3>
+                        <div className="modal-answer">
+                          <p className="label">내가 말한 내용:</p>
+                          <p className="incorrect-answer">{webbookModalContent.userAnswer || '(인식되지 않음)'}</p>
+                          <p className="label">정답:</p>
+                          <p className="correct-answer">{webbookModalContent.correctAnswer}</p>
+                        </div>
+                        <p className="modal-hint">스피커로 다시 듣고 마이크로 다시 시도해주세요</p>
+                        <button className="modal-button" onClick={closeWebbookModal}>
+                          다시 시도
+                        </button>
+                      </>
+                    )}
+
+                    {webbookModalType === 'success' && (
+                      <>
+                        <h3 className="success-title">정답입니다!</h3>
+                        <div className="modal-answer success">
+                          <p className="label">완성된 문장:</p>
+                          <p className="correct-answer">{webbookModalContent.correctAnswer}</p>
+                        </div>
+                        <button className="modal-button success" onClick={handleWebbookSuccessConfirm}>
+                          다음
+                        </button>
+                      </>
+                    )}
+
+                    {webbookModalType === 'unitComplete' && (
+                      <>
+                        <h3>{selectedWebbookUnit ? `${selectedWebbookUnit}의 마지막 문장을 끝냈습니다.` : '단원의 마지막 문장을 끝냈습니다.'}</h3>
+                        <button className="modal-button success" onClick={returnToWebbookSelection}>
                           확인
                         </button>
                       </>

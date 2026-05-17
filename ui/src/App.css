@@ -1632,3 +1632,109 @@
     gap: 5px;
   }
 }
+
+/* ===== web book 화면 ===== */
+.webbook-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.webbook-settings {
+  flex-wrap: wrap;
+}
+
+.webbook-area {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 30px;
+  background-color: #1B3A4B;
+  border-radius: 8px;
+  align-items: center;
+}
+
+.webbook-card {
+  width: 100%;
+  max-width: 720px;
+  padding: 28px 24px;
+  background-color: #0D2535;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.webbook-korean {
+  color: #E8F4FD;
+  font-weight: 700;
+  font-size: 1.35rem;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.webbook-progress {
+  color: #6B9AAD;
+  font-size: 1rem;
+  width: 100%;
+  max-width: 720px;
+  text-align: left;
+  padding-left: 5px;
+}
+
+.webbook-controls {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.webbook-control-button {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid #3D7A8C;
+  background-color: #0D2535;
+  color: #E8F4FD;
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.webbook-control-button:hover:not(:disabled) {
+  border-color: #FF69B4;
+  box-shadow: 0 0 12px rgba(255, 105, 180, 0.35);
+  transform: scale(1.05);
+}
+
+.webbook-control-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.webbook-control-button.mic.listening {
+  border-color: #F87171;
+  animation: webbook-pulse 1s ease-in-out infinite;
+}
+
+@keyframes webbook-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.4); }
+  50% { box-shadow: 0 0 0 12px rgba(248, 113, 113, 0); }
+}
+
+.webbook-hint {
+  color: #6B9AAD;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.webbook-hint.listening {
+  color: #F87171;
+}
+
+.modal-answer .incorrect-answer {
+  color: #F87171;
+  font-size: 1.05rem;
+  margin: 0 0 12px;
+}
