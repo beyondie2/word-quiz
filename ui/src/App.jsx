@@ -1567,6 +1567,8 @@ function App() {
   const blockwritingAnswerInputRef = useRef(null)
   const webbookRecognitionRef = useRef(null)
   const webbookWrongAttemptsRef = useRef([])
+  const webbookAttemptNumberRef = useRef(1)
+  const webbookSentenceStartedAtRef = useRef(null)
 
   // 블럭 영작 탭 활성화 시 책 목록 조회
   useEffect(() => {
@@ -1961,6 +1963,8 @@ function App() {
 
   const resetWebbookWrongAttempts = () => {
     webbookWrongAttemptsRef.current = []
+    webbookAttemptNumberRef.current = 1
+    webbookSentenceStartedAtRef.current = Date.now()
   }
 
   const initializeWebbookSentences = (sentences, index = 0) => {
@@ -1996,31 +2000,70 @@ function App() {
   const compareSpokenAnswer = (userText, correctText) =>
     normalizeSpokenEnglish(userText) === normalizeSpokenEnglish(correctText)
 
-  // user_progress: book→book_name, unit→unit, eng_sen→english, kor_sen→korean, is_correct, wrong_answer
   const saveWebbookProgress = async (sentence, spokenText, isCorrect) => {
-    if (!userId || !sentence) return
+    if (!userId) {
+      console.warn('webbook progress: 로그인(userId)이 없어 저장하지 않습니다')
+      return false
+    }
+    if (!sentence) return false
+
+    const book = sentence.book || selectedWebbookBook
+    const section = sentence.section || selectedWebbookSection
+    const unit = sentence.unit || selectedWebbookUnit
+    const engSen = (sentence.eng_sen || '').trim()
+    const korSen = (sentence.kor_sen || '').trim()
+
+    if (!book || !unit || !engSen || !korSen) {
+      console.warn('webbook progress: 필수 필드 누락', { book, unit, engSen, korSen })
+      return false
+    }
 
     const trimmedAnswer = (spokenText || '').trim()
     if (!isCorrect && trimmedAnswer) {
       webbookWrongAttemptsRef.current.push(trimmedAnswer)
     }
 
+    const startedAt = webbookSentenceStartedAtRef.current
+    const elapsedSeconds =
+      startedAt != null ? Math.max(0, Math.round((Date.now() - startedAt) / 1000)) : null
+    const priorWrongAttempts = [...webbookWrongAttemptsRef.current]
+    const wrongAttemptsSummary =
+      isCorrect && priorWrongAttempts.length > 0 ? priorWrongAttempts.join(' | ') : null
+    const attemptNumber = webbookAttemptNumberRef.current
+
     try {
-      await fetch(`${API_BASE}/spoken/progress`, {
+      const response = await fetch(`${API_BASE}/spoken/progress`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId,
-          book: sentence.book,
-          unit: sentence.unit,
-          engSen: sentence.eng_sen,
-          korSen: sentence.kor_sen,
-          wrongAnswer: isCorrect ? null : trimmedAnswer,
-          isCorrect: !!isCorrect
+          spokenSentenceId: sentence.id ?? null,
+          book,
+          section: section || null,
+          unit,
+          engSen,
+          korSen,
+          userAnswer: trimmedAnswer || null,
+          wrongAnswer: isCorrect ? null : trimmedAnswer || null,
+          wrongAttempts: wrongAttemptsSummary,
+          isCorrect: !!isCorrect,
+          sentenceIndex: currentWebbookIndex,
+          totalSentences: webbookSentences.length,
+          attemptNumber,
+          round: 1,
+          elapsedSeconds
         })
       })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        console.error('webbook progress 저장 실패:', data.error || response.status)
+        return false
+      }
+      webbookAttemptNumberRef.current += 1
+      return true
     } catch (error) {
       console.error('webbook progress save error:', error)
+      return false
     }
   }
 
@@ -2113,6 +2156,7 @@ function App() {
 
     if (currentWebbookIndex < webbookSentences.length - 1) {
       setCurrentWebbookIndex((prev) => prev + 1)
+      resetWebbookWrongAttempts()
     } else {
       setWebbookModalType('unitComplete')
       setShowWebbookModal(true)

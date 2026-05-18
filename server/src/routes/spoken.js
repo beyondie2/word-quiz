@@ -89,9 +89,26 @@ router.get('/sentences', async (req, res) => {
   }
 });
 
-// POST /api/spoken/progress - web book 수행 기록 (user_progress)
+// POST /api/spoken/progress - web book 수행 기록 (webbook_progress)
 router.post('/progress', async (req, res) => {
-  const { userId, book, unit, engSen, korSen, wrongAnswer, isCorrect } = req.body;
+  const {
+    userId,
+    spokenSentenceId,
+    book,
+    section,
+    unit,
+    engSen,
+    korSen,
+    userAnswer,
+    wrongAnswer,
+    wrongAttempts,
+    isCorrect,
+    sentenceIndex,
+    totalSentences,
+    attemptNumber,
+    round,
+    elapsedSeconds
+  } = req.body;
 
   if (!userId || !book || !unit || !engSen || !korSen) {
     return res.status(400).json({ error: '필수 필드가 누락되었습니다' });
@@ -101,26 +118,44 @@ router.post('/progress', async (req, res) => {
     return res.status(400).json({ error: 'isCorrect 값이 필요합니다' });
   }
 
+  const trimmedEng = String(engSen).trim();
+  const trimmedKor = String(korSen).trim();
+  const trimmedUserAnswer = userAnswer != null ? String(userAnswer).trim() : '';
+  const trimmedWrongAnswer = wrongAnswer != null ? String(wrongAnswer).trim() : '';
+  const answerForRow = trimmedUserAnswer || trimmedWrongAnswer;
+
   try {
     const result = await pool.query(
-      `INSERT INTO user_progress
-       (user_id, book_name, unit, english, korean, wrong_answer, practice_mode, korean_answer_type, round, unit_review_count, is_correct)
-       VALUES ($1, $2, $3, $4, $5, $6, 'english', 'one', 1, 0, $7)
+      `INSERT INTO webbook_progress
+       (user_id, spoken_sentence_id, book, section, unit, kor_sen, eng_sen, correct_answer,
+        user_answer, wrong_answer, wrong_attempts, is_correct, sentence_index, total_sentences,
+        attempt_number, round, elapsed_seconds)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
        RETURNING id`,
       [
         userId,
+        spokenSentenceId || null,
         book,
+        section || null,
         unit,
-        engSen,
-        korSen,
-        isCorrect ? null : (wrongAnswer || null),
-        isCorrect
+        trimmedKor,
+        trimmedEng,
+        trimmedEng,
+        answerForRow || null,
+        isCorrect ? null : (answerForRow || null),
+        wrongAttempts || null,
+        isCorrect,
+        sentenceIndex ?? null,
+        totalSentences ?? null,
+        attemptNumber ?? 1,
+        round ?? 1,
+        elapsedSeconds ?? null
       ]
     );
 
     res.json({ success: true, progressId: result.rows[0].id });
   } catch (error) {
-    console.error('Error saving spoken progress:', error);
+    console.error('Error saving webbook progress:', error);
     res.status(500).json({ success: false, error: '수행 기록 저장에 실패했습니다' });
   }
 });
