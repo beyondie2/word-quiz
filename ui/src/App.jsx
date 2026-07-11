@@ -139,7 +139,12 @@ function App() {
   const [webbookSpeechSupported, setWebbookSpeechSupported] = useState(true)
   const [showWebbookModal, setShowWebbookModal] = useState(false)
   const [webbookModalType, setWebbookModalType] = useState('') // 'incorrect' | 'success' | 'unitComplete'
-  const [webbookModalContent, setWebbookModalContent] = useState({ correctAnswer: '', userAnswer: '' })
+  const [webbookModalContent, setWebbookModalContent] = useState({
+    correctAnswer: '',
+    userAnswer: '',
+    attemptNumber: 1,
+    wordMatchRatio: 0
+  })
 
   // 문법 익히기 관련 상태
   const [grammarCategory1List, setGrammarCategory1List] = useState([])
@@ -1914,7 +1919,7 @@ function App() {
     setIsWebbookListening(false)
     setShowWebbookModal(false)
     setWebbookModalType('')
-    setWebbookModalContent({ correctAnswer: '', userAnswer: '' })
+    setWebbookModalContent({ correctAnswer: '', userAnswer: '', attemptNumber: 1, wordMatchRatio: 0 })
     resetWebbookWrongAttempts()
     if (webbookRecognitionRef.current) {
       try {
@@ -1973,7 +1978,7 @@ function App() {
     setIsWebbookStarted(sentences.length > 0)
     setShowWebbookModal(false)
     setWebbookModalType('')
-    setWebbookModalContent({ correctAnswer: '', userAnswer: '' })
+    setWebbookModalContent({ correctAnswer: '', userAnswer: '', attemptNumber: 1, wordMatchRatio: 0 })
     resetWebbookWrongAttempts()
   }
 
@@ -1996,6 +2001,28 @@ function App() {
 
   const normalizeSpokenEnglish = (str) =>
     (str || '').trim().replace(/\s+/g, ' ').replace(/[^\w\s']/g, '').toLowerCase()
+
+  const tokenizeSpokenEnglish = (str) => {
+    const normalized = normalizeSpokenEnglish(str)
+    return normalized ? normalized.split(' ').filter(Boolean) : []
+  }
+
+  // 정답 단어 중 사용자가 말한 동일 단어 비율 (0~1)
+  const calcSpokenWordMatchRatio = (userText, correctText) => {
+    const correctWords = tokenizeSpokenEnglish(correctText)
+    if (correctWords.length === 0) return 0
+
+    const remainingUserWords = [...tokenizeSpokenEnglish(userText)]
+    let matched = 0
+    for (const word of correctWords) {
+      const idx = remainingUserWords.indexOf(word)
+      if (idx !== -1) {
+        matched += 1
+        remainingUserWords.splice(idx, 1)
+      }
+    }
+    return matched / correctWords.length
+  }
 
   const compareSpokenAnswer = (userText, correctText) =>
     normalizeSpokenEnglish(userText) === normalizeSpokenEnglish(correctText)
@@ -2077,17 +2104,20 @@ function App() {
     if (!currentWebbookSentence || showWebbookModal) return
 
     const correctAnswer = (currentWebbookSentence.eng_sen || '').trim()
+    const userAnswer = spokenText.trim()
     const isCorrect = compareSpokenAnswer(spokenText, correctAnswer)
+    const attemptNumber = webbookAttemptNumberRef.current
+    const wordMatchRatio = calcSpokenWordMatchRatio(userAnswer, correctAnswer)
 
-    await saveWebbookProgress(currentWebbookSentence, spokenText.trim(), isCorrect)
+    await saveWebbookProgress(currentWebbookSentence, userAnswer, isCorrect)
     speakEnglish(correctAnswer)
 
     if (isCorrect) {
       setWebbookModalType('success')
-      setWebbookModalContent({ correctAnswer, userAnswer: spokenText.trim() })
+      setWebbookModalContent({ correctAnswer, userAnswer, attemptNumber, wordMatchRatio })
     } else {
       setWebbookModalType('incorrect')
-      setWebbookModalContent({ correctAnswer, userAnswer: spokenText.trim() })
+      setWebbookModalContent({ correctAnswer, userAnswer, attemptNumber, wordMatchRatio })
     }
     setShowWebbookModal(true)
   }
@@ -2146,12 +2176,13 @@ function App() {
   const closeWebbookModal = () => {
     setShowWebbookModal(false)
     setWebbookModalType('')
-    setWebbookModalContent({ correctAnswer: '', userAnswer: '' })
+    setWebbookModalContent({ correctAnswer: '', userAnswer: '', attemptNumber: 1, wordMatchRatio: 0 })
   }
 
   const handleWebbookSuccessConfirm = () => {
     setShowWebbookModal(false)
     setWebbookModalType('')
+    setWebbookModalContent({ correctAnswer: '', userAnswer: '', attemptNumber: 1, wordMatchRatio: 0 })
     resetWebbookWrongAttempts()
 
     if (currentWebbookIndex < webbookSentences.length - 1) {
@@ -3400,9 +3431,30 @@ function App() {
                           <p className="correct-answer">{webbookModalContent.correctAnswer}</p>
                         </div>
                         <p className="modal-hint">스피커로 다시 듣고 마이크로 다시 시도해주세요</p>
-                        <button className="modal-button" onClick={closeWebbookModal}>
-                          다시 시도
-                        </button>
+                        <div className="webbook-incorrect-actions">
+                          <div className="webbook-retry-row">
+                            <button className="modal-button" onClick={closeWebbookModal}>
+                              다시 시도
+                            </button>
+                            {(webbookModalContent.wordMatchRatio ?? 0) < 0.5 ? (
+                              <span className="webbook-match-indicator low" title="정답과 동일 단어 비율 50% 미만" aria-label="동일 단어 비율 부족">
+                                X
+                              </span>
+                            ) : (
+                              <span className="webbook-match-indicator attempts" title="마이크 시도 횟수">
+                                {webbookModalContent.attemptNumber}회
+                              </span>
+                            )}
+                          </div>
+                          {webbookModalContent.attemptNumber >= 10 && (
+                            <button
+                              className="modal-button webbook-skip-button"
+                              onClick={handleWebbookSuccessConfirm}
+                            >
+                              다음 문장으로
+                            </button>
+                          )}
+                        </div>
                       </>
                     )}
 
