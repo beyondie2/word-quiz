@@ -143,7 +143,8 @@ function App() {
     correctAnswer: '',
     userAnswer: '',
     attemptNumber: 1,
-    wordMatchRatio: 0
+    wordMatchRatio: 0,
+    countsAsMicAttempt: false
   })
 
   // 문법 익히기 관련 상태
@@ -1919,7 +1920,7 @@ function App() {
     setIsWebbookListening(false)
     setShowWebbookModal(false)
     setWebbookModalType('')
-    setWebbookModalContent({ correctAnswer: '', userAnswer: '', attemptNumber: 1, wordMatchRatio: 0 })
+    setWebbookModalContent({ correctAnswer: '', userAnswer: '', attemptNumber: 1, wordMatchRatio: 0, countsAsMicAttempt: false })
     resetWebbookWrongAttempts()
     if (webbookRecognitionRef.current) {
       try {
@@ -1978,7 +1979,7 @@ function App() {
     setIsWebbookStarted(sentences.length > 0)
     setShowWebbookModal(false)
     setWebbookModalType('')
-    setWebbookModalContent({ correctAnswer: '', userAnswer: '', attemptNumber: 1, wordMatchRatio: 0 })
+    setWebbookModalContent({ correctAnswer: '', userAnswer: '', attemptNumber: 1, wordMatchRatio: 0, countsAsMicAttempt: false })
     resetWebbookWrongAttempts()
   }
 
@@ -2027,7 +2028,7 @@ function App() {
   const compareSpokenAnswer = (userText, correctText) =>
     normalizeSpokenEnglish(userText) === normalizeSpokenEnglish(correctText)
 
-  const saveWebbookProgress = async (sentence, spokenText, isCorrect) => {
+  const saveWebbookProgress = async (sentence, spokenText, isCorrect, { countsAsMicAttempt = true } = {}) => {
     if (!userId) {
       console.warn('webbook progress: 로그인(userId)이 없어 저장하지 않습니다')
       return false
@@ -2086,7 +2087,10 @@ function App() {
         console.error('webbook progress 저장 실패:', data.error || response.status)
         return false
       }
-      webbookAttemptNumberRef.current += 1
+      // 동일 단어 비율 50% 미만(X)은 구두 연습으로 보지 않아 횟수에 가산하지 않음
+      if (countsAsMicAttempt) {
+        webbookAttemptNumberRef.current += 1
+      }
       return true
     } catch (error) {
       console.error('webbook progress save error:', error)
@@ -2106,18 +2110,20 @@ function App() {
     const correctAnswer = (currentWebbookSentence.eng_sen || '').trim()
     const userAnswer = spokenText.trim()
     const isCorrect = compareSpokenAnswer(spokenText, correctAnswer)
-    const attemptNumber = webbookAttemptNumberRef.current
     const wordMatchRatio = calcSpokenWordMatchRatio(userAnswer, correctAnswer)
+    // 정답이거나 동일 단어 비율 50% 이상일 때만 마이크 시도 횟수로 인정
+    const countsAsMicAttempt = isCorrect || wordMatchRatio >= 0.5
+    const attemptNumber = webbookAttemptNumberRef.current
 
-    await saveWebbookProgress(currentWebbookSentence, userAnswer, isCorrect)
+    await saveWebbookProgress(currentWebbookSentence, userAnswer, isCorrect, { countsAsMicAttempt })
     speakEnglish(correctAnswer)
 
     if (isCorrect) {
       setWebbookModalType('success')
-      setWebbookModalContent({ correctAnswer, userAnswer, attemptNumber, wordMatchRatio })
+      setWebbookModalContent({ correctAnswer, userAnswer, attemptNumber, wordMatchRatio, countsAsMicAttempt })
     } else {
       setWebbookModalType('incorrect')
-      setWebbookModalContent({ correctAnswer, userAnswer, attemptNumber, wordMatchRatio })
+      setWebbookModalContent({ correctAnswer, userAnswer, attemptNumber, wordMatchRatio, countsAsMicAttempt })
     }
     setShowWebbookModal(true)
   }
@@ -2176,13 +2182,13 @@ function App() {
   const closeWebbookModal = () => {
     setShowWebbookModal(false)
     setWebbookModalType('')
-    setWebbookModalContent({ correctAnswer: '', userAnswer: '', attemptNumber: 1, wordMatchRatio: 0 })
+    setWebbookModalContent({ correctAnswer: '', userAnswer: '', attemptNumber: 1, wordMatchRatio: 0, countsAsMicAttempt: false })
   }
 
   const handleWebbookSuccessConfirm = () => {
     setShowWebbookModal(false)
     setWebbookModalType('')
-    setWebbookModalContent({ correctAnswer: '', userAnswer: '', attemptNumber: 1, wordMatchRatio: 0 })
+    setWebbookModalContent({ correctAnswer: '', userAnswer: '', attemptNumber: 1, wordMatchRatio: 0, countsAsMicAttempt: false })
     resetWebbookWrongAttempts()
 
     if (currentWebbookIndex < webbookSentences.length - 1) {
@@ -3446,7 +3452,7 @@ function App() {
                               </span>
                             )}
                           </div>
-                          {webbookModalContent.attemptNumber >= 10 && (
+                          {webbookModalContent.countsAsMicAttempt && webbookModalContent.attemptNumber >= 10 && (
                             <button
                               className="modal-button webbook-skip-button"
                               onClick={handleWebbookSuccessConfirm}
