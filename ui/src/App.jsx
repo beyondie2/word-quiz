@@ -53,13 +53,16 @@ function App() {
   const [progressRecords, setProgressRecords] = useState([])
   const [progressStats, setProgressStats] = useState(null)
   const [isLoadingProgress, setIsLoadingProgress] = useState(false)
-  const [reviewSubTab, setReviewSubTab] = useState('words') // 'words' | 'grammar' | 'blocks'
+  const [reviewSubTab, setReviewSubTab] = useState('words') // 'words' | 'grammar' | 'blocks' | 'webbook'
   const [grammarProgressRecords, setGrammarProgressRecords] = useState([])
   const [grammarProgressStats, setGrammarProgressStats] = useState(null)
   const [isLoadingGrammarProgress, setIsLoadingGrammarProgress] = useState(false)
   const [blocksProgressRecords, setBlocksProgressRecords] = useState([])
   const [blocksProgressStats, setBlocksProgressStats] = useState(null)
   const [isLoadingBlocksProgress, setIsLoadingBlocksProgress] = useState(false)
+  const [webbookProgressRecords, setWebbookProgressRecords] = useState([])
+  const [webbookProgressStats, setWebbookProgressStats] = useState(null)
+  const [isLoadingWebbookProgress, setIsLoadingWebbookProgress] = useState(false)
 
   // 관리자 페이지 관련 상태
   const [adminUsers, setAdminUsers] = useState([])
@@ -723,6 +726,8 @@ function App() {
         fetchGrammarProgress()
       } else if (reviewSubTab === 'blocks') {
         fetchBlocksProgress()
+      } else if (reviewSubTab === 'webbook') {
+        fetchWebbookProgress()
       }
     }
   }, [activeTab, selectedUserId, selectedDate, userId, isAdmin, reviewSubTab])
@@ -746,6 +751,28 @@ function App() {
       console.error('Fetch blocks progress error:', error)
     } finally {
       setIsLoadingBlocksProgress(false)
+    }
+  }
+
+  // web book 수행 기록 조회
+  const fetchWebbookProgress = async () => {
+    if (!userId) return
+
+    setIsLoadingWebbookProgress(true)
+    try {
+      const params = new URLSearchParams()
+      params.append('requesterId', userId)
+      if (isAdmin && selectedUserId) params.append('userId', selectedUserId)
+      if (selectedDate) params.append('date', selectedDate)
+
+      const response = await fetch(`${API_BASE}/spoken/progress?${params}`)
+      const data = await response.json()
+      setWebbookProgressRecords(data.records || [])
+      setWebbookProgressStats(data.stats)
+    } catch (error) {
+      console.error('Fetch webbook progress error:', error)
+    } finally {
+      setIsLoadingWebbookProgress(false)
     }
   }
 
@@ -2585,6 +2612,12 @@ function App() {
                 >
                   블럭 영작
                 </button>
+                <button
+                  className={`sub-tab-button ${reviewSubTab === 'webbook' ? 'active' : ''}`}
+                  onClick={() => setReviewSubTab('webbook')}
+                >
+                  web book
+                </button>
               </div>
 
               {/* 필터 영역 */}
@@ -2821,6 +2854,79 @@ function App() {
                                   {record.is_correct ? '정답' : '오답'}
                                 </span>
                               </td>
+                              <td>{formatDate(record.created_at)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* web book 수행 기록 */}
+              {reviewSubTab === 'webbook' && (
+                <>
+                  {webbookProgressStats && webbookProgressStats.totalQuestions > 0 && (
+                    <div className="stats-card">
+                      <div className="stat-item">
+                        <span className="stat-label">총 문제</span>
+                        <span className="stat-value">{webbookProgressStats.totalQuestions}</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-label">정답</span>
+                        <span className="stat-value correct">{webbookProgressStats.correctCount}</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-label">오답</span>
+                        <span className="stat-value incorrect">{webbookProgressStats.wrongCount}</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-label">정답률</span>
+                        <span className={`stat-value ${webbookProgressStats.accuracy >= 80 ? 'high' : webbookProgressStats.accuracy >= 50 ? 'medium' : 'low'}`}>
+                          {webbookProgressStats.accuracy}%
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="records-container">
+                    {isLoadingWebbookProgress ? (
+                      <div className="loading">로딩 중...</div>
+                    ) : webbookProgressRecords.length === 0 ? (
+                      <div className="no-records">수행 기록이 없습니다</div>
+                    ) : (
+                      <table className="records-table">
+                        <thead>
+                          <tr>
+                            {isAdmin && <th>사용자</th>}
+                            <th>책</th>
+                            <th>장</th>
+                            <th>단원</th>
+                            <th>한국어</th>
+                            <th>영어</th>
+                            <th>오답</th>
+                            <th>결과</th>
+                            <th>시도</th>
+                            <th>일시</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {webbookProgressRecords.map(record => (
+                            <tr key={record.id} className={record.is_correct ? 'correct-row' : 'incorrect-row'}>
+                              {isAdmin && <td>{record.username}</td>}
+                              <td>{record.book || '-'}</td>
+                              <td>{record.section || '-'}</td>
+                              <td>{record.unit || '-'}</td>
+                              <td className="question-cell">{record.kor_sen ? (record.kor_sen.length > 30 ? record.kor_sen.substring(0, 30) + '...' : record.kor_sen) : '-'}</td>
+                              <td className="question-cell">{record.eng_sen ? (record.eng_sen.length > 40 ? record.eng_sen.substring(0, 40) + '...' : record.eng_sen) : '-'}</td>
+                              <td>{record.wrong_answer || '-'}</td>
+                              <td>
+                                <span className={`result-badge ${record.is_correct ? 'correct' : 'incorrect'}`}>
+                                  {record.is_correct ? '정답' : '오답'}
+                                </span>
+                              </td>
+                              <td>{record.attempt_number ?? '-'}</td>
                               <td>{formatDate(record.created_at)}</td>
                             </tr>
                           ))}

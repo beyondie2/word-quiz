@@ -89,6 +89,65 @@ router.get('/sentences', async (req, res) => {
   }
 });
 
+// GET /api/spoken/progress - web book 수행 기록 조회
+router.get('/progress', async (req, res) => {
+  const { requesterId, userId, date } = req.query;
+
+  try {
+    const requesterResult = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [requesterId]
+    );
+    const isAdmin = requesterResult.rows[0]?.is_admin || false;
+
+    let query = `
+      SELECT wp.id, wp.user_id, wp.spoken_sentence_id, wp.book, wp.section, wp.unit,
+             wp.kor_sen, wp.eng_sen, wp.correct_answer, wp.user_answer, wp.wrong_answer,
+             wp.wrong_attempts, wp.is_correct, wp.sentence_index, wp.total_sentences,
+             wp.attempt_number, wp.round, wp.elapsed_seconds, wp.created_at, u.username
+      FROM webbook_progress wp
+      JOIN users u ON wp.user_id = u.id
+      WHERE 1=1
+    `;
+    const params = [];
+    let paramIndex = 1;
+
+    if (!isAdmin) {
+      query += ` AND wp.user_id = $${paramIndex}`;
+      params.push(requesterId);
+      paramIndex++;
+    } else if (userId) {
+      query += ` AND wp.user_id = $${paramIndex}`;
+      params.push(userId);
+      paramIndex++;
+    }
+
+    if (date) {
+      query += ` AND DATE(wp.created_at) = $${paramIndex}`;
+      params.push(date);
+      paramIndex++;
+    }
+
+    query += ' ORDER BY wp.created_at DESC LIMIT 500';
+
+    const result = await pool.query(query, params);
+    const records = trimStringFields(result.rows);
+
+    const totalQuestions = records.length;
+    const correctCount = records.filter((r) => r.is_correct).length;
+    const wrongCount = totalQuestions - correctCount;
+    const accuracy = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+
+    res.json({
+      records,
+      stats: { totalQuestions, correctCount, wrongCount, accuracy }
+    });
+  } catch (error) {
+    console.error('Error fetching webbook progress:', error);
+    res.status(500).json({ error: 'web book 수행 기록 조회에 실패했습니다' });
+  }
+});
+
 // POST /api/spoken/progress - web book 수행 기록 (webbook_progress)
 router.post('/progress', async (req, res) => {
   const {
