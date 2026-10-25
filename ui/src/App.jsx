@@ -2299,6 +2299,12 @@ function App() {
             web book
           </button>
           <button
+            className={`tab-button ${activeTab === 'createProblem' ? 'active' : ''}`}
+            onClick={() => setActiveTab('createProblem')}
+          >
+            문제 만들기
+          </button>
+          <button
             className={`tab-button ${activeTab === 'review' ? 'active' : ''}`}
             onClick={() => setActiveTab('review')}
           >
@@ -3594,6 +3600,29 @@ function App() {
                   </div>
                 </div>
               )}
+            </>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'createProblem' && (
+        <div className="create-problem-container">
+          {!isVerified ? (
+            <div className="welcome-message">
+              <h2>로그인이 필요합니다</h2>
+              <p>"단어 맞추기" 탭에서 로그인해주세요.</p>
+            </div>
+          ) : (
+            <>
+              <div className="settings-bar">
+                <div className="user-info">
+                  <span className="user-name">{userName}</span>
+                </div>
+              </div>
+              <div className="create-problem-area">
+                <h2>문제 만들기</h2>
+                <p>여기에서 문제를 만들 수 있습니다.</p>
+              </div>
             </>
           )}
         </div>
