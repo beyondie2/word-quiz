@@ -14,11 +14,24 @@ const router = express.Router();
 
 // 회원가입
 router.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, role, teacherId } = req.body;
 
   // 유효성 검사
   if (!username || !email || !password) {
     return res.status(400).json({ error: '이름, 이메일, 비밀번호를 모두 입력해주세요' });
+  }
+
+  if (role !== 'student' && role !== 'teacher') {
+    return res.status(400).json({ error: '신분을 선택해주세요' });
+  }
+
+  let teacherIdValue = null;
+  if (role === 'student' && teacherId !== undefined && teacherId !== null && String(teacherId).trim() !== '') {
+    const teacherIdText = String(teacherId).trim();
+    if (!/^\d+$/.test(teacherIdText)) {
+      return res.status(400).json({ error: '선생님 ID는 숫자로 입력해주세요' });
+    }
+    teacherIdValue = Number(teacherIdText);
   }
 
   if (password.length < 4) {
@@ -50,16 +63,26 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ error: '이미 사용 중인 이름입니다' });
     }
 
+    if (teacherIdValue !== null) {
+      const teacherCheck = await pool.query(
+        'SELECT id FROM users WHERE id = $1 AND role = $2',
+        [teacherIdValue, 'teacher']
+      );
+      if (teacherCheck.rows.length === 0) {
+        return res.status(400).json({ error: '존재하지 않는 선생님 ID입니다' });
+      }
+    }
+
     // 비밀번호 해시화
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
     // 사용자 생성
     const result = await pool.query(
-      `INSERT INTO users (username, email, password_hash, is_admin, created_at, updated_at) 
-       VALUES ($1, $2, $3, FALSE, NOW(), NOW()) 
-       RETURNING id, username, email, is_admin, created_at`,
-      [username, email, passwordHash]
+      `INSERT INTO users (username, email, password_hash, is_admin, role, teacher_id, created_at, updated_at) 
+       VALUES ($1, $2, $3, FALSE, $4, $5, NOW(), NOW()) 
+       RETURNING id, username, email, is_admin, role, teacher_id, created_at`,
+      [username, email, passwordHash, role, teacherIdValue]
     );
 
     const user = trimStringFields(result.rows[0]);

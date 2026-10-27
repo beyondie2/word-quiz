@@ -111,6 +111,38 @@
   font-weight: 600;
 }
 
+.role-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.role-select-label {
+  color: #6B9AAD;
+  font-size: 0.9rem;
+}
+
+.role-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #0D2535;
+  color: #6B9AAD;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.role-button:hover {
+  background-color: #153045;
+}
+
+.role-button.active {
+  background-color: #3D7A8C;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
 .auth-inputs {
   display: flex;
   flex-wrap: wrap;

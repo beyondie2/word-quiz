@@ -16,6 +16,8 @@ function App() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [verifyError, setVerifyError] = useState('')
   const [authMode, setAuthMode] = useState('login') // 'login' or 'register'
+  const [signupRole, setSignupRole] = useState('student') // 'student' or 'teacher'
+  const [teacherIdInput, setTeacherIdInput] = useState('')
   const [accessToken, setAccessToken] = useState(localStorage.getItem('accessToken') || '')
   const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refreshToken') || '')
   
@@ -335,6 +337,12 @@ function App() {
       return
     }
 
+    const teacherId = teacherIdInput.trim()
+    if (signupRole === 'student' && teacherId && !/^\d+$/.test(teacherId)) {
+      setVerifyError('선생님 ID는 숫자로 입력해주세요')
+      return
+    }
+
     try {
       const response = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
@@ -342,7 +350,9 @@ function App() {
         body: JSON.stringify({ 
           username: userName.trim(),
           email: userEmail.trim(), 
-          password: userPassword 
+          password: userPassword,
+          role: signupRole,
+          teacherId: signupRole === 'student' ? teacherId : null
         })
       })
 
@@ -362,6 +372,7 @@ function App() {
         setIsVerified(true)
         setVerifyError('')
         setUserPassword('')
+        setTeacherIdInput('')
         
         // 단어장 목록 가져오기
         const booksResponse = await fetch(`${API_BASE}/books`)
@@ -2341,6 +2352,25 @@ function App() {
                     회원가입
                   </button>
                 </div>
+                {authMode === 'register' && (
+                  <div className="role-select">
+                    <span className="role-select-label">신분</span>
+                    <button
+                      type="button"
+                      className={`role-button ${signupRole === 'student' ? 'active' : ''}`}
+                      onClick={() => { setSignupRole('student'); setVerifyError(''); }}
+                    >
+                      학생
+                    </button>
+                    <button
+                      type="button"
+                      className={`role-button ${signupRole === 'teacher' ? 'active' : ''}`}
+                      onClick={() => { setSignupRole('teacher'); setVerifyError(''); }}
+                    >
+                      선생님
+                    </button>
+                  </div>
+                )}
                 <div className="auth-inputs">
                   {authMode === 'register' && (
                     <input
@@ -2368,6 +2398,17 @@ function App() {
                     onChange={(e) => setUserPassword(e.target.value)}
                     onKeyPress={handleAuthKeyPress}
                   />
+                  {authMode === 'register' && signupRole === 'student' && (
+                    <input
+                      type="text"
+                      className="auth-input"
+                      placeholder="선생님 ID"
+                      value={teacherIdInput}
+                      onChange={(e) => setTeacherIdInput(e.target.value)}
+                      onKeyPress={handleAuthKeyPress}
+                      inputMode="numeric"
+                    />
+                  )}
                   <button 
                     className="select-button primary" 
                     onClick={authMode === 'login' ? handleLogin : handleRegister}
