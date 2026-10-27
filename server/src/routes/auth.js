@@ -104,7 +104,8 @@ router.post('/register', async (req, res) => {
         id: user.id,
         username: user.username,
         email: user.email,
-        isAdmin: user.is_admin
+        isAdmin: user.is_admin,
+        role: user.role
       },
       accessToken,
       refreshToken
@@ -127,7 +128,7 @@ router.post('/login', async (req, res) => {
   try {
     // 사용자 조회
     const result = await pool.query(
-      'SELECT id, username, email, password_hash, is_admin FROM users WHERE email = $1',
+      'SELECT id, username, email, password_hash, is_admin, role FROM users WHERE email = $1',
       [email]
     );
 
@@ -168,7 +169,8 @@ router.post('/login', async (req, res) => {
         id: user.id,
         username: user.username,
         email: user.email,
-        isAdmin: user.is_admin
+        isAdmin: user.is_admin,
+        role: user.role
       },
       accessToken,
       refreshToken
@@ -238,7 +240,7 @@ router.post('/refresh', async (req, res) => {
 router.get('/me', authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, username, email, is_admin, created_at FROM users WHERE id = $1',
+      'SELECT id, username, email, is_admin, role, created_at FROM users WHERE id = $1',
       [req.user.id]
     );
 
@@ -254,6 +256,7 @@ router.get('/me', authenticateToken, async (req, res) => {
         username: user.username,
         email: user.email,
         isAdmin: user.is_admin,
+        role: user.role,
         createdAt: user.created_at
       }
     });

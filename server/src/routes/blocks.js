@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../config/database.js';
 import { trimStringFields } from '../utils/trimHelper.js';
+import { resolveProgressScope, appendProgressUserFilter } from '../utils/progressViewer.js';
 
 const router = express.Router();
 
@@ -42,11 +43,7 @@ router.get('/progress', async (req, res) => {
   const { requesterId, userId, date } = req.query;
 
   try {
-    const requesterResult = await pool.query(
-      'SELECT is_admin FROM users WHERE id = $1',
-      [requesterId]
-    );
-    const isAdmin = requesterResult.rows[0]?.is_admin || false;
+    const scope = await resolveProgressScope(requesterId, userId);
 
     let query = `
       SELECT bp.id, bp.user_id, bp.blocks_id, bp.book, bp.lesson, bp.sentence_number,
@@ -59,15 +56,10 @@ router.get('/progress', async (req, res) => {
     const params = [];
     let paramIndex = 1;
 
-    if (!isAdmin) {
-      query += ` AND bp.user_id = $${paramIndex}`;
-      params.push(requesterId);
-      paramIndex++;
-    } else if (userId) {
-      query += ` AND bp.user_id = $${paramIndex}`;
-      params.push(userId);
-      paramIndex++;
-    }
+    const userFilter = appendProgressUserFilter(scope, 'bp.user_id', paramIndex);
+    query += userFilter.sql;
+    params.push(...userFilter.params);
+    paramIndex = userFilter.nextIndex;
 
     if (date) {
       query += ` AND DATE(bp.created_at) = $${paramIndex}`;

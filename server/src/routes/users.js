@@ -4,9 +4,31 @@ import { trimStringFields } from '../utils/trimHelper.js';
 
 const router = express.Router();
 
-// GET /api/users - 모든 사용자 목록 조회
+// GET /api/users - 사용자 목록 조회
+// 선생님은 본인 id를 teacher_id로 가진 학생만 반환
 router.get('/', async (req, res) => {
+  const { requesterId } = req.query;
+
   try {
+    if (requesterId) {
+      const requesterResult = await pool.query(
+        'SELECT id, role FROM users WHERE id = $1',
+        [requesterId]
+      );
+      const requester = requesterResult.rows[0];
+
+      if (requester?.role === 'teacher') {
+        const result = await pool.query(
+          `SELECT id, username
+           FROM users
+           WHERE role = 'student' AND teacher_id = $1
+           ORDER BY username`,
+          [requester.id]
+        );
+        return res.json({ users: trimStringFields(result.rows) });
+      }
+    }
+
     const result = await pool.query(
       'SELECT id, username FROM users ORDER BY username'
     );

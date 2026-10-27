@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../config/database.js';
 import { trimStringFields } from '../utils/trimHelper.js';
+import { resolveProgressScope, appendProgressUserFilter } from '../utils/progressViewer.js';
 
 const router = express.Router();
 
@@ -183,13 +184,7 @@ router.get('/progress', async (req, res) => {
   const { requesterId, userId, date } = req.query;
 
   try {
-    // 요청자 정보 확인
-    const requesterResult = await pool.query(
-      'SELECT is_admin FROM users WHERE id = $1',
-      [requesterId]
-    );
-    
-    const isAdmin = requesterResult.rows[0]?.is_admin || false;
+    const scope = await resolveProgressScope(requesterId, userId);
 
     let query = `
       SELECT gp.*, u.username
@@ -200,16 +195,10 @@ router.get('/progress', async (req, res) => {
     const params = [];
     let paramIndex = 1;
 
-    // 관리자가 아니면 자신의 기록만
-    if (!isAdmin) {
-      query += ` AND gp.user_id = $${paramIndex}`;
-      params.push(requesterId);
-      paramIndex++;
-    } else if (userId) {
-      query += ` AND gp.user_id = $${paramIndex}`;
-      params.push(userId);
-      paramIndex++;
-    }
+    const userFilter = appendProgressUserFilter(scope, 'gp.user_id', paramIndex);
+    query += userFilter.sql;
+    params.push(...userFilter.params);
+    paramIndex = userFilter.nextIndex;
 
     if (date) {
       query += ` AND DATE(gp.created_at) = $${paramIndex}`;

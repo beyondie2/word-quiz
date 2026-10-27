@@ -14,6 +14,7 @@ function App() {
   const [userId, setUserId] = useState(null)
   const [isVerified, setIsVerified] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [userRole, setUserRole] = useState('') // 'teacher' | 'student'
   const [verifyError, setVerifyError] = useState('')
   const [authMode, setAuthMode] = useState('login') // 'login' or 'register'
   const [signupRole, setSignupRole] = useState('student') // 'student' or 'teacher'
@@ -226,6 +227,7 @@ function App() {
             setUserName(data.user.username)
             setUserEmail(data.user.email)
             setIsAdmin(data.user.isAdmin)
+            setUserRole(data.user.role || '')
             setIsVerified(true)
             // 단어장 목록 가져오기
             const booksResponse = await fetch(`${API_BASE}/books`)
@@ -308,6 +310,7 @@ function App() {
         setUserId(data.user.id)
         setUserName(data.user.username)
         setIsAdmin(data.user.isAdmin)
+        setUserRole(data.user.role || '')
         setIsVerified(true)
         setVerifyError('')
         setUserPassword('')
@@ -369,6 +372,7 @@ function App() {
         setUserId(data.user.id)
         setUserName(data.user.username)
         setIsAdmin(data.user.isAdmin)
+        setUserRole(data.user.role || '')
         setIsVerified(true)
         setVerifyError('')
         setUserPassword('')
@@ -678,6 +682,7 @@ function App() {
     setUserEmail('')
     setUserPassword('')
     setIsAdmin(false)
+    setUserRole('')
     setBooks([])
     setSelectedBook('')
     setUnits([])
@@ -690,18 +695,21 @@ function App() {
 
   // ===== 수행 확인 관련 =====
   
-  // 사용자 목록 조회 (관리자만)
-  useEffect(() => {
-    if (activeTab === 'review' && isAdmin) {
-      fetchAllUsers()
-    }
-  }, [activeTab, isAdmin])
+  const isTeacher = userRole === 'teacher'
+  const canViewOthers = isAdmin || isTeacher
 
-  const fetchAllUsers = async () => {
+  // 사용자 목록 조회 (관리자: 전체, 선생님: 본인 학생)
+  useEffect(() => {
+    if (activeTab === 'review' && userId && canViewOthers) {
+      fetchAllUsers(userId)
+    }
+  }, [activeTab, canViewOthers, userId])
+
+  const fetchAllUsers = async (requesterId) => {
     try {
-      const response = await fetch(`${API_BASE}/users`)
+      const response = await fetch(`${API_BASE}/users?requesterId=${requesterId}`)
       const data = await response.json()
-      setAllUsers(data.users)
+      setAllUsers(data.users || [])
     } catch (error) {
       console.error('Fetch users error:', error)
     }
@@ -715,7 +723,7 @@ function App() {
     try {
       const params = new URLSearchParams()
       params.append('requesterId', userId) // 요청자 ID (권한 체크용)
-      if (isAdmin && selectedUserId) params.append('userId', selectedUserId) // 관리자만 다른 사용자 조회 가능
+      if (canViewOthers && selectedUserId) params.append('userId', selectedUserId)
       if (selectedDate) params.append('date', selectedDate)
 
       const response = await fetch(`${API_BASE}/progress?${params}`)
@@ -741,7 +749,7 @@ function App() {
         fetchWebbookProgress()
       }
     }
-  }, [activeTab, selectedUserId, selectedDate, userId, isAdmin, reviewSubTab])
+  }, [activeTab, selectedUserId, selectedDate, userId, canViewOthers, reviewSubTab])
 
   // 블럭영작 수행 기록 조회
   const fetchBlocksProgress = async () => {
@@ -751,7 +759,7 @@ function App() {
     try {
       const params = new URLSearchParams()
       params.append('requesterId', userId)
-      if (isAdmin && selectedUserId) params.append('userId', selectedUserId)
+      if (canViewOthers && selectedUserId) params.append('userId', selectedUserId)
       if (selectedDate) params.append('date', selectedDate)
 
       const response = await fetch(`${API_BASE}/blocks/progress?${params}`)
@@ -773,7 +781,7 @@ function App() {
     try {
       const params = new URLSearchParams()
       params.append('requesterId', userId)
-      if (isAdmin && selectedUserId) params.append('userId', selectedUserId)
+      if (canViewOthers && selectedUserId) params.append('userId', selectedUserId)
       if (selectedDate) params.append('date', selectedDate)
 
       const response = await fetch(`${API_BASE}/spoken/progress?${params}`)
@@ -795,7 +803,7 @@ function App() {
     try {
       const params = new URLSearchParams()
       params.append('requesterId', userId)
-      if (isAdmin && selectedUserId) params.append('userId', selectedUserId)
+      if (canViewOthers && selectedUserId) params.append('userId', selectedUserId)
       if (selectedDate) params.append('date', selectedDate)
 
       const response = await fetch(`${API_BASE}/grammar/progress?${params}`)
@@ -2669,13 +2677,13 @@ function App() {
 
               {/* 필터 영역 */}
               <div className="filter-bar">
-                {isAdmin ? (
+                {canViewOthers ? (
                   <select 
                     className="filter-select"
                     value={selectedUserId}
                     onChange={(e) => setSelectedUserId(e.target.value)}
                   >
-                    <option value="">전체 사용자</option>
+                    <option value="">{isTeacher ? '학생' : '전체 사용자'}</option>
                     {allUsers.map(user => (
                       <option key={user.id} value={user.id}>{user.username}</option>
                     ))}
@@ -2729,7 +2737,7 @@ function App() {
                       <table className="records-table">
                         <thead>
                           <tr>
-                            {isAdmin && <th>사용자</th>}
+                            {canViewOthers && <th>사용자</th>}
                             <th>단어장</th>
                             <th>단원</th>
                             <th>영어</th>
@@ -2743,7 +2751,7 @@ function App() {
                         <tbody>
                           {progressRecords.map(record => (
                             <tr key={record.id} className={record.is_correct ? 'correct-row' : 'incorrect-row'}>
-                              {isAdmin && <td>{record.username}</td>}
+                              {canViewOthers && <td>{record.username}</td>}
                               <td>{record.book_name}</td>
                               <td>{record.unit}</td>
                               <td>{record.english}</td>
@@ -2802,7 +2810,7 @@ function App() {
                       <table className="records-table">
                         <thead>
                           <tr>
-                            {isAdmin && <th>사용자</th>}
+                            {canViewOthers && <th>사용자</th>}
                             <th>분류1</th>
                             <th>분류2</th>
                             <th>수준</th>
@@ -2817,7 +2825,7 @@ function App() {
                         <tbody>
                           {grammarProgressRecords.map(record => (
                             <tr key={record.id} className={record.is_correct ? 'correct-row' : 'incorrect-row'}>
-                              {isAdmin && <td>{record.username}</td>}
+                              {canViewOthers && <td>{record.username}</td>}
                               <td>{record.category1 || '-'}</td>
                               <td>{record.category2 || '-'}</td>
                               <td>{record.level || '-'}</td>
@@ -2877,7 +2885,7 @@ function App() {
                       <table className="records-table">
                         <thead>
                           <tr>
-                            {isAdmin && <th>사용자</th>}
+                            {canViewOthers && <th>사용자</th>}
                             <th>책</th>
                             <th>과</th>
                             <th>영어문장</th>
@@ -2890,7 +2898,7 @@ function App() {
                         <tbody>
                           {blocksProgressRecords.map(record => (
                             <tr key={record.id} className={record.is_correct ? 'correct-row' : 'incorrect-row'}>
-                              {isAdmin && <td>{record.username}</td>}
+                              {canViewOthers && <td>{record.username}</td>}
                               <td>{record.book || '-'}</td>
                               <td>{record.lesson || '-'}</td>
                               <td className="question-cell">{record.english ? (record.english.length > 50 ? record.english.substring(0, 50) + '...' : record.english) : '-'}</td>
@@ -2946,7 +2954,7 @@ function App() {
                       <table className="records-table">
                         <thead>
                           <tr>
-                            {isAdmin && <th>사용자</th>}
+                            {canViewOthers && <th>사용자</th>}
                             <th>책</th>
                             <th>장</th>
                             <th>단원</th>
@@ -2961,7 +2969,7 @@ function App() {
                         <tbody>
                           {webbookProgressRecords.map(record => (
                             <tr key={record.id} className={record.is_correct ? 'correct-row' : 'incorrect-row'}>
-                              {isAdmin && <td>{record.username}</td>}
+                              {canViewOthers && <td>{record.username}</td>}
                               <td>{record.book || '-'}</td>
                               <td>{record.section || '-'}</td>
                               <td>{record.unit || '-'}</td>

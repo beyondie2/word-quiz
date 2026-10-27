@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../config/database.js';
 import { trimStringFields } from '../utils/trimHelper.js';
+import { resolveProgressScope, appendProgressUserFilter } from '../utils/progressViewer.js';
 
 const router = express.Router();
 
@@ -9,17 +10,7 @@ router.get('/', async (req, res) => {
   const { userId, date, requesterId } = req.query;
 
   try {
-    // 요청자의 관리자 여부 확인
-    let isAdmin = false;
-    if (requesterId) {
-      const adminCheck = await pool.query(
-        'SELECT is_admin FROM users WHERE id = $1',
-        [requesterId]
-      );
-      if (adminCheck.rows.length > 0) {
-        isAdmin = adminCheck.rows[0].is_admin || false;
-      }
-    }
+    const scope = await resolveProgressScope(requesterId, userId);
 
     let query = `
       SELECT 
@@ -42,15 +33,9 @@ router.get('/', async (req, res) => {
     `;
     const params = [];
 
-    // 관리자가 아닌 경우 본인 기록만 조회 가능
-    if (!isAdmin && requesterId) {
-      params.push(requesterId);
-      query += ` AND up.user_id = $${params.length}`;
-    } else if (userId) {
-      // 관리자인 경우 특정 사용자 필터링 가능
-      params.push(userId);
-      query += ` AND up.user_id = $${params.length}`;
-    }
+    const userFilter = appendProgressUserFilter(scope, 'up.user_id', params.length + 1);
+    query += userFilter.sql;
+    params.push(...userFilter.params);
 
     if (date) {
       params.push(date);
