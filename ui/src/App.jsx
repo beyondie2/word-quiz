@@ -74,7 +74,7 @@ function App() {
   const [newUserIsAdmin, setNewUserIsAdmin] = useState(false)
   const [isLoadingAdmin, setIsLoadingAdmin] = useState(false)
   const [adminError, setAdminError] = useState('')
-  const [adminSubTab, setAdminSubTab] = useState('users') // 'users', 'stats', 'books', 'grammar', 'blockwriting', 'webbook'
+  const [adminSubTab, setAdminSubTab] = useState('users') // 'users', 'stats', 'books', 'grammar', 'blockwriting', 'webbook', 'examQuestions'
 
   // 단어장 관리 관련 상태
   const [adminBooks, setAdminBooks] = useState([])
@@ -99,6 +99,12 @@ function App() {
   const [webbookUploadFile, setWebbookUploadFile] = useState(null)
   const [isWebbookUploading, setIsWebbookUploading] = useState(false)
   const [webbookUploadResult, setWebbookUploadResult] = useState(null)
+
+  // 문제만들기 관리 (exam_questions) 관련 상태
+  const [adminExamQuestions, setAdminExamQuestions] = useState([])
+  const [examQuestionUploadFile, setExamQuestionUploadFile] = useState(null)
+  const [isExamQuestionUploading, setIsExamQuestionUploading] = useState(false)
+  const [examQuestionUploadResult, setExamQuestionUploadResult] = useState(null)
 
   // 블럭 영작 학습 관련 상태
   const [blockwritingBooks, setBlockwritingBooks] = useState([])
@@ -840,6 +846,7 @@ function App() {
       fetchAdminGrammar()
       fetchAdminBlockwriting()
       fetchAdminWebbooks()
+      fetchAdminExamQuestions()
     }
   }, [activeTab, isAdmin, userId])
 
@@ -1585,6 +1592,89 @@ function App() {
       setWebbookUploadResult({ error: '서버 연결에 실패했습니다' })
     } finally {
       setIsWebbookUploading(false)
+    }
+  }
+
+  // 관리자용 문제만들기(exam_questions) 목록
+  const fetchAdminExamQuestions = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/admin/exam-questions?adminId=${userId}`)
+      const data = await response.json()
+      if (data.examQuestions) {
+        setAdminExamQuestions(data.examQuestions)
+      }
+    } catch (error) {
+      console.error('Fetch admin exam questions error:', error)
+    }
+  }
+
+  // 문제만들기 엑셀 업로드
+  const handleExamQuestionFileUpload = async () => {
+    if (!examQuestionUploadFile) {
+      setExamQuestionUploadResult({ error: '파일을 선택해주세요' })
+      return
+    }
+
+    setIsExamQuestionUploading(true)
+    setExamQuestionUploadResult(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', examQuestionUploadFile)
+      formData.append('adminId', userId)
+
+      const response = await fetch(`${API_BASE}/admin/exam-questions/upload`, {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setExamQuestionUploadResult({
+          success: true,
+          message: data.message,
+          insertedCount: data.insertedCount,
+          skippedCount: data.skippedCount,
+          errors: data.errors
+        })
+        setExamQuestionUploadFile(null)
+        const fileInput = document.getElementById('exam-question-excel-file-input')
+        if (fileInput) fileInput.value = ''
+        fetchAdminExamQuestions()
+      } else {
+        setExamQuestionUploadResult({ error: data.error || '업로드에 실패했습니다', hint: data.hint })
+      }
+    } catch (error) {
+      console.error('Exam question upload error:', error)
+      setExamQuestionUploadResult({ error: '서버 연결에 실패했습니다' })
+    } finally {
+      setIsExamQuestionUploading(false)
+    }
+  }
+
+  // 시험범위별 문제 삭제
+  const handleDeleteExamQuestions = async (examScope) => {
+    if (!confirm(`"${examScope}" 범위의 문제를 삭제하시겠습니까?\n해당 범위의 모든 문제가 삭제됩니다.`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/admin/exam-questions/${encodeURIComponent(examScope)}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: userId })
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        fetchAdminExamQuestions()
+      } else {
+        alert(data.error || '삭제에 실패했습니다')
+      }
+    } catch (error) {
+      console.error('Delete exam questions error:', error)
+      alert('서버 오류가 발생했습니다')
     }
   }
 
@@ -3712,6 +3802,12 @@ function App() {
               webbook 관리
             </button>
             <button
+              className={`sub-tab-button ${adminSubTab === 'examQuestions' ? 'active' : ''}`}
+              onClick={() => setAdminSubTab('examQuestions')}
+            >
+              문제만들기 관리
+            </button>
+            <button
               className={`sub-tab-button ${adminSubTab === 'stats' ? 'active' : ''}`}
               onClick={() => setAdminSubTab('stats')}
             >
@@ -4154,6 +4250,101 @@ function App() {
                             <button
                               className="delete-btn"
                               onClick={() => handleDeleteWebbook(item.book)}
+                            >
+                              삭제
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          )}
+
+          {adminSubTab === 'examQuestions' && (
+            <div className="admin-books">
+              <div className="upload-section">
+                <h3>엑셀 파일로 문제 추가</h3>
+                <div className="upload-info">
+                  <p>엑셀 파일 형식: 첫 번째 행에 컬럼명이 있어야 합니다.</p>
+                  <p><strong>필수 컬럼:</strong> exam_scope(시험범위), question_type(문제유형), answer_format(객주), question(문제), answer(해답)</p>
+                  <p><strong>객주</strong> 값은 <strong>객관식</strong> 또는 <strong>주관식</strong>만 가능합니다.</p>
+                </div>
+                <div className="upload-form">
+                  <input
+                    id="exam-question-excel-file-input"
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    onChange={(e) => setExamQuestionUploadFile(e.target.files[0])}
+                    className="file-input"
+                  />
+                  <button
+                    className="upload-button"
+                    onClick={handleExamQuestionFileUpload}
+                    disabled={isExamQuestionUploading || !examQuestionUploadFile}
+                  >
+                    {isExamQuestionUploading ? '업로드 중...' : '업로드'}
+                  </button>
+                </div>
+                {examQuestionUploadResult && (
+                  <div className={`upload-result ${examQuestionUploadResult.success ? 'success' : 'error'}`}>
+                    {examQuestionUploadResult.success ? (
+                      <>
+                        <p>{examQuestionUploadResult.message}</p>
+                        {examQuestionUploadResult.skippedCount > 0 && (
+                          <p>건너뛴 항목: {examQuestionUploadResult.skippedCount}개</p>
+                        )}
+                        {examQuestionUploadResult.errors && examQuestionUploadResult.errors.length > 0 && (
+                          <div className="upload-errors">
+                            <p>오류 목록:</p>
+                            <ul>
+                              {examQuestionUploadResult.errors.map((err, idx) => (
+                                <li key={idx}>{err}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <p>{examQuestionUploadResult.error}</p>
+                        {examQuestionUploadResult.hint && <p className="hint">{examQuestionUploadResult.hint}</p>}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="books-list">
+                <h3>문제 목록 ({adminExamQuestions.length}개 범위)</h3>
+                {adminExamQuestions.length === 0 ? (
+                  <div className="no-records">등록된 문제가 없습니다</div>
+                ) : (
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>시험범위</th>
+                        <th>유형 수</th>
+                        <th>객관식</th>
+                        <th>주관식</th>
+                        <th>문제 수</th>
+                        <th>작업</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {adminExamQuestions.map((item, index) => (
+                        <tr key={index}>
+                          <td>{item.exam_scope}</td>
+                          <td>{item.type_count}</td>
+                          <td>{item.multiple_choice_count}</td>
+                          <td>{item.short_answer_count}</td>
+                          <td>{item.question_count}</td>
+                          <td>
+                            <button
+                              className="delete-btn"
+                              onClick={() => handleDeleteExamQuestions(item.exam_scope)}
                             >
                               삭제
                             </button>

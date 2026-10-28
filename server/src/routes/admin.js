@@ -749,4 +749,192 @@ router.delete('/spoken-sentences/:bookName', async (req, res) => {
   }
 });
 
+// ==================== 문제만들기 (exam_questions) 관리 API ====================
+
+const EXAM_QUESTION_COLUMNS = {
+  exam_scope: ['exam_scope', '시험범위', '시험 범위'],
+  question_type: ['question_type', '문제유형', '문제 유형'],
+  answer_format: ['answer_format', '객주', '답안형식', '답안 형식'],
+  question: ['question', '문제'],
+  answer: ['answer', '해답', '정답'],
+};
+
+function examQuestionCell(row, keys) {
+  const normalized = {};
+  for (const [key, value] of Object.entries(row)) {
+    normalized[String(key).trim()] = value;
+  }
+  for (const key of keys) {
+    if (normalized[key] != null && String(normalized[key]).trim() !== '') {
+      return String(normalized[key]).trim();
+    }
+  }
+  return '';
+}
+
+function examQuestionHasColumn(row, keys) {
+  const names = Object.keys(row).map((key) => String(key).trim());
+  return keys.some((key) => names.includes(key));
+}
+
+// POST /api/admin/exam-questions/upload - 엑셀로 exam_questions 일괄 추가
+router.post('/exam-questions/upload', upload.single('file'), async (req, res) => {
+  const { adminId } = req.body;
+
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: '파일이 업로드되지 않았습니다' });
+    }
+
+    const workbook = XLSX.read(req.file.buffer, { type: 'buffer', codepage: 65001 });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet);
+
+    if (data.length === 0) {
+      return res.status(400).json({ error: '엑셀 파일에 데이터가 없습니다' });
+    }
+
+    const missingColumns = Object.entries(EXAM_QUESTION_COLUMNS)
+      .filter(([, aliases]) => !examQuestionHasColumn(data[0], aliases))
+      .map(([name]) => name);
+
+    if (missingColumns.length > 0) {
+      return res.status(400).json({
+        error: `필수 컬럼이 누락되었습니다: ${missingColumns.join(', ')}`,
+        hint: '첫 번째 행에 exam_scope(시험범위), question_type(문제유형), answer_format(객주: 객관식|주관식), question(문제), answer(해답) 컬럼명이 있어야 합니다',
+      });
+    }
+
+    let insertedCount = 0;
+    let skippedCount = 0;
+    const errors = [];
+
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      const rowNum = i + 2;
+
+      const exam_scope = examQuestionCell(row, EXAM_QUESTION_COLUMNS.exam_scope);
+      const question_type = examQuestionCell(row, EXAM_QUESTION_COLUMNS.question_type);
+      const answer_format = examQuestionCell(row, EXAM_QUESTION_COLUMNS.answer_format);
+      const question = examQuestionCell(row, EXAM_QUESTION_COLUMNS.question);
+      const answer = examQuestionCell(row, EXAM_QUESTION_COLUMNS.answer);
+
+      if (!exam_scope || !question_type || !answer_format || !question || !answer) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: 시험범위, 문제유형, 객주, 문제, 해답은 비울 수 없습니다`);
+        continue;
+      }
+
+      if (!['객관식', '주관식'].includes(answer_format)) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: 객주는 "객관식" 또는 "주관식"이어야 합니다`);
+        continue;
+      }
+
+      if (exam_scope.length > 200 || question_type.length > 100) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: 시험범위는 200자, 문제유형은 100자 이하여야 합니다`);
+        continue;
+      }
+
+      try {
+        await pool.query(
+          `INSERT INTO exam_questions (exam_scope, question_type, answer_format, question, answer)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [exam_scope, question_type, answer_format, question, answer]
+        );
+        insertedCount++;
+      } catch (dbError) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: ${dbError.message}`);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `${insertedCount}개의 문제가 추가되었습니다`,
+      insertedCount,
+      skippedCount,
+      totalRows: data.length,
+      errors: errors.length > 0 ? errors.slice(0, 10) : undefined,
+    });
+  } catch (error) {
+    console.error('Exam question upload error:', error);
+    res.status(500).json({ error: error.message || '파일 업로드에 실패했습니다' });
+  }
+});
+
+// GET /api/admin/exam-questions - 시험범위별 문제 수 (관리자용)
+router.get('/exam-questions', async (req, res) => {
+  const { adminId } = req.query;
+
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    const result = await pool.query(`
+      SELECT
+        exam_scope,
+        COUNT(DISTINCT question_type)::int AS type_count,
+        COUNT(*) FILTER (WHERE answer_format = '객관식')::int AS multiple_choice_count,
+        COUNT(*) FILTER (WHERE answer_format = '주관식')::int AS short_answer_count,
+        COUNT(*)::int AS question_count
+      FROM exam_questions
+      GROUP BY exam_scope
+      ORDER BY exam_scope
+    `);
+
+    res.json({ examQuestions: trimStringFields(result.rows) });
+  } catch (error) {
+    console.error('Error fetching exam questions:', error);
+    res.status(500).json({ error: '문제 목록 조회에 실패했습니다' });
+  }
+});
+
+// DELETE /api/admin/exam-questions/:examScope - 시험범위별 문제 전체 삭제
+router.delete('/exam-questions/:examScope', async (req, res) => {
+  const { examScope } = req.params;
+  const { adminId } = req.body;
+
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    const result = await pool.query(
+      'DELETE FROM exam_questions WHERE exam_scope = $1',
+      [examScope]
+    );
+
+    res.json({
+      success: true,
+      deletedCount: result.rowCount,
+    });
+  } catch (error) {
+    console.error('Error deleting exam questions:', error);
+    res.status(500).json({ error: '문제 삭제에 실패했습니다' });
+  }
+});
+
 export default router;
