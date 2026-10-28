@@ -937,4 +937,221 @@ router.delete('/exam-questions/:examScope', async (req, res) => {
   }
 });
 
+// ==================== 시험지 (exam_papers) 관리 API ====================
+
+const EXAM_PAPER_COLUMNS = {
+  school: ['school', '학교'],
+  exam_sheet: ['exam_sheet', '시험별시험지', '시험지'],
+  order_no: ['order_no', '순서번호', '순서'],
+  composition_no: ['composition_no', '구성번호', '구성'],
+  sources: ['sources', '출처들', '출처'],
+  answer_format: ['answer_format', '객주'],
+  question_type: ['question_type', '유형', '문제유형', '문제 유형'],
+};
+
+function examPaperOrderNo(row) {
+  const raw = examQuestionCell(row, EXAM_PAPER_COLUMNS.order_no);
+  if (!raw) return null;
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value <= 0) return null;
+  return value;
+}
+
+// POST /api/admin/exam-papers/upload - 엑셀로 exam_papers 일괄 반영
+router.post('/exam-papers/upload', upload.single('file'), async (req, res) => {
+  const { adminId } = req.body;
+
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: '파일이 업로드되지 않았습니다' });
+    }
+
+    const workbook = XLSX.read(req.file.buffer, { type: 'buffer', codepage: 65001 });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet);
+
+    if (data.length === 0) {
+      return res.status(400).json({ error: '엑셀 파일에 데이터가 없습니다' });
+    }
+
+    const missingColumns = Object.entries(EXAM_PAPER_COLUMNS)
+      .filter(([, aliases]) => !examQuestionHasColumn(data[0], aliases))
+      .map(([name]) => name);
+
+    if (missingColumns.length > 0) {
+      return res.status(400).json({
+        error: `필수 컬럼이 누락되었습니다: ${missingColumns.join(', ')}`,
+        hint: '첫 번째 행에 학교, 시험별시험지, 순서번호, 구성번호, 출처들, 객주(객관식|주관식), 유형 컬럼명이 있어야 합니다',
+      });
+    }
+
+    let insertedCount = 0;
+    let updatedCount = 0;
+    let skippedCount = 0;
+    const errors = [];
+
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      const rowNum = i + 2;
+
+      const school = examQuestionCell(row, EXAM_PAPER_COLUMNS.school);
+      const exam_sheet = examQuestionCell(row, EXAM_PAPER_COLUMNS.exam_sheet);
+      const order_no = examPaperOrderNo(row);
+      const composition_no = examQuestionCell(row, EXAM_PAPER_COLUMNS.composition_no);
+      const sources = examQuestionCell(row, EXAM_PAPER_COLUMNS.sources);
+      const answer_format = examQuestionCell(row, EXAM_PAPER_COLUMNS.answer_format);
+      const question_type = examQuestionCell(row, EXAM_PAPER_COLUMNS.question_type);
+
+      if (!school || !exam_sheet || order_no == null || !composition_no || !sources || !answer_format || !question_type) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: 학교, 시험별시험지, 순서번호, 구성번호, 출처들, 객주, 유형은 비울 수 없습니다. 순서번호는 1 이상의 정수여야 합니다`);
+        continue;
+      }
+
+      if (!['객관식', '주관식'].includes(answer_format)) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: 객주는 "객관식" 또는 "주관식"이어야 합니다`);
+        continue;
+      }
+
+      if (school.length > 100 || exam_sheet.length > 200 || composition_no.length > 50 || question_type.length > 100) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: 학교는 100자, 시험별시험지는 200자, 구성번호는 50자, 유형은 100자 이하여야 합니다`);
+        continue;
+      }
+
+      try {
+        const updated = await pool.query(
+          `UPDATE exam_papers
+           SET composition_no = $4, sources = $5, answer_format = $6, question_type = $7
+           WHERE school = $1 AND exam_sheet = $2 AND order_no = $3`,
+          [school, exam_sheet, order_no, composition_no, sources, answer_format, question_type]
+        );
+
+        if (updated.rowCount > 0) {
+          updatedCount++;
+          continue;
+        }
+
+        await pool.query(
+          `INSERT INTO exam_papers
+             (school, exam_sheet, order_no, composition_no, sources, answer_format, question_type)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [school, exam_sheet, order_no, composition_no, sources, answer_format, question_type]
+        );
+        insertedCount++;
+      } catch (dbError) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: ${dbError.message}`);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `${insertedCount}개가 추가되고 ${updatedCount}개가 수정되었습니다`,
+      insertedCount,
+      updatedCount,
+      skippedCount,
+      totalRows: data.length,
+      errors: errors.length > 0 ? errors.slice(0, 10) : undefined,
+    });
+  } catch (error) {
+    console.error('Exam paper upload error:', error);
+    res.status(500).json({ error: error.message || '파일 업로드에 실패했습니다' });
+  }
+});
+
+// GET /api/admin/exam-papers - 시험지 목록 (관리자용)
+router.get('/exam-papers', async (req, res) => {
+  const { adminId } = req.query;
+
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    const papers = await pool.query(`
+      SELECT
+        school,
+        exam_sheet,
+        COUNT(*) FILTER (WHERE answer_format = '객관식')::int AS multiple_choice_count,
+        COUNT(*) FILTER (WHERE answer_format = '주관식')::int AS short_answer_count,
+        COUNT(*)::int AS item_count
+      FROM exam_papers
+      GROUP BY school, exam_sheet
+      ORDER BY school, exam_sheet
+    `);
+
+    const items = await pool.query(`
+      SELECT
+        id,
+        school,
+        exam_sheet,
+        order_no,
+        composition_no,
+        sources,
+        answer_format,
+        question_type
+      FROM exam_papers
+      ORDER BY school, exam_sheet, order_no, id
+    `);
+
+    res.json({
+      examPapers: trimStringFields(papers.rows),
+      items: trimStringFields(items.rows),
+    });
+  } catch (error) {
+    console.error('Error fetching exam papers:', error);
+    res.status(500).json({ error: '시험지 목록 조회에 실패했습니다' });
+  }
+});
+
+// DELETE /api/admin/exam-papers - 학교+시험별시험지 단위 삭제
+router.delete('/exam-papers', async (req, res) => {
+  const { adminId, school, examSheet } = req.body;
+
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    if (!school || !examSheet) {
+      return res.status(400).json({ error: '학교와 시험별시험지가 필요합니다' });
+    }
+
+    const result = await pool.query(
+      'DELETE FROM exam_papers WHERE school = $1 AND exam_sheet = $2',
+      [school, examSheet]
+    );
+
+    res.json({
+      success: true,
+      deletedCount: result.rowCount,
+    });
+  } catch (error) {
+    console.error('Error deleting exam papers:', error);
+    res.status(500).json({ error: '시험지 삭제에 실패했습니다' });
+  }
+});
+
 export default router;

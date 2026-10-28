@@ -119,6 +119,21 @@ CREATE TABLE IF NOT EXISTS exam_questions (
     CONSTRAINT exam_questions_answer_format_check CHECK (answer_format IN ('객관식', '주관식'))
 );
 
+-- ExamPapers 테이블: 시험지 구성 (학교, 시험별시험지, 순서, 구성, 출처, 객주, 유형)
+CREATE TABLE IF NOT EXISTS exam_papers (
+    id SERIAL PRIMARY KEY,
+    school VARCHAR(100) NOT NULL,            -- 학교
+    exam_sheet VARCHAR(200) NOT NULL,        -- 시험별시험지
+    order_no INTEGER NOT NULL,               -- 순서번호
+    composition_no VARCHAR(50) NOT NULL,     -- 구성번호 (숫자, 서답형, 단답형)
+    sources TEXT NOT NULL,                   -- 출처들
+    answer_format VARCHAR(20) NOT NULL,      -- 객주: 객관식 | 주관식
+    question_type VARCHAR(100) NOT NULL,     -- 유형
+    created_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT exam_papers_answer_format_check CHECK (answer_format IN ('객관식', '주관식')),
+    CONSTRAINT exam_papers_school_sheet_order_key UNIQUE (school, exam_sheet, order_no)
+);
+
 -- SpokenSentence 테이블: 말하기/문장 연습용 문장
 CREATE TABLE IF NOT EXISTS spoken_sentence (
     id SERIAL PRIMARY KEY,
@@ -161,6 +176,7 @@ CREATE TABLE IF NOT EXISTS webbook_progress (
 CREATE INDEX IF NOT EXISTS idx_exam_questions_exam_scope ON exam_questions(exam_scope);
 CREATE INDEX IF NOT EXISTS idx_exam_questions_question_type ON exam_questions(question_type);
 CREATE INDEX IF NOT EXISTS idx_exam_questions_answer_format ON exam_questions(answer_format);
+CREATE INDEX IF NOT EXISTS idx_exam_papers_school_sheet ON exam_papers(school, exam_sheet);
 CREATE INDEX IF NOT EXISTS idx_spoken_sentence_book ON spoken_sentence(book);
 CREATE INDEX IF NOT EXISTS idx_spoken_sentence_book_section_unit ON spoken_sentence(book, section, unit);
 CREATE INDEX IF NOT EXISTS idx_webbook_progress_user_id ON webbook_progress(user_id);
@@ -211,3 +227,40 @@ INSERT INTO books (book_name, unit, english, korean, example) VALUES
     ('TOEIC 필수 단어', 'Chapter 1', 'budget', '예산', 'We need to stay within budget.'),
     ('TOEIC 필수 단어', 'Chapter 1', 'confirm', '확인하다', 'Please confirm your reservation.')
 ON CONFLICT DO NOTHING;
+
+-- 센텀여고 26학년도 2학년 2학기 중간 시험지
+INSERT INTO exam_papers (school, exam_sheet, order_no, composition_no, sources, answer_format, question_type)
+VALUES
+    ('센텀여고', '26학년도2학년2학기중간', 1, '1', '24년10월2,25년10월2,26년10월2', '객관식', '주제'),
+    ('센텀여고', '26학년도2학년2학기중간', 2, '2', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '일치'),
+    ('센텀여고', '26학년도2학년2학기중간', 3, '서답형 1', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '주관식', '국어영작'),
+    ('센텀여고', '26학년도2학년2학기중간', 4, '3', '외부', '객관식', '어법'),
+    ('센텀여고', '26학년도2학년2학기중간', 5, '4', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '낱말'),
+    ('센텀여고', '26학년도2학년2학기중간', 6, '5', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '제목'),
+    ('센텀여고', '26학년도2학년2학기중간', 7, '단답형 1', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '주관식', '국어낱말'),
+    ('센텀여고', '26학년도2학년2학기중간', 8, '6', '24년10월2,25년10월2,26년10월2', '객관식', '낱말'),
+    ('센텀여고', '26학년도2학년2학기중간', 9, '서답형 2', '24년10월2,25년10월2,26년10월2', '주관식', '국어영작'),
+    ('센텀여고', '26학년도2학년2학기중간', 10, '7', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '삽입'),
+    ('센텀여고', '26학년도2학년2학기중간', 11, '8', '24년10월2,25년10월2,26년10월2', '객관식', '삽입'),
+    ('센텀여고', '26학년도2학년2학기중간', 12, '단답형 2', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '주관식', '주관식요약'),
+    ('센텀여고', '26학년도2학년2학기중간', 13, '9', '24년10월2,25년10월2,26년10월2', '객관식', '어법'),
+    ('센텀여고', '26학년도2학년2학기중간', 14, '서답형 3', '24년10월2,25년10월2,26년10월2', '주관식', '추론영작'),
+    ('센텀여고', '26학년도2학년2학기중간', 15, '10', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '주제'),
+    ('센텀여고', '26학년도2학년2학기중간', 16, '11', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '어법'),
+    ('센텀여고', '26학년도2학년2학기중간', 17, '12', '외부', '객관식', '순서'),
+    ('센텀여고', '26학년도2학년2학기중간', 18, '13', '24년10월2,25년10월2,26년10월2', '객관식', '순서'),
+    ('센텀여고', '26학년도2학년2학기중간', 19, '서답형 4', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '주관식', '국어영작'),
+    ('센텀여고', '26학년도2학년2학기중간', 20, '14', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '빈칸'),
+    ('센텀여고', '26학년도2학년2학기중간', 21, '15', '외부', '객관식', '빈칸'),
+    ('센텀여고', '26학년도2학년2학기중간', 22, '16', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '빈칸'),
+    ('센텀여고', '26학년도2학년2학기중간', 23, '17', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '빈칸'),
+    ('센텀여고', '26학년도2학년2학기중간', 24, '18', '24년10월2,25년10월2,26년10월2', '객관식', '빈칸'),
+    ('센텀여고', '26학년도2학년2학기중간', 25, '19', '24년10월2,25년10월2,26년10월2', '객관식', '빈칸'),
+    ('센텀여고', '26학년도2학년2학기중간', 26, '20', '24년10월2,25년10월2,26년10월2', '객관식', '삽입'),
+    ('센텀여고', '26학년도2학년2학기중간', 27, '서답형 5', '24년10월2,25년10월2,26년10월2', '주관식', '추론영작'),
+    ('센텀여고', '26학년도2학년2학기중간', 28, '21', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '요약'),
+    ('센텀여고', '26학년도2학년2학기중간', 29, '22', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '순서'),
+    ('센텀여고', '26학년도2학년2학기중간', 30, '23', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '요지'),
+    ('센텀여고', '26학년도2학년2학기중간', 31, '24', '24년10월2,25년10월2,26년10월2', '객관식', '요약'),
+    ('센텀여고', '26학년도2학년2학기중간', 32, '서답형 6', '국어영작', '주관식', '국어영작')
+ON CONFLICT (school, exam_sheet, order_no) DO NOTHING;

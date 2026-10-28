@@ -74,7 +74,7 @@ function App() {
   const [newUserIsAdmin, setNewUserIsAdmin] = useState(false)
   const [isLoadingAdmin, setIsLoadingAdmin] = useState(false)
   const [adminError, setAdminError] = useState('')
-  const [adminSubTab, setAdminSubTab] = useState('users') // 'users', 'stats', 'books', 'grammar', 'blockwriting', 'webbook', 'examQuestions'
+  const [adminSubTab, setAdminSubTab] = useState('users') // 'users', 'stats', 'books', 'grammar', 'blockwriting', 'webbook', 'examQuestions', 'examPapers'
 
   // 단어장 관리 관련 상태
   const [adminBooks, setAdminBooks] = useState([])
@@ -105,6 +105,13 @@ function App() {
   const [examQuestionUploadFile, setExamQuestionUploadFile] = useState(null)
   const [isExamQuestionUploading, setIsExamQuestionUploading] = useState(false)
   const [examQuestionUploadResult, setExamQuestionUploadResult] = useState(null)
+
+  // 시험지 관리 (exam_papers) 관련 상태
+  const [adminExamPapers, setAdminExamPapers] = useState([])
+  const [adminExamPaperItems, setAdminExamPaperItems] = useState([])
+  const [examPaperUploadFile, setExamPaperUploadFile] = useState(null)
+  const [isExamPaperUploading, setIsExamPaperUploading] = useState(false)
+  const [examPaperUploadResult, setExamPaperUploadResult] = useState(null)
 
   // 블럭 영작 학습 관련 상태
   const [blockwritingBooks, setBlockwritingBooks] = useState([])
@@ -847,6 +854,7 @@ function App() {
       fetchAdminBlockwriting()
       fetchAdminWebbooks()
       fetchAdminExamQuestions()
+      fetchAdminExamPapers()
     }
   }, [activeTab, isAdmin, userId])
 
@@ -1674,6 +1682,93 @@ function App() {
       }
     } catch (error) {
       console.error('Delete exam questions error:', error)
+      alert('서버 오류가 발생했습니다')
+    }
+  }
+
+  // 관리자용 시험지(exam_papers) 목록
+  const fetchAdminExamPapers = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/admin/exam-papers?adminId=${userId}`)
+      const data = await response.json()
+      if (data.examPapers) {
+        setAdminExamPapers(data.examPapers)
+      }
+      if (data.items) {
+        setAdminExamPaperItems(data.items)
+      }
+    } catch (error) {
+      console.error('Fetch admin exam papers error:', error)
+    }
+  }
+
+  // 시험지 엑셀 업로드
+  const handleExamPaperFileUpload = async () => {
+    if (!examPaperUploadFile) {
+      setExamPaperUploadResult({ error: '파일을 선택해주세요' })
+      return
+    }
+
+    setIsExamPaperUploading(true)
+    setExamPaperUploadResult(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', examPaperUploadFile)
+      formData.append('adminId', userId)
+
+      const response = await fetch(`${API_BASE}/admin/exam-papers/upload`, {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setExamPaperUploadResult({
+          success: true,
+          message: data.message,
+          insertedCount: data.insertedCount,
+          updatedCount: data.updatedCount,
+          skippedCount: data.skippedCount,
+          errors: data.errors
+        })
+        setExamPaperUploadFile(null)
+        const fileInput = document.getElementById('exam-paper-excel-file-input')
+        if (fileInput) fileInput.value = ''
+        fetchAdminExamPapers()
+      } else {
+        setExamPaperUploadResult({ error: data.error || '업로드에 실패했습니다', hint: data.hint })
+      }
+    } catch (error) {
+      console.error('Exam paper upload error:', error)
+      setExamPaperUploadResult({ error: '서버 연결에 실패했습니다' })
+    } finally {
+      setIsExamPaperUploading(false)
+    }
+  }
+
+  // 학교+시험별시험지 단위 삭제
+  const handleDeleteExamPaper = async (school, examSheet) => {
+    if (!confirm(`"${school} / ${examSheet}" 시험지를 삭제하시겠습니까?\n해당 시험지의 모든 항목이 삭제됩니다.`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/admin/exam-papers`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: userId, school, examSheet })
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        fetchAdminExamPapers()
+      } else {
+        alert(data.error || '삭제에 실패했습니다')
+      }
+    } catch (error) {
+      console.error('Delete exam paper error:', error)
       alert('서버 오류가 발생했습니다')
     }
   }
@@ -3808,6 +3903,12 @@ function App() {
               문제만들기 관리
             </button>
             <button
+              className={`sub-tab-button ${adminSubTab === 'examPapers' ? 'active' : ''}`}
+              onClick={() => setAdminSubTab('examPapers')}
+            >
+              시험지 관리
+            </button>
+            <button
               className={`sub-tab-button ${adminSubTab === 'stats' ? 'active' : ''}`}
               onClick={() => setAdminSubTab('stats')}
             >
@@ -4353,6 +4454,140 @@ function App() {
                       ))}
                     </tbody>
                   </table>
+                )}
+              </div>
+            </div>
+          )}
+
+          {adminSubTab === 'examPapers' && (
+            <div className="admin-books">
+              <div className="upload-section">
+                <h3>엑셀 파일로 시험지 반영</h3>
+                <div className="upload-info">
+                  <p>엑셀 파일 형식: 첫 번째 행에 컬럼명이 있어야 합니다.</p>
+                  <p><strong>필수 컬럼:</strong> 학교, 시험별시험지, 순서번호, 구성번호, 출처들, 객주, 유형</p>
+                  <p><strong>객주</strong> 값은 <strong>객관식</strong> 또는 <strong>주관식</strong>만 가능합니다.</p>
+                  <p>같은 학교, 시험별시험지, 순서번호가 이미 있으면 해당 행을 수정합니다.</p>
+                </div>
+                <div className="upload-form">
+                  <input
+                    id="exam-paper-excel-file-input"
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    onChange={(e) => setExamPaperUploadFile(e.target.files[0])}
+                    className="file-input"
+                  />
+                  <button
+                    className="upload-button"
+                    onClick={handleExamPaperFileUpload}
+                    disabled={isExamPaperUploading || !examPaperUploadFile}
+                  >
+                    {isExamPaperUploading ? '업로드 중...' : '업로드'}
+                  </button>
+                </div>
+                {examPaperUploadResult && (
+                  <div className={`upload-result ${examPaperUploadResult.success ? 'success' : 'error'}`}>
+                    {examPaperUploadResult.success ? (
+                      <>
+                        <p>{examPaperUploadResult.message}</p>
+                        {examPaperUploadResult.skippedCount > 0 && (
+                          <p>건너뛴 항목: {examPaperUploadResult.skippedCount}개</p>
+                        )}
+                        {examPaperUploadResult.errors && examPaperUploadResult.errors.length > 0 && (
+                          <div className="upload-errors">
+                            <p>오류 목록:</p>
+                            <ul>
+                              {examPaperUploadResult.errors.map((err, idx) => (
+                                <li key={idx}>{err}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <p>{examPaperUploadResult.error}</p>
+                        {examPaperUploadResult.hint && <p className="hint">{examPaperUploadResult.hint}</p>}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="books-list">
+                <h3>시험지 목록 ({adminExamPapers.length}개)</h3>
+                {adminExamPapers.length === 0 ? (
+                  <div className="no-records">등록된 시험지가 없습니다</div>
+                ) : (
+                  <div className="exam-paper-table-wrap">
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>학교</th>
+                          <th>시험별시험지</th>
+                          <th>객관식</th>
+                          <th>주관식</th>
+                          <th>항목 수</th>
+                          <th>작업</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {adminExamPapers.map((item) => (
+                          <tr key={`${item.school}-${item.exam_sheet}`}>
+                            <td>{item.school}</td>
+                            <td>{item.exam_sheet}</td>
+                            <td>{item.multiple_choice_count}</td>
+                            <td>{item.short_answer_count}</td>
+                            <td>{item.item_count}</td>
+                            <td>
+                              <button
+                                className="delete-btn"
+                                onClick={() => handleDeleteExamPaper(item.school, item.exam_sheet)}
+                              >
+                                삭제
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              <div className="books-list">
+                <h3>시험지 항목 ({adminExamPaperItems.length}개)</h3>
+                {adminExamPaperItems.length === 0 ? (
+                  <div className="no-records">등록된 항목이 없습니다</div>
+                ) : (
+                  <div className="exam-paper-table-wrap">
+                    <table className="admin-table exam-paper-detail">
+                      <thead>
+                        <tr>
+                          <th>학교</th>
+                          <th>시험별시험지</th>
+                          <th>순서번호</th>
+                          <th>구성번호</th>
+                          <th>출처들</th>
+                          <th>객주</th>
+                          <th>유형</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {adminExamPaperItems.map((item) => (
+                          <tr key={item.id}>
+                            <td>{item.school}</td>
+                            <td>{item.exam_sheet}</td>
+                            <td>{item.order_no}</td>
+                            <td>{item.composition_no}</td>
+                            <td className="exam-paper-sources">{item.sources}</td>
+                            <td>{item.answer_format}</td>
+                            <td>{item.question_type}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </div>
             </div>
