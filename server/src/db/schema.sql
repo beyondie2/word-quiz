@@ -107,6 +107,18 @@ CREATE TABLE IF NOT EXISTS blocks_progress (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- ExamQuestions 테이블: 시험 문제 (범위, 유형, 객주, 문제, 해답)
+CREATE TABLE IF NOT EXISTS exam_questions (
+    id SERIAL PRIMARY KEY,
+    exam_scope VARCHAR(200) NOT NULL,       -- 시험범위 (예: 지학(신상근)2고1과, 24년10월2)
+    question_type VARCHAR(100) NOT NULL,    -- 문제 유형 (예: 주제, 일치, 국어영작)
+    answer_format VARCHAR(20) NOT NULL,     -- 객주: 객관식 | 주관식
+    question TEXT NOT NULL,                 -- 문제
+    answer TEXT NOT NULL,                   -- 해답 (정답과 해설)
+    created_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT exam_questions_answer_format_check CHECK (answer_format IN ('객관식', '주관식'))
+);
+
 -- SpokenSentence 테이블: 말하기/문장 연습용 문장
 CREATE TABLE IF NOT EXISTS spoken_sentence (
     id SERIAL PRIMARY KEY,
@@ -146,6 +158,9 @@ CREATE TABLE IF NOT EXISTS webbook_progress (
 );
 
 -- 인덱스 생성
+CREATE INDEX IF NOT EXISTS idx_exam_questions_exam_scope ON exam_questions(exam_scope);
+CREATE INDEX IF NOT EXISTS idx_exam_questions_question_type ON exam_questions(question_type);
+CREATE INDEX IF NOT EXISTS idx_exam_questions_answer_format ON exam_questions(answer_format);
 CREATE INDEX IF NOT EXISTS idx_spoken_sentence_book ON spoken_sentence(book);
 CREATE INDEX IF NOT EXISTS idx_spoken_sentence_book_section_unit ON spoken_sentence(book, section, unit);
 CREATE INDEX IF NOT EXISTS idx_webbook_progress_user_id ON webbook_progress(user_id);
