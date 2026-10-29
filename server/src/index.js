@@ -11,6 +11,7 @@ import authRouter from './routes/auth.js';
 import grammarRouter from './routes/grammar.js';
 import blocksRouter from './routes/blocks.js';
 import spokenRouter from './routes/spoken.js';
+import examPapersRouter from './routes/examPapers.js';
 
 // 환경 변수 로드
 dotenv.config();
@@ -32,6 +33,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api/grammar', grammarRouter);
 app.use('/api/blocks', blocksRouter);
 app.use('/api/spoken', spokenRouter);
+app.use('/api/exam-papers', examPapersRouter);
 
 // 헬스 체크
 app.get('/api/health', (req, res) => {

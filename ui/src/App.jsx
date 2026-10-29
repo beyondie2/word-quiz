@@ -113,6 +113,11 @@ function App() {
   const [isExamPaperUploading, setIsExamPaperUploading] = useState(false)
   const [examPaperUploadResult, setExamPaperUploadResult] = useState(null)
 
+  // 문제 만들기: 학교 선택
+  const [examSchools, setExamSchools] = useState([])
+  const [selectedExamSchool, setSelectedExamSchool] = useState('')
+  const [showExamSchoolDropdown, setShowExamSchoolDropdown] = useState(false)
+
   // 블럭 영작 학습 관련 상태
   const [blockwritingBooks, setBlockwritingBooks] = useState([])
   const [selectedBlockwritingBook, setSelectedBlockwritingBook] = useState('')
@@ -1813,6 +1818,28 @@ function App() {
       fetchBlockwritingBooks()
     }
   }, [activeTab, isVerified])
+
+  // 문제 만들기 탭 활성화 시 학교 목록 조회
+  useEffect(() => {
+    if (activeTab === 'createProblem' && isVerified) {
+      fetchExamSchools()
+    }
+  }, [activeTab, isVerified])
+
+  const fetchExamSchools = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/exam-papers/schools`)
+      const data = await response.json()
+      setExamSchools(data.schools || [])
+    } catch (error) {
+      console.error('Error fetching exam schools:', error)
+    }
+  }
+
+  const handleExamSchoolSelect = (school) => {
+    setSelectedExamSchool(school)
+    setShowExamSchoolDropdown(false)
+  }
 
   // 블럭영작 책 목록 조회
   const fetchBlockwritingBooks = async () => {
@@ -3851,6 +3878,31 @@ function App() {
               <div className="settings-bar">
                 <div className="user-info">
                   <span className="user-name">{userName}</span>
+                </div>
+                <div className="dropdown-container">
+                  <button
+                    className="select-button"
+                    onClick={() => setShowExamSchoolDropdown(!showExamSchoolDropdown)}
+                  >
+                    {selectedExamSchool || '학교선택'}
+                  </button>
+                  {showExamSchoolDropdown && (
+                    <div className="dropdown-menu">
+                      {examSchools.length === 0 ? (
+                        <div className="dropdown-item">등록된 학교가 없습니다</div>
+                      ) : (
+                        examSchools.map((school) => (
+                          <div
+                            key={school}
+                            className="dropdown-item"
+                            onClick={() => handleExamSchoolSelect(school)}
+                          >
+                            {school}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="create-problem-area">
