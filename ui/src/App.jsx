@@ -113,10 +113,13 @@ function App() {
   const [isExamPaperUploading, setIsExamPaperUploading] = useState(false)
   const [examPaperUploadResult, setExamPaperUploadResult] = useState(null)
 
-  // 문제 만들기: 학교 선택
+  // 문제 만들기: 학교 / 시기별시험지 선택
   const [examSchools, setExamSchools] = useState([])
   const [selectedExamSchool, setSelectedExamSchool] = useState('')
   const [showExamSchoolDropdown, setShowExamSchoolDropdown] = useState(false)
+  const [examSheets, setExamSheets] = useState([])
+  const [selectedExamSheet, setSelectedExamSheet] = useState('')
+  const [showExamSheetDropdown, setShowExamSheetDropdown] = useState(false)
 
   // 블럭 영작 학습 관련 상태
   const [blockwritingBooks, setBlockwritingBooks] = useState([])
@@ -1836,9 +1839,25 @@ function App() {
     }
   }
 
-  const handleExamSchoolSelect = (school) => {
+  const handleExamSchoolSelect = async (school) => {
     setSelectedExamSchool(school)
     setShowExamSchoolDropdown(false)
+    setSelectedExamSheet('')
+    setExamSheets([])
+    setShowExamSheetDropdown(false)
+
+    try {
+      const response = await fetch(`${API_BASE}/exam-papers/sheets?school=${encodeURIComponent(school)}`)
+      const data = await response.json()
+      setExamSheets(data.examSheets || [])
+    } catch (error) {
+      console.error('Error fetching exam sheets:', error)
+    }
+  }
+
+  const handleExamSheetSelect = (examSheet) => {
+    setSelectedExamSheet(examSheet)
+    setShowExamSheetDropdown(false)
   }
 
   // 블럭영작 책 목록 조회
@@ -3904,6 +3923,33 @@ function App() {
                     </div>
                   )}
                 </div>
+                {selectedExamSchool && (
+                  <div className="dropdown-container">
+                    <button
+                      className="select-button"
+                      onClick={() => setShowExamSheetDropdown(!showExamSheetDropdown)}
+                    >
+                      {selectedExamSheet || '시기별시험지'}
+                    </button>
+                    {showExamSheetDropdown && (
+                      <div className="dropdown-menu">
+                        {examSheets.length === 0 ? (
+                          <div className="dropdown-item">등록된 시험지가 없습니다</div>
+                        ) : (
+                          examSheets.map((sheet) => (
+                            <div
+                              key={sheet}
+                              className="dropdown-item"
+                              onClick={() => handleExamSheetSelect(sheet)}
+                            >
+                              {sheet}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="create-problem-area">
                 <h2>문제 만들기</h2>
