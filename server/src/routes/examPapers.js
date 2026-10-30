@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../config/database.js';
 import { trimStringFields } from '../utils/trimHelper.js';
+import { buildExamSheetPdf } from '../utils/examSheetPdf.js';
 
 const router = express.Router();
 
@@ -116,6 +117,73 @@ router.get('/build', async (req, res) => {
   } catch (error) {
     console.error('Error building exam paper:', error);
     res.status(500).json({ error: '시험 문제를 만들지 못했습니다' });
+  }
+});
+
+function questionIdsOf(items) {
+  return [...new Set(
+    items
+      .map((item) => Number(item?.questionId))
+      .filter((id) => Number.isInteger(id) && id > 0)
+  )];
+}
+
+async function answersByQuestionId(items) {
+  const ids = questionIdsOf(items);
+  if (ids.length === 0) return new Map();
+
+  const result = await pool.query(
+    `SELECT id, answer FROM exam_questions WHERE id = ANY($1::int[])`,
+    [ids]
+  );
+  const rows = trimStringFields(result.rows);
+  return new Map(rows.map((row) => [Number(row.id), row.answer]));
+}
+
+// POST /api/exam-papers/pdf
+// 화면 문항으로 시험지를 만들고, answer는 여기서만 읽어 맨 뒤 답지에 넣는다.
+router.post('/pdf', async (req, res) => {
+  const school = String(req.body?.school || '').trim();
+  const examSheet = String(req.body?.examSheet || '').trim();
+  const items = req.body?.items;
+
+  if (!school || !examSheet) {
+    return res.status(400).json({ error: '학교와 시험지를 선택해주세요' });
+  }
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: '받을 문항이 없습니다' });
+  }
+  if (items.length > 300) {
+    return res.status(400).json({ error: '문항이 너무 많습니다' });
+  }
+
+  try {
+    const answers = await answersByQuestionId(items);
+    const pdfItems = items.map((item) => {
+      const questionId = Number(item?.questionId);
+      const answer = Number.isInteger(questionId) ? answers.get(questionId) : '';
+      return {
+        orderNo: item?.orderNo ?? '',
+        compositionNo: item?.compositionNo ?? '',
+        examScope: item?.examScope ?? '',
+        questionType: item?.questionType ?? '',
+        question: item?.question ?? '',
+        answer: answer ?? ''
+      };
+    });
+    const pdf = await buildExamSheetPdf({ school, examSheet, items: pdfItems });
+    const filename = `${school}_${examSheet}.pdf`.replace(/[\\/:*?"<>|]/g, '_');
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="exam-sheet.pdf"; filename*=UTF-8''${encodeURIComponent(filename)}`
+    );
+    res.send(pdf);
+  } catch (error) {
+    console.error('Error creating exam sheet PDF:', error);
+    const message = String(error?.message || '');
+    const clientError = message.includes('글꼴') ? message : 'PDF를 만들지 못했습니다';
+    res.status(500).json({ error: clientError });
   }
 });
 

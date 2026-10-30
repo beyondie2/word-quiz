@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 3000;
 
 // CORS 설정 - 모든 origin 허용 (디버깅용)
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
 
 // 라우터
 app.use('/api/auth', authRouter);

@@ -1723,59 +1723,114 @@
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 16px;
   text-align: left;
 }
 
-.exam-generate-header h2 {
-  font-size: 1.15rem;
+.exam-generate-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
-.create-problem-area p.exam-generate-error,
-.create-problem-area p.generated-exam-empty {
+.exam-generate-actions .select-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.create-problem-area p.exam-generate-error {
   color: #F0A8A8;
 }
 
-.generated-exam-list {
+.exam-pdf-error {
   width: 100%;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
   text-align: left;
 }
 
-.generated-exam-item {
-  padding: 16px 18px;
-  background-color: #0D2535;
-  border-radius: 8px;
+.exam-sheet {
+  width: 100%;
+  box-sizing: border-box;
+  background: #ffffff;
+  color: #111111;
+  padding: 42px 46px 48px;
+  border: 1px solid #d5d5d5;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  text-align: left;
+  font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
 }
 
-.generated-exam-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 10px;
-  color: #6B9AAD;
-  font-size: 0.85rem;
+.create-problem-area .exam-sheet,
+.create-problem-area .exam-sheet p {
+  color: #111111;
+  text-align: left;
 }
 
-.generated-exam-no {
-  color: #E8F4FD;
+.exam-sheet-head {
+  border-bottom: 3px double #111111;
+  padding-bottom: 12px;
+  margin-bottom: 22px;
+}
+
+.create-problem-area .exam-sheet-school {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
   font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.4;
 }
 
-.generated-exam-question {
-  color: #E8F4FD;
+.create-problem-area .exam-sheet-base {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.exam-sheet-item {
+  margin: 0 0 22px;
+}
+
+.exam-sheet-item:last-child {
+  margin-bottom: 0;
+}
+
+.create-problem-area .exam-sheet-meta {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.exam-sheet-body {
+  display: flex;
+  align-items: flex-start;
+  color: #111111;
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+.exam-sheet-no {
+  flex-shrink: 0;
+  font-weight: 700;
+  white-space: pre;
+}
+
+.exam-sheet-text {
+  min-width: 0;
   white-space: pre-wrap;
-  line-height: 1.7;
 }
 
-.generated-exam-empty {
-  color: #F0A8A8;
+.exam-sheet-text.is-missing {
+  color: #8a3a3a;
+}
+
+.create-problem-area .exam-sheet-rest {
+  margin: 0;
+  color: #111111;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  white-space: pre-wrap;
 }
 
 /* ===== web book 화면 ===== */

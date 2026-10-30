@@ -4,6 +4,28 @@ import './App.css'
 // API 베이스 URL (프로덕션에서는 환경변수 사용)
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
+function examCompositionLabel(compositionNo) {
+  const value = String(compositionNo ?? '').trim()
+  if (!value) return ''
+  return /[.。]$/.test(value) ? `${value} ` : `${value}. `
+}
+
+function examMetaLine(item) {
+  const tail = [item.examScope, item.questionType]
+    .map((part) => String(part ?? '').trim())
+    .filter(Boolean)
+    .join(' ')
+  return tail ? `${item.orderNo}] ${tail}` : `${item.orderNo}]`
+}
+
+function splitExamQuestion(question) {
+  const body = String(question ?? '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim()
+    || '조건에 맞는 문제가 없습니다.'
+  const newline = body.indexOf('\n')
+  if (newline === -1) return { first: body, rest: '' }
+  return { first: body.slice(0, newline), rest: body.slice(newline + 1) }
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState('quiz')
   
@@ -122,7 +144,9 @@ function App() {
   const [showExamSheetDropdown, setShowExamSheetDropdown] = useState(false)
   const [generatedExamItems, setGeneratedExamItems] = useState([])
   const [isGeneratingExam, setIsGeneratingExam] = useState(false)
+  const [isDownloadingExam, setIsDownloadingExam] = useState(false)
   const [examGenerateError, setExamGenerateError] = useState('')
+  const [examPdfError, setExamPdfError] = useState('')
   const examBuildRequestRef = useRef(0)
 
   // 블럭 영작 학습 관련 상태
@@ -1851,6 +1875,7 @@ function App() {
     setShowExamSheetDropdown(false)
     setGeneratedExamItems([])
     setExamGenerateError('')
+    setExamPdfError('')
     setIsGeneratingExam(false)
     examBuildRequestRef.current += 1
 
@@ -1868,6 +1893,7 @@ function App() {
     setShowExamSheetDropdown(false)
     setGeneratedExamItems([])
     setExamGenerateError('')
+    setExamPdfError('')
 
     const requestId = ++examBuildRequestRef.current
     setIsGeneratingExam(true)
@@ -1886,7 +1912,11 @@ function App() {
         return
       }
 
-      setGeneratedExamItems(data.items || [])
+      setGeneratedExamItems((data.items || []).map((item) => {
+        const screenItem = { ...item }
+        delete screenItem.answer
+        return screenItem
+      }))
     } catch (error) {
       console.error('Error building exam paper:', error)
       if (requestId !== examBuildRequestRef.current) return
@@ -1895,6 +1925,46 @@ function App() {
       if (requestId === examBuildRequestRef.current) {
         setIsGeneratingExam(false)
       }
+    }
+  }
+
+  const handleReceiveExam = async () => {
+    if (isDownloadingExam || generatedExamItems.length === 0) return
+    setExamPdfError('')
+    setIsDownloadingExam(true)
+
+    try {
+      const response = await fetch(`${API_BASE}/exam-papers/pdf`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          school: selectedExamSchool,
+          examSheet: selectedExamSheet,
+          items: generatedExamItems
+        })
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        setExamPdfError(data.error || 'PDF를 만들지 못했습니다')
+        return
+      }
+
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      const safeName = `${selectedExamSchool}_${selectedExamSheet}`.replace(/[\\/:*?"<>|]/g, '_')
+      link.href = url
+      link.download = `${safeName}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error downloading exam PDF:', error)
+      setExamPdfError('PDF를 만들지 못했습니다')
+    } finally {
+      setIsDownloadingExam(false)
     }
   }
 
@@ -4004,32 +4074,47 @@ function App() {
                 {!isGeneratingExam && generatedExamItems.length > 0 && (
                   <>
                     <div className="exam-generate-header">
-                      <h2>{selectedExamSchool} · {selectedExamSheet}</h2>
-                      <button
-                        className="select-button"
-                        onClick={() => handleExamSheetSelect(selectedExamSheet)}
-                      >
-                        다시 만들기
-                      </button>
+                      <div className="exam-generate-actions">
+                        <button
+                          className="select-button"
+                          onClick={handleReceiveExam}
+                          disabled={isDownloadingExam}
+                        >
+                          {isDownloadingExam ? 'PDF 만드는 중...' : 'PDF로 받기'}
+                        </button>
+                        <button
+                          className="select-button"
+                          onClick={() => handleExamSheetSelect(selectedExamSheet)}
+                          disabled={isDownloadingExam}
+                        >
+                          다시 만들기
+                        </button>
+                      </div>
                     </div>
-                    <ol className="generated-exam-list">
-                      {generatedExamItems.map((item) => (
-                        <li key={item.orderNo} className="generated-exam-item">
-                          <div className="generated-exam-meta">
-                            <span className="generated-exam-no">{item.orderNo}번</span>
-                            <span>{item.compositionNo}</span>
-                            <span>{item.questionType}</span>
-                            <span>{item.answerFormat}</span>
-                            {item.examScope && <span>{item.examScope}</span>}
-                          </div>
-                          {item.question ? (
-                            <p className="generated-exam-question">{item.question}</p>
-                          ) : (
-                            <p className="generated-exam-empty">조건에 맞는 문제가 없습니다.</p>
-                          )}
-                        </li>
-                      ))}
-                    </ol>
+                    {examPdfError && <p className="exam-generate-error exam-pdf-error">{examPdfError}</p>}
+                    <article className="exam-sheet">
+                      <header className="exam-sheet-head">
+                        <p className="exam-sheet-school">학교 : {selectedExamSchool}</p>
+                        <p className="exam-sheet-base">기준 시험지 : {selectedExamSheet}</p>
+                      </header>
+                      {generatedExamItems.map((item) => {
+                        const questionParts = splitExamQuestion(item.question)
+                        return (
+                          <section key={item.orderNo} className="exam-sheet-item">
+                            <p className="exam-sheet-meta">{examMetaLine(item)}</p>
+                            <div className="exam-sheet-body">
+                              <span className="exam-sheet-no">{examCompositionLabel(item.compositionNo)}</span>
+                              <span className={item.question ? 'exam-sheet-text' : 'exam-sheet-text is-missing'}>
+                                {questionParts.first}
+                              </span>
+                            </div>
+                            {questionParts.rest && (
+                              <p className="exam-sheet-rest">{questionParts.rest}</p>
+                            )}
+                          </section>
+                        )
+                      })}
+                    </article>
                   </>
                 )}
               </div>
