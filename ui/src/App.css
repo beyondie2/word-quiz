@@ -1719,6 +1719,65 @@
   color: #A0C4D8;
 }
 
+.exam-generate-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  text-align: left;
+}
+
+.exam-generate-header h2 {
+  font-size: 1.15rem;
+}
+
+.create-problem-area p.exam-generate-error,
+.create-problem-area p.generated-exam-empty {
+  color: #F0A8A8;
+}
+
+.generated-exam-list {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.generated-exam-item {
+  padding: 16px 18px;
+  background-color: #0D2535;
+  border-radius: 8px;
+}
+
+.generated-exam-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #6B9AAD;
+  font-size: 0.85rem;
+}
+
+.generated-exam-no {
+  color: #E8F4FD;
+  font-weight: 700;
+}
+
+.generated-exam-question {
+  color: #E8F4FD;
+  white-space: pre-wrap;
+  line-height: 1.7;
+}
+
+.generated-exam-empty {
+  color: #F0A8A8;
+}
+
 /* ===== web book 화면 ===== */
 .webbook-container {
   display: flex;

@@ -120,6 +120,10 @@ function App() {
   const [examSheets, setExamSheets] = useState([])
   const [selectedExamSheet, setSelectedExamSheet] = useState('')
   const [showExamSheetDropdown, setShowExamSheetDropdown] = useState(false)
+  const [generatedExamItems, setGeneratedExamItems] = useState([])
+  const [isGeneratingExam, setIsGeneratingExam] = useState(false)
+  const [examGenerateError, setExamGenerateError] = useState('')
+  const examBuildRequestRef = useRef(0)
 
   // 블럭 영작 학습 관련 상태
   const [blockwritingBooks, setBlockwritingBooks] = useState([])
@@ -1845,6 +1849,10 @@ function App() {
     setSelectedExamSheet('')
     setExamSheets([])
     setShowExamSheetDropdown(false)
+    setGeneratedExamItems([])
+    setExamGenerateError('')
+    setIsGeneratingExam(false)
+    examBuildRequestRef.current += 1
 
     try {
       const response = await fetch(`${API_BASE}/exam-papers/sheets?school=${encodeURIComponent(school)}`)
@@ -1855,9 +1863,39 @@ function App() {
     }
   }
 
-  const handleExamSheetSelect = (examSheet) => {
+  const handleExamSheetSelect = async (examSheet) => {
     setSelectedExamSheet(examSheet)
     setShowExamSheetDropdown(false)
+    setGeneratedExamItems([])
+    setExamGenerateError('')
+
+    const requestId = ++examBuildRequestRef.current
+    setIsGeneratingExam(true)
+
+    try {
+      const params = new URLSearchParams({
+        school: selectedExamSchool,
+        examSheet
+      })
+      const response = await fetch(`${API_BASE}/exam-papers/build?${params}`)
+      const data = await response.json()
+      if (requestId !== examBuildRequestRef.current) return
+
+      if (!response.ok) {
+        setExamGenerateError(data.error || '시험 문제를 만들지 못했습니다')
+        return
+      }
+
+      setGeneratedExamItems(data.items || [])
+    } catch (error) {
+      console.error('Error building exam paper:', error)
+      if (requestId !== examBuildRequestRef.current) return
+      setExamGenerateError('시험 문제를 만들지 못했습니다')
+    } finally {
+      if (requestId === examBuildRequestRef.current) {
+        setIsGeneratingExam(false)
+      }
+    }
   }
 
   // 블럭영작 책 목록 조회
@@ -3952,8 +3990,48 @@ function App() {
                 )}
               </div>
               <div className="create-problem-area">
-                <h2>문제 만들기</h2>
-                <p>여기에서 문제를 만들 수 있습니다.</p>
+                {!selectedExamSheet && !isGeneratingExam && (
+                  <>
+                    <h2>문제 만들기</h2>
+                    <p>학교와 시기별시험지를 선택하면 문항이 만들어집니다.</p>
+                  </>
+                )}
+                {isGeneratingExam && <p>문제를 만들고 있습니다...</p>}
+                {examGenerateError && <p className="exam-generate-error">{examGenerateError}</p>}
+                {!isGeneratingExam && selectedExamSheet && generatedExamItems.length === 0 && !examGenerateError && (
+                  <p>이 시험지에 문항 구성이 없습니다.</p>
+                )}
+                {!isGeneratingExam && generatedExamItems.length > 0 && (
+                  <>
+                    <div className="exam-generate-header">
+                      <h2>{selectedExamSchool} · {selectedExamSheet}</h2>
+                      <button
+                        className="select-button"
+                        onClick={() => handleExamSheetSelect(selectedExamSheet)}
+                      >
+                        다시 만들기
+                      </button>
+                    </div>
+                    <ol className="generated-exam-list">
+                      {generatedExamItems.map((item) => (
+                        <li key={item.orderNo} className="generated-exam-item">
+                          <div className="generated-exam-meta">
+                            <span className="generated-exam-no">{item.orderNo}번</span>
+                            <span>{item.compositionNo}</span>
+                            <span>{item.questionType}</span>
+                            <span>{item.answerFormat}</span>
+                            {item.examScope && <span>{item.examScope}</span>}
+                          </div>
+                          {item.question ? (
+                            <p className="generated-exam-question">{item.question}</p>
+                          ) : (
+                            <p className="generated-exam-empty">조건에 맞는 문제가 없습니다.</p>
+                          )}
+                        </li>
+                      ))}
+                    </ol>
+                  </>
+                )}
               </div>
             </>
           )}

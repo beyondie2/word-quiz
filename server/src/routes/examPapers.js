@@ -44,4 +44,79 @@ router.get('/sheets', async (req, res) => {
   }
 });
 
+function parseSources(sources) {
+  return String(sources || '')
+    .split(',')
+    .map((source) => source.trim())
+    .filter(Boolean);
+}
+
+function pickRandom(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+// GET /api/exam-papers/build?school=&examSheet=
+// order_no 1번부터 끝까지, 출처·유형·객주에 맞는 문제 중 하나를 무작위로 고른다.
+router.get('/build', async (req, res) => {
+  const school = String(req.query.school || '').trim();
+  const examSheet = String(req.query.examSheet || '').trim();
+
+  if (!school || !examSheet) {
+    return res.status(400).json({ error: '학교와 시험지를 선택해주세요' });
+  }
+
+  try {
+    const papersResult = await pool.query(`
+      SELECT order_no, composition_no, sources, answer_format, question_type
+      FROM exam_papers
+      WHERE school = $1 AND exam_sheet = $2
+      ORDER BY order_no ASC
+    `, [school, examSheet]);
+
+    const papers = trimStringFields(papersResult.rows);
+    const usedQuestionIds = new Set();
+    const items = [];
+
+    for (const paper of papers) {
+      const sources = parseSources(paper.sources);
+      let picked = null;
+
+      if (sources.length > 0) {
+        const questionsResult = await pool.query(`
+          SELECT id, exam_scope, question
+          FROM exam_questions
+          WHERE exam_scope = ANY($1::text[])
+            AND question_type = $2
+            AND answer_format = $3
+        `, [sources, paper.question_type, paper.answer_format]);
+
+        const candidates = trimStringFields(questionsResult.rows);
+        const unused = candidates.filter((question) => !usedQuestionIds.has(question.id));
+        const poolToPick = unused.length > 0 ? unused : candidates;
+
+        if (poolToPick.length > 0) {
+          picked = pickRandom(poolToPick);
+          usedQuestionIds.add(picked.id);
+        }
+      }
+
+      items.push({
+        orderNo: paper.order_no,
+        compositionNo: paper.composition_no,
+        sources,
+        questionType: paper.question_type,
+        answerFormat: paper.answer_format,
+        questionId: picked ? picked.id : null,
+        examScope: picked ? picked.exam_scope : null,
+        question: picked ? picked.question : null
+      });
+    }
+
+    res.json({ school, examSheet, items });
+  } catch (error) {
+    console.error('Error building exam paper:', error);
+    res.status(500).json({ error: '시험 문제를 만들지 못했습니다' });
+  }
+});
+
 export default router;
