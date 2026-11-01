@@ -2642,13 +2642,13 @@ function App() {
             className={`tab-button ${activeTab === 'grammar' ? 'active' : ''}`}
             onClick={() => setActiveTab('grammar')}
           >
-            문법 익히기
+            문법 개념
           </button>
           <button
             className={`tab-button ${activeTab === 'webbook' ? 'active' : ''}`}
             onClick={() => setActiveTab('webbook')}
           >
-            web book
+            문법 체화
           </button>
           <button
             className={`tab-button ${activeTab === 'blockwriting' ? 'active' : ''}`}
@@ -2998,13 +2998,13 @@ function App() {
                   className={`sub-tab-button ${reviewSubTab === 'grammar' ? 'active' : ''}`}
                   onClick={() => setReviewSubTab('grammar')}
                 >
-                  문법 익히기
+                  문법 개념
                 </button>
                 <button
                   className={`sub-tab-button ${reviewSubTab === 'webbook' ? 'active' : ''}`}
                   onClick={() => setReviewSubTab('webbook')}
                 >
-                  web book
+                  문법 체화
                 </button>
                 <button
                   className={`sub-tab-button ${reviewSubTab === 'blocks' ? 'active' : ''}`}
