@@ -2645,16 +2645,16 @@ function App() {
             문법 익히기
           </button>
           <button
-            className={`tab-button ${activeTab === 'blockwriting' ? 'active' : ''}`}
-            onClick={() => setActiveTab('blockwriting')}
-          >
-            블럭 영작
-          </button>
-          <button
             className={`tab-button ${activeTab === 'webbook' ? 'active' : ''}`}
             onClick={() => setActiveTab('webbook')}
           >
             web book
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'blockwriting' ? 'active' : ''}`}
+            onClick={() => setActiveTab('blockwriting')}
+          >
+            블럭 영작
           </button>
           <button
             className={`tab-button ${activeTab === 'createProblem' ? 'active' : ''}`}
@@ -3001,16 +3001,16 @@ function App() {
                   문법 익히기
                 </button>
                 <button
-                  className={`sub-tab-button ${reviewSubTab === 'blocks' ? 'active' : ''}`}
-                  onClick={() => setReviewSubTab('blocks')}
-                >
-                  블럭 영작
-                </button>
-                <button
                   className={`sub-tab-button ${reviewSubTab === 'webbook' ? 'active' : ''}`}
                   onClick={() => setReviewSubTab('webbook')}
                 >
                   web book
+                </button>
+                <button
+                  className={`sub-tab-button ${reviewSubTab === 'blocks' ? 'active' : ''}`}
+                  onClick={() => setReviewSubTab('blocks')}
+                >
+                  블럭 영작
                 </button>
               </div>
 
@@ -4146,16 +4146,16 @@ function App() {
               문법 관리
             </button>
             <button
-              className={`sub-tab-button ${adminSubTab === 'blockwriting' ? 'active' : ''}`}
-              onClick={() => setAdminSubTab('blockwriting')}
-            >
-              블럭영작 관리
-            </button>
-            <button
               className={`sub-tab-button ${adminSubTab === 'webbook' ? 'active' : ''}`}
               onClick={() => setAdminSubTab('webbook')}
             >
               webbook 관리
+            </button>
+            <button
+              className={`sub-tab-button ${adminSubTab === 'blockwriting' ? 'active' : ''}`}
+              onClick={() => setAdminSubTab('blockwriting')}
+            >
+              블럭영작 관리
             </button>
             <button
               className={`sub-tab-button ${adminSubTab === 'examQuestions' ? 'active' : ''}`}
