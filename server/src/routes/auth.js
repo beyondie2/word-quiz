@@ -14,7 +14,7 @@ const router = express.Router();
 
 // 회원가입
 router.post('/register', async (req, res) => {
-  const { username, email, password, role, teacherId } = req.body;
+  const { username, email, password, role, teacherEmail } = req.body;
 
   // 유효성 검사
   if (!username || !email || !password) {
@@ -25,13 +25,13 @@ router.post('/register', async (req, res) => {
     return res.status(400).json({ error: '신분을 선택해주세요' });
   }
 
-  let teacherIdValue = null;
-  if (role === 'student' && teacherId !== undefined && teacherId !== null && String(teacherId).trim() !== '') {
-    const teacherIdText = String(teacherId).trim();
-    if (!/^\d+$/.test(teacherIdText)) {
-      return res.status(400).json({ error: '선생님 ID는 숫자로 입력해주세요' });
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  let teacherEmailValue = null;
+  if (role === 'student' && teacherEmail !== undefined && teacherEmail !== null && String(teacherEmail).trim() !== '') {
+    teacherEmailValue = String(teacherEmail).trim();
+    if (!emailRegex.test(teacherEmailValue)) {
+      return res.status(400).json({ error: '올바른 선생님 이메일 형식을 입력해주세요' });
     }
-    teacherIdValue = Number(teacherIdText);
   }
 
   if (password.length < 4) {
@@ -39,7 +39,6 @@ router.post('/register', async (req, res) => {
   }
 
   // 이메일 형식 검사
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return res.status(400).json({ error: '올바른 이메일 형식을 입력해주세요' });
   }
@@ -63,14 +62,17 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ error: '이미 사용 중인 이름입니다' });
     }
 
-    if (teacherIdValue !== null) {
+    let teacherIdValue = null;
+    if (teacherEmailValue !== null) {
       const teacherCheck = await pool.query(
-        'SELECT id FROM users WHERE id = $1 AND role = $2',
-        [teacherIdValue, 'teacher']
+        'SELECT id, email FROM users WHERE LOWER(email) = LOWER($1) AND role = $2',
+        [teacherEmailValue, 'teacher']
       );
       if (teacherCheck.rows.length === 0) {
-        return res.status(400).json({ error: '존재하지 않는 선생님 ID입니다' });
+        return res.status(400).json({ error: '선생님으로 등록된 이메일이 아닙니다' });
       }
+      teacherIdValue = teacherCheck.rows[0].id;
+      teacherEmailValue = teacherCheck.rows[0].email;
     }
 
     // 비밀번호 해시화
@@ -79,10 +81,10 @@ router.post('/register', async (req, res) => {
 
     // 사용자 생성
     const result = await pool.query(
-      `INSERT INTO users (username, email, password_hash, is_admin, role, teacher_id, created_at, updated_at) 
-       VALUES ($1, $2, $3, FALSE, $4, $5, NOW(), NOW()) 
-       RETURNING id, username, email, is_admin, role, teacher_id, created_at`,
-      [username, email, passwordHash, role, teacherIdValue]
+      `INSERT INTO users (username, email, password_hash, is_admin, role, teacher_id, teacher_email, created_at, updated_at) 
+       VALUES ($1, $2, $3, FALSE, $4, $5, $6, NOW(), NOW()) 
+       RETURNING id, username, email, is_admin, role, teacher_id, teacher_email, created_at`,
+      [username, email, passwordHash, role, teacherIdValue, teacherEmailValue]
     );
 
     const user = trimStringFields(result.rows[0]);

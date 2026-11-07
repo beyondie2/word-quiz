@@ -40,7 +40,7 @@ function App() {
   const [verifyError, setVerifyError] = useState('')
   const [authMode, setAuthMode] = useState('login') // 'login' or 'register'
   const [signupRole, setSignupRole] = useState('student') // 'student' or 'teacher'
-  const [teacherIdInput, setTeacherIdInput] = useState('')
+  const [teacherEmailInput, setTeacherEmailInput] = useState('')
   const [accessToken, setAccessToken] = useState(localStorage.getItem('accessToken') || '')
   const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refreshToken') || '')
   
@@ -389,9 +389,9 @@ function App() {
       return
     }
 
-    const teacherId = teacherIdInput.trim()
-    if (signupRole === 'student' && teacherId && !/^\d+$/.test(teacherId)) {
-      setVerifyError('선생님 ID는 숫자로 입력해주세요')
+    const teacherEmail = teacherEmailInput.trim()
+    if (signupRole === 'student' && teacherEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(teacherEmail)) {
+      setVerifyError('올바른 선생님 이메일 형식을 입력해주세요')
       return
     }
 
@@ -404,7 +404,7 @@ function App() {
           email: userEmail.trim(), 
           password: userPassword,
           role: signupRole,
-          teacherId: signupRole === 'student' ? teacherId : null
+          teacherEmail: signupRole === 'student' ? teacherEmail : null
         })
       })
 
@@ -425,7 +425,7 @@ function App() {
         setIsVerified(true)
         setVerifyError('')
         setUserPassword('')
-        setTeacherIdInput('')
+        setTeacherEmailInput('')
         
         // 단어장 목록 가져오기
         const booksResponse = await fetch(`${API_BASE}/books`)
@@ -2747,13 +2747,12 @@ function App() {
                   />
                   {authMode === 'register' && signupRole === 'student' && (
                     <input
-                      type="text"
+                      type="email"
                       className="auth-input"
-                      placeholder="선생님 ID"
-                      value={teacherIdInput}
-                      onChange={(e) => setTeacherIdInput(e.target.value)}
+                      placeholder="선생님 이메일"
+                      value={teacherEmailInput}
+                      onChange={(e) => setTeacherEmailInput(e.target.value)}
                       onKeyPress={handleAuthKeyPress}
-                      inputMode="numeric"
                     />
                   )}
                   <button 

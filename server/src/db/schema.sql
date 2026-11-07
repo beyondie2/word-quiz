@@ -7,10 +7,12 @@ CREATE TABLE IF NOT EXISTS users (
     is_admin BOOLEAN DEFAULT FALSE,
     role VARCHAR(20) NOT NULL DEFAULT 'student', -- 신분: teacher(선생님), student(학생)
     teacher_id INTEGER,                          -- 학생의 담당 선생님 (users.id)
+    teacher_email VARCHAR(255),                  -- 학생의 담당 선생님 이메일
     created_at TIMESTAMP DEFAULT NOW(),
     CONSTRAINT users_role_check CHECK (role IN ('teacher', 'student')),
     CONSTRAINT users_teacher_id_fkey FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE SET NULL,
     CONSTRAINT users_teacher_only_for_student CHECK (role = 'student' OR teacher_id IS NULL),
+    CONSTRAINT users_teacher_email_only_for_student CHECK (role = 'student' OR teacher_email IS NULL),
     CONSTRAINT users_teacher_not_self CHECK (teacher_id IS NULL OR teacher_id <> id)
 );
 
@@ -186,6 +188,7 @@ CREATE INDEX IF NOT EXISTS idx_webbook_progress_created_at ON webbook_progress(c
 CREATE INDEX IF NOT EXISTS idx_blocks_id ON blocks(id);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_users_teacher_id ON users(teacher_id);
+CREATE INDEX IF NOT EXISTS idx_users_teacher_email ON users(teacher_email);
 CREATE INDEX IF NOT EXISTS idx_blocks_book ON blocks(book);
 CREATE INDEX IF NOT EXISTS idx_blocks_lesson ON blocks(lesson);
 CREATE INDEX IF NOT EXISTS idx_books_book_name ON books(book_name);
