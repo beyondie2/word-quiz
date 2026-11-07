@@ -3879,7 +3879,7 @@ function App() {
               <div className="webbook-area">
                 {!isWebbookStarted ? (
                   <div className="welcome-message">
-                    <h2>web book을 시작하세요</h2>
+                    <h2>동일 패턴의 여러 문장을 듣고, 소리내어 따라 읽으면서 문법 패턴을 체화시키세요.</h2>
                     <p>책 → 장 → 단원을 순서대로 선택해주세요.</p>
                   </div>
                 ) : (
