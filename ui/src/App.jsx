@@ -4,6 +4,22 @@ import './App.css'
 // API 베이스 URL (프로덕션에서는 환경변수 사용)
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
+// 설문지 탭에 표시할 구글 설문지. 공유 주소 또는 삽입 주소 모두 가능.
+const SURVEY_FORM_URL = import.meta.env.VITE_SURVEY_FORM_URL
+  || 'https://docs.google.com/forms/d/e/1FAIpQLSfzz-h-1GOWdS_2nkRPot7ZLvAoeI8SCbBbihEIBbGkc57xUg/viewform?usp=header'
+
+function toSurveyEmbedUrl(url) {
+  const value = String(url ?? '').trim()
+  if (!value) return ''
+  try {
+    const parsed = new URL(value)
+    parsed.searchParams.set('embedded', 'true')
+    return parsed.toString()
+  } catch {
+    return value
+  }
+}
+
 function examCompositionLabel(compositionNo) {
   const value = String(compositionNo ?? '').trim()
   if (!value) return ''
@@ -2668,6 +2684,12 @@ function App() {
           >
             수행 확인
           </button>
+          <button
+            className={`tab-button ${activeTab === 'survey' ? 'active' : ''}`}
+            onClick={() => setActiveTab('survey')}
+          >
+            설문지
+          </button>
           {isAdmin && (
             <button
               className={`tab-button ${activeTab === 'admin' ? 'active' : ''}`}
@@ -4118,6 +4140,25 @@ function App() {
                 )}
               </div>
             </>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'survey' && (
+        <div className="survey-container">
+          {toSurveyEmbedUrl(SURVEY_FORM_URL) ? (
+            <iframe
+              className="survey-frame"
+              src={toSurveyEmbedUrl(SURVEY_FORM_URL)}
+              title="설문지"
+            >
+              설문지를 불러오는 중입니다.
+            </iframe>
+          ) : (
+            <div className="welcome-message">
+              <h2>설문지</h2>
+              <p>표시할 구글 설문지 주소가 아직 없습니다.</p>
+            </div>
           )}
         </div>
       )}

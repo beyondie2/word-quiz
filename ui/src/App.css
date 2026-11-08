@@ -532,6 +532,32 @@
   gap: 20px;
 }
 
+/* ===== 설문지 화면 ===== */
+.survey-container {
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  min-height: calc(100vh - 180px);
+}
+
+.survey-frame {
+  display: block;
+  width: 100%;
+  height: calc(100vh - 180px);
+  min-height: 720px;
+  border: 0;
+  background-color: #ffffff;
+}
+
+.survey-container .welcome-message {
+  color: #3D5A6C;
+  padding: 48px 20px;
+}
+
+.survey-container .welcome-message h2 {
+  color: #0D1B2A;
+}
+
 /* 필터 바 */
 .filter-bar {
   display: flex;
