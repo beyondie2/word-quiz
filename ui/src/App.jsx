@@ -156,6 +156,8 @@ function App() {
   const [selectedExamSchool, setSelectedExamSchool] = useState('')
   const [showExamSchoolDropdown, setShowExamSchoolDropdown] = useState(false)
   const [isNewExamMode, setIsNewExamMode] = useState(false) // 문제 만들기 > 새로 만들기 모드
+  const [newExamImageFiles, setNewExamImageFiles] = useState([]) // 새로 만들기: 문제지 사진들
+  const [newExamPdfFile, setNewExamPdfFile] = useState(null) // 새로 만들기: 문제지 PDF
   const [examSheets, setExamSheets] = useState([])
   const [selectedExamSheet, setSelectedExamSheet] = useState('')
   const [showExamSheetDropdown, setShowExamSheetDropdown] = useState(false)
@@ -1885,6 +1887,7 @@ function App() {
   }
 
   const handleExamSchoolSelect = async (school) => {
+    setIsNewExamMode(false)
     setSelectedExamSchool(school)
     setShowExamSchoolDropdown(false)
     setSelectedExamSheet('')
@@ -4088,6 +4091,82 @@ function App() {
                   새로 만들기
                 </button>
               </div>
+              {isNewExamMode ? (
+                <div className="create-problem-area">
+                  <h2>새로 만들기</h2>
+                  <p>문제지를 사진으로 찍어 올리거나 PDF 파일을 올려주세요.</p>
+                  <div className="new-exam-upload">
+                    <div className="new-exam-upload-panel">
+                      <h3>사진으로 올리기</h3>
+                      <p>문제지를 사진으로 찍어 올립니다. 여러 장을 올릴 수 있습니다.</p>
+                      <label className="select-button new-exam-upload-button">
+                        사진 찍기 / 고르기
+                        <input
+                          type="file"
+                          accept="image/*"
+                          capture="environment"
+                          multiple
+                          hidden
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || [])
+                            if (files.length > 0) {
+                              setNewExamImageFiles((prev) => [...prev, ...files])
+                            }
+                            e.target.value = ''
+                          }}
+                        />
+                      </label>
+                      {newExamImageFiles.length > 0 && (
+                        <ul className="new-exam-file-list">
+                          {newExamImageFiles.map((file, index) => (
+                            <li key={`${file.name}-${index}`}>
+                              <span>{index + 1}. {file.name}</span>
+                              <button
+                                className="new-exam-file-remove"
+                                onClick={() =>
+                                  setNewExamImageFiles((prev) => prev.filter((_, i) => i !== index))
+                                }
+                              >
+                                삭제
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                    <div className="new-exam-upload-panel">
+                      <h3>PDF로 올리기</h3>
+                      <p>문제지 PDF 파일을 올립니다.</p>
+                      <label className="select-button new-exam-upload-button">
+                        PDF 파일 고르기
+                        <input
+                          type="file"
+                          accept="application/pdf,.pdf"
+                          hidden
+                          onChange={(e) => {
+                            const file = e.target.files && e.target.files[0]
+                            if (file) setNewExamPdfFile(file)
+                            e.target.value = ''
+                          }}
+                        />
+                      </label>
+                      {newExamPdfFile && (
+                        <ul className="new-exam-file-list">
+                          <li>
+                            <span>{newExamPdfFile.name}</span>
+                            <button
+                              className="new-exam-file-remove"
+                              onClick={() => setNewExamPdfFile(null)}
+                            >
+                              삭제
+                            </button>
+                          </li>
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
               <div className="create-problem-area">
                 {!selectedExamSheet && !isGeneratingExam && (
                   <>
@@ -4147,6 +4226,7 @@ function App() {
                   </>
                 )}
               </div>
+              )}
             </>
           )}
         </div>
