@@ -2088,3 +2088,8 @@
 .webbook-skip-button:hover {
   background-color: #3D7A8C;
 }
+
+.new-exam-analysis-table {
+  width: 100%;
+  text-align: left;
+}

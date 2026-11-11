@@ -136,6 +136,14 @@ CREATE TABLE IF NOT EXISTS exam_papers (
     CONSTRAINT exam_papers_school_sheet_order_key UNIQUE (school, exam_sheet, order_no)
 );
 
+-- QuestionTypeSamples 테이블: 유형별 예시 문제 (업로드된 시험지의 문항 유형 분석에 사용)
+CREATE TABLE IF NOT EXISTS question_type_samples (
+    id SERIAL PRIMARY KEY,
+    question_type VARCHAR(100) NOT NULL,     -- 유형 (예: 주제, 일치, 국어영작)
+    question TEXT NOT NULL,                  -- 문제 (발문 + 지문 + 선택지)
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
 -- SpokenSentence 테이블: 말하기/문장 연습용 문장
 CREATE TABLE IF NOT EXISTS spoken_sentence (
     id SERIAL PRIMARY KEY,
@@ -179,6 +187,7 @@ CREATE INDEX IF NOT EXISTS idx_exam_questions_exam_scope ON exam_questions(exam_
 CREATE INDEX IF NOT EXISTS idx_exam_questions_question_type ON exam_questions(question_type);
 CREATE INDEX IF NOT EXISTS idx_exam_questions_answer_format ON exam_questions(answer_format);
 CREATE INDEX IF NOT EXISTS idx_exam_papers_school_sheet ON exam_papers(school, exam_sheet);
+CREATE INDEX IF NOT EXISTS idx_question_type_samples_question_type ON question_type_samples(question_type);
 CREATE INDEX IF NOT EXISTS idx_spoken_sentence_book ON spoken_sentence(book);
 CREATE INDEX IF NOT EXISTS idx_spoken_sentence_book_section_unit ON spoken_sentence(book, section, unit);
 CREATE INDEX IF NOT EXISTS idx_webbook_progress_user_id ON webbook_progress(user_id);

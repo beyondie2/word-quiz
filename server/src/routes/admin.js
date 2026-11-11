@@ -937,6 +937,155 @@ router.delete('/exam-questions/:examScope', async (req, res) => {
   }
 });
 
+// ==================== 유형 샘플 (question_type_samples) 관리 API ====================
+// 업로드된 시험지의 문항 유형을 분석할 때 참고하는 유형별 예시 문제
+
+const QUESTION_TYPE_SAMPLE_COLUMNS = {
+  question_type: ['question_type', '유형', '문제유형', '문제 유형'],
+  question: ['question', '문제'],
+};
+
+// POST /api/admin/question-type-samples/upload - 엑셀로 유형 샘플 일괄 추가
+router.post('/question-type-samples/upload', upload.single('file'), async (req, res) => {
+  const { adminId } = req.body;
+
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: '파일이 업로드되지 않았습니다' });
+    }
+
+    const workbook = XLSX.read(req.file.buffer, { type: 'buffer', codepage: 65001 });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(worksheet);
+
+    if (data.length === 0) {
+      return res.status(400).json({ error: '엑셀 파일에 데이터가 없습니다' });
+    }
+
+    const missingColumns = Object.entries(QUESTION_TYPE_SAMPLE_COLUMNS)
+      .filter(([, aliases]) => !examQuestionHasColumn(data[0], aliases))
+      .map(([name]) => name);
+
+    if (missingColumns.length > 0) {
+      return res.status(400).json({
+        error: `필수 컬럼이 누락되었습니다: ${missingColumns.join(', ')}`,
+        hint: '첫 번째 행에 유형, 문제 컬럼명이 있어야 합니다',
+      });
+    }
+
+    let insertedCount = 0;
+    let skippedCount = 0;
+    const errors = [];
+
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      const rowNum = i + 2;
+
+      const question_type = examQuestionCell(row, QUESTION_TYPE_SAMPLE_COLUMNS.question_type);
+      const question = examQuestionCell(row, QUESTION_TYPE_SAMPLE_COLUMNS.question);
+
+      if (!question_type || !question) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: 유형과 문제는 비울 수 없습니다`);
+        continue;
+      }
+
+      if (question_type.length > 100) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: 유형은 100자 이하여야 합니다`);
+        continue;
+      }
+
+      try {
+        await pool.query(
+          'INSERT INTO question_type_samples (question_type, question) VALUES ($1, $2)',
+          [question_type, question]
+        );
+        insertedCount++;
+      } catch (dbError) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: ${dbError.message}`);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `${insertedCount}개의 유형 샘플이 추가되었습니다`,
+      insertedCount,
+      skippedCount,
+      totalRows: data.length,
+      errors: errors.length > 0 ? errors.slice(0, 10) : undefined,
+    });
+  } catch (error) {
+    console.error('Question type sample upload error:', error);
+    res.status(500).json({ error: error.message || '파일 업로드에 실패했습니다' });
+  }
+});
+
+// GET /api/admin/question-type-samples - 유형별 샘플 수 (관리자용)
+router.get('/question-type-samples', async (req, res) => {
+  const { adminId } = req.query;
+
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    const result = await pool.query(`
+      SELECT question_type, COUNT(*)::int AS sample_count
+      FROM question_type_samples
+      GROUP BY question_type
+      ORDER BY question_type
+    `);
+
+    res.json({ questionTypeSamples: trimStringFields(result.rows) });
+  } catch (error) {
+    console.error('Error fetching question type samples:', error);
+    res.status(500).json({ error: '유형 샘플 조회에 실패했습니다' });
+  }
+});
+
+// DELETE /api/admin/question-type-samples/:questionType - 유형별 샘플 전체 삭제
+router.delete('/question-type-samples/:questionType', async (req, res) => {
+  const { questionType } = req.params;
+  const { adminId } = req.body;
+
+  try {
+    const adminCheck = await pool.query(
+      'SELECT is_admin FROM users WHERE id = $1',
+      [adminId]
+    );
+
+    if (adminCheck.rows.length === 0 || !adminCheck.rows[0].is_admin) {
+      return res.status(403).json({ error: '관리자 권한이 필요합니다' });
+    }
+
+    const result = await pool.query(
+      'DELETE FROM question_type_samples WHERE question_type = $1',
+      [questionType]
+    );
+
+    res.json({ success: true, deletedCount: result.rowCount });
+  } catch (error) {
+    console.error('Error deleting question type samples:', error);
+    res.status(500).json({ error: '유형 샘플 삭제에 실패했습니다' });
+  }
+});
+
 // ==================== 시험지 (exam_papers) 관리 API ====================
 
 const EXAM_PAPER_COLUMNS = {

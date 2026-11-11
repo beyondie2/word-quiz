@@ -30,7 +30,7 @@ One-off DB scripts are run directly: `node src/db/<script>.js` from `server/` (e
 
 ## Environment
 
-- Server: `DATABASE_URL` (Render-style, SSL on) **or** `DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD` (SSL auto-enabled when host isn't localhost); `JWT_SECRET`, `JWT_EXPIRES_IN`, `JWT_REFRESH_EXPIRES_IN`, `PORT`. See [server/src/config/database.js](server/src/config/database.js). Note `db/init.js` builds its own pool from the `DB_*` vars only.
+- Server: `DATABASE_URL` (Render-style, SSL on) **or** `DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD` (SSL auto-enabled when host isn't localhost); `JWT_SECRET`, `JWT_EXPIRES_IN`, `JWT_REFRESH_EXPIRES_IN`, `PORT`, `ANTHROPIC_API_KEY` (used by `routes/examAnalysis.js`, which sends uploaded exam photos/PDFs to Claude to classify each question against `question_type_samples`). See [server/src/config/database.js](server/src/config/database.js). Note `db/init.js` builds its own pool from the `DB_*` vars only.
 - UI: `VITE_API_URL` (defaults to `/api`), `VITE_SURVEY_FORM_URL` (Google Form embedded in the survey tab).
 - UI deploys as a static SPA (`ui/public/_redirects`, `_headers` — Netlify/Cloudflare Pages style); backend targets Render.
 

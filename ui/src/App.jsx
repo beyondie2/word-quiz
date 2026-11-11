@@ -8,6 +8,25 @@ const API_BASE = import.meta.env.VITE_API_URL || '/api'
 const SURVEY_FORM_URL = import.meta.env.VITE_SURVEY_FORM_URL
   || 'https://docs.google.com/forms/d/e/1FAIpQLSfzz-h-1GOWdS_2nkRPot7ZLvAoeI8SCbBbihEIBbGkc57xUg/viewform?usp=header'
 
+// 휴대폰 사진은 커서 AI 전송 한도(장당 5MB)를 넘을 수 있으므로, 긴 변 2000px JPEG로 줄인다
+async function shrinkImageForUpload(file, maxSide = 2000) {
+  try {
+    const bitmap = await createImageBitmap(file)
+    const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.round(bitmap.width * scale)
+    canvas.height = Math.round(bitmap.height * scale)
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+    bitmap.close()
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85))
+    if (!blob) return file
+    const baseName = file.name.replace(/\.[^.]+$/, '')
+    return new File([blob], `${baseName}.jpg`, { type: 'image/jpeg' })
+  } catch {
+    return file // 브라우저가 읽지 못하는 형식이면 원본 그대로 보낸다
+  }
+}
+
 function toSurveyEmbedUrl(url) {
   const value = String(url ?? '').trim()
   if (!value) return ''
@@ -112,7 +131,7 @@ function App() {
   const [newUserIsAdmin, setNewUserIsAdmin] = useState(false)
   const [isLoadingAdmin, setIsLoadingAdmin] = useState(false)
   const [adminError, setAdminError] = useState('')
-  const [adminSubTab, setAdminSubTab] = useState('users') // 'users', 'stats', 'books', 'grammar', 'blockwriting', 'webbook', 'examQuestions', 'examPapers'
+  const [adminSubTab, setAdminSubTab] = useState('users') // 'users', 'stats', 'books', 'grammar', 'blockwriting', 'webbook', 'examQuestions', 'examPapers', 'questionTypeSamples'
 
   // 단어장 관리 관련 상태
   const [adminBooks, setAdminBooks] = useState([])
@@ -143,6 +162,10 @@ function App() {
   const [examQuestionUploadFile, setExamQuestionUploadFile] = useState(null)
   const [isExamQuestionUploading, setIsExamQuestionUploading] = useState(false)
   const [examQuestionUploadResult, setExamQuestionUploadResult] = useState(null)
+  const [adminQuestionTypeSamples, setAdminQuestionTypeSamples] = useState([])
+  const [questionTypeSampleUploadFile, setQuestionTypeSampleUploadFile] = useState(null)
+  const [isQuestionTypeSampleUploading, setIsQuestionTypeSampleUploading] = useState(false)
+  const [questionTypeSampleUploadResult, setQuestionTypeSampleUploadResult] = useState(null)
 
   // 시험지 관리 (exam_papers) 관련 상태
   const [adminExamPapers, setAdminExamPapers] = useState([])
@@ -158,6 +181,9 @@ function App() {
   const [isNewExamMode, setIsNewExamMode] = useState(false) // 문제 만들기 > 새로 만들기 모드
   const [newExamImageFiles, setNewExamImageFiles] = useState([]) // 새로 만들기: 문제지 사진들
   const [newExamPdfFile, setNewExamPdfFile] = useState(null) // 새로 만들기: 문제지 PDF
+  const [isAnalyzingNewExam, setIsAnalyzingNewExam] = useState(false)
+  const [newExamAnalysis, setNewExamAnalysis] = useState([]) // 문항별 유형 분석 결과
+  const [newExamAnalysisError, setNewExamAnalysisError] = useState('')
   const [examSheets, setExamSheets] = useState([])
   const [selectedExamSheet, setSelectedExamSheet] = useState('')
   const [showExamSheetDropdown, setShowExamSheetDropdown] = useState(false)
@@ -910,6 +936,7 @@ function App() {
       fetchAdminWebbooks()
       fetchAdminExamQuestions()
       fetchAdminExamPapers()
+      fetchAdminQuestionTypeSamples()
     }
   }, [activeTab, isAdmin, userId])
 
@@ -1741,6 +1768,87 @@ function App() {
     }
   }
 
+  // 관리자용 유형 샘플(question_type_samples) 목록
+  const fetchAdminQuestionTypeSamples = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/admin/question-type-samples?adminId=${userId}`)
+      const data = await response.json()
+      if (data.questionTypeSamples) {
+        setAdminQuestionTypeSamples(data.questionTypeSamples)
+      }
+    } catch (error) {
+      console.error('Fetch admin question type samples error:', error)
+    }
+  }
+
+  // 유형 샘플 엑셀 업로드
+  const handleQuestionTypeSampleFileUpload = async () => {
+    if (!questionTypeSampleUploadFile) {
+      setQuestionTypeSampleUploadResult({ error: '파일을 선택해주세요' })
+      return
+    }
+
+    setIsQuestionTypeSampleUploading(true)
+    setQuestionTypeSampleUploadResult(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', questionTypeSampleUploadFile)
+      formData.append('adminId', userId)
+
+      const response = await fetch(`${API_BASE}/admin/question-type-samples/upload`, {
+        method: 'POST',
+        body: formData
+      })
+      const data = await response.json()
+
+      if (response.ok) {
+        setQuestionTypeSampleUploadResult({
+          success: true,
+          message: data.message,
+          skippedCount: data.skippedCount,
+          errors: data.errors
+        })
+        setQuestionTypeSampleUploadFile(null)
+        const fileInput = document.getElementById('question-type-sample-excel-file-input')
+        if (fileInput) fileInput.value = ''
+        fetchAdminQuestionTypeSamples()
+      } else {
+        setQuestionTypeSampleUploadResult({ error: data.error || '업로드에 실패했습니다', hint: data.hint })
+      }
+    } catch (error) {
+      console.error('Question type sample upload error:', error)
+      setQuestionTypeSampleUploadResult({ error: '서버 연결에 실패했습니다' })
+    } finally {
+      setIsQuestionTypeSampleUploading(false)
+    }
+  }
+
+  // 유형별 샘플 삭제
+  const handleDeleteQuestionTypeSamples = async (questionType) => {
+    if (!confirm(`"${questionType}" 유형의 샘플을 모두 삭제하시겠습니까?`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/admin/question-type-samples/${encodeURIComponent(questionType)}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: userId })
+      })
+      const data = await response.json()
+
+      if (data.success) {
+        fetchAdminQuestionTypeSamples()
+      } else {
+        alert(data.error || '삭제에 실패했습니다')
+      }
+    } catch (error) {
+      console.error('Delete question type samples error:', error)
+      alert('서버 오류가 발생했습니다')
+    }
+  }
+
   // 관리자용 시험지(exam_papers) 목록
   const fetchAdminExamPapers = async () => {
     try {
@@ -1883,6 +1991,45 @@ function App() {
       setExamSchools(data.schools || [])
     } catch (error) {
       console.error('Error fetching exam schools:', error)
+    }
+  }
+
+  // 새로 만들기: 올린 시험지를 서버로 보내 문항별 유형 분석
+  const handleAnalyzeNewExam = async () => {
+    setIsAnalyzingNewExam(true)
+    setNewExamAnalysis([])
+    setNewExamAnalysisError('')
+
+    try {
+      const formData = new FormData()
+      for (const file of newExamImageFiles) {
+        const resized = await shrinkImageForUpload(file)
+        formData.append('images', resized, resized.name)
+      }
+      if (newExamPdfFile) formData.append('pdf', newExamPdfFile)
+
+      const response = await fetch(`${API_BASE}/exam-analysis/analyze`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}` },
+        body: formData
+      })
+      const data = await response.json()
+
+      if (response.ok) {
+        setNewExamAnalysis(data.questions || [])
+        if (!data.questions || data.questions.length === 0) {
+          setNewExamAnalysisError('시험지에서 문항을 찾지 못했습니다')
+        }
+      } else if (response.status === 401 || response.status === 403) {
+        setNewExamAnalysisError(data.error || '로그인이 만료되었습니다. 다시 로그인해주세요')
+      } else {
+        setNewExamAnalysisError(data.error || '분석에 실패했습니다')
+      }
+    } catch (error) {
+      console.error('Analyze new exam error:', error)
+      setNewExamAnalysisError('서버 연결에 실패했습니다')
+    } finally {
+      setIsAnalyzingNewExam(false)
     }
   }
 
@@ -4165,6 +4312,36 @@ function App() {
                       )}
                     </div>
                   </div>
+                  <button
+                    className="select-button primary"
+                    onClick={handleAnalyzeNewExam}
+                    disabled={isAnalyzingNewExam || (newExamImageFiles.length === 0 && !newExamPdfFile)}
+                  >
+                    {isAnalyzingNewExam ? '분석 중... (1분 정도 걸릴 수 있습니다)' : '분석하기'}
+                  </button>
+                  {newExamAnalysisError && <p className="exam-generate-error">{newExamAnalysisError}</p>}
+                  {newExamAnalysis.length > 0 && (
+                    <table className="admin-table new-exam-analysis-table">
+                      <thead>
+                        <tr>
+                          <th>번호</th>
+                          <th>유형</th>
+                          <th>객주</th>
+                          <th>발문</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {newExamAnalysis.map((item, index) => (
+                          <tr key={`${item.number}-${index}`}>
+                            <td>{item.number}</td>
+                            <td>{item.question_type}</td>
+                            <td>{item.answer_format}</td>
+                            <td>{item.instruction}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
               ) : (
               <div className="create-problem-area">
@@ -4296,6 +4473,12 @@ function App() {
               onClick={() => setAdminSubTab('examPapers')}
             >
               시험지 관리
+            </button>
+            <button
+              className={`sub-tab-button ${adminSubTab === 'questionTypeSamples' ? 'active' : ''}`}
+              onClick={() => setAdminSubTab('questionTypeSamples')}
+            >
+              유형 샘플 관리
             </button>
             <button
               className={`sub-tab-button ${adminSubTab === 'stats' ? 'active' : ''}`}
@@ -4835,6 +5018,95 @@ function App() {
                             <button
                               className="delete-btn"
                               onClick={() => handleDeleteExamQuestions(item.exam_scope)}
+                            >
+                              삭제
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          )}
+
+          {adminSubTab === 'questionTypeSamples' && (
+            <div className="admin-books">
+              <div className="upload-section">
+                <h3>엑셀 파일로 유형 샘플 추가</h3>
+                <div className="upload-info">
+                  <p>엑셀 파일 형식: 첫 번째 행에 컬럼명이 있어야 합니다.</p>
+                  <p><strong>필수 컬럼:</strong> 유형, 문제</p>
+                  <p>시험지를 업로드하면 이 샘플들을 참고해 문항별 유형을 분석합니다.</p>
+                </div>
+                <div className="upload-form">
+                  <input
+                    id="question-type-sample-excel-file-input"
+                    type="file"
+                    accept=".xlsx,.xls,.csv"
+                    onChange={(e) => setQuestionTypeSampleUploadFile(e.target.files[0])}
+                    className="file-input"
+                  />
+                  <button
+                    className="upload-button"
+                    onClick={handleQuestionTypeSampleFileUpload}
+                    disabled={isQuestionTypeSampleUploading || !questionTypeSampleUploadFile}
+                  >
+                    {isQuestionTypeSampleUploading ? '업로드 중...' : '업로드'}
+                  </button>
+                </div>
+                {questionTypeSampleUploadResult && (
+                  <div className={`upload-result ${questionTypeSampleUploadResult.success ? 'success' : 'error'}`}>
+                    {questionTypeSampleUploadResult.success ? (
+                      <>
+                        <p>{questionTypeSampleUploadResult.message}</p>
+                        {questionTypeSampleUploadResult.skippedCount > 0 && (
+                          <p>건너뛴 항목: {questionTypeSampleUploadResult.skippedCount}개</p>
+                        )}
+                        {questionTypeSampleUploadResult.errors && questionTypeSampleUploadResult.errors.length > 0 && (
+                          <div className="upload-errors">
+                            <p>오류 목록:</p>
+                            <ul>
+                              {questionTypeSampleUploadResult.errors.map((err, idx) => (
+                                <li key={idx}>{err}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <p>{questionTypeSampleUploadResult.error}</p>
+                        {questionTypeSampleUploadResult.hint && <p className="hint">{questionTypeSampleUploadResult.hint}</p>}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="books-list">
+                <h3>유형 샘플 목록 ({adminQuestionTypeSamples.length}개 유형)</h3>
+                {adminQuestionTypeSamples.length === 0 ? (
+                  <div className="no-records">등록된 유형 샘플이 없습니다</div>
+                ) : (
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>유형</th>
+                        <th>샘플 수</th>
+                        <th>작업</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {adminQuestionTypeSamples.map((item) => (
+                        <tr key={item.question_type}>
+                          <td>{item.question_type}</td>
+                          <td>{item.sample_count}</td>
+                          <td>
+                            <button
+                              className="delete-btn"
+                              onClick={() => handleDeleteQuestionTypeSamples(item.question_type)}
                             >
                               삭제
                             </button>
