@@ -4025,12 +4025,6 @@ function App() {
           ) : (
             <>
               <div className="settings-bar">
-                <button
-                  className="select-button"
-                  onClick={() => setIsNewExamMode(true)}
-                >
-                  새로 만들기
-                </button>
                 <div className="user-info">
                   <span className="user-name">{userName}</span>
                 </div>
@@ -4086,6 +4080,13 @@ function App() {
                     )}
                   </div>
                 )}
+                <button
+                  className="select-button"
+                  style={{ marginLeft: 'auto' }}
+                  onClick={() => setIsNewExamMode(true)}
+                >
+                  새로 만들기
+                </button>
               </div>
               <div className="create-problem-area">
                 {!selectedExamSheet && !isGeneratingExam && (
