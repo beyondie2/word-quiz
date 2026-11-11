@@ -155,6 +155,7 @@ function App() {
   const [examSchools, setExamSchools] = useState([])
   const [selectedExamSchool, setSelectedExamSchool] = useState('')
   const [showExamSchoolDropdown, setShowExamSchoolDropdown] = useState(false)
+  const [isNewExamMode, setIsNewExamMode] = useState(false) // 문제 만들기 > 새로 만들기 모드
   const [examSheets, setExamSheets] = useState([])
   const [selectedExamSheet, setSelectedExamSheet] = useState('')
   const [showExamSheetDropdown, setShowExamSheetDropdown] = useState(false)
@@ -4024,6 +4025,12 @@ function App() {
           ) : (
             <>
               <div className="settings-bar">
+                <button
+                  className="select-button"
+                  onClick={() => setIsNewExamMode(true)}
+                >
+                  새로 만들기
+                </button>
                 <div className="user-info">
                   <span className="user-name">{userName}</span>
                 </div>
