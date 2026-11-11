@@ -4321,26 +4321,13 @@ function App() {
                   </button>
                   {newExamAnalysisError && <p className="exam-generate-error">{newExamAnalysisError}</p>}
                   {newExamAnalysis.length > 0 && (
-                    <table className="admin-table new-exam-analysis-table">
-                      <thead>
-                        <tr>
-                          <th>번호</th>
-                          <th>유형</th>
-                          <th>객주</th>
-                          <th>발문</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {newExamAnalysis.map((item, index) => (
-                          <tr key={`${item.number}-${index}`}>
-                            <td>{item.number}</td>
-                            <td>{item.question_type}</td>
-                            <td>{item.answer_format}</td>
-                            <td>{item.instruction}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                    <ul className="new-exam-analysis-list">
+                      {newExamAnalysis.map((item, index) => (
+                        <li key={`${item.number}-${index}`}>
+                          {item.number}. {item.question_type}
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </div>
               ) : (

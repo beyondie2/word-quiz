@@ -7,7 +7,6 @@ import { authenticateToken } from '../middleware/auth.js';
 // 문제 만들기 > 새로 만들기: 업로드한 시험지(사진/PDF)를 Claude로 읽어 문항별 유형을 매칭한다.
 
 const MODEL = 'claude-opus-5-5';
-const SAMPLES_PER_TYPE = 2; // 프롬프트에 넣을 유형별 예시 문제 수
 const UNCLASSIFIED = '미분류';
 
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -36,18 +35,13 @@ function getClient() {
 
 const router = express.Router();
 
-// 유형 샘플을 유형별로 묶어 프롬프트용 텍스트로 만든다
+// question_type_samples의 모든 문제를 유형별로 묶는다 (시험지의 각 문항을 이 문제들 전부와 비교)
 async function loadTypeSamples() {
   const result = await pool.query(`
     SELECT question_type, question
-    FROM (
-      SELECT question_type, question,
-             ROW_NUMBER() OVER (PARTITION BY question_type ORDER BY id) AS rn
-      FROM question_type_samples
-    ) t
-    WHERE rn <= $1
-    ORDER BY question_type, rn
-  `, [SAMPLES_PER_TYPE]);
+    FROM question_type_samples
+    ORDER BY question_type, id
+  `);
 
   const byType = new Map();
   for (const row of result.rows) {
