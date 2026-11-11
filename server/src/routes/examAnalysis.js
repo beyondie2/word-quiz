@@ -132,7 +132,7 @@ router.post('/analyze', authenticateToken, (req, res, next) => {
   try {
     const byType = await loadTypeSamples();
     if (byType.size === 0) {
-      return res.status(400).json({ error: '등록된 유형 샘플이 없습니다. 관리자 > 유형 샘플 관리에서 먼저 추가해주세요' });
+      return res.status(400).json({ error: '등록된 시험지유형이 없습니다. 관리자 > 시험지유형 관리에서 먼저 추가해주세요' });
     }
 
     // 사진은 올린 순서대로, PDF는 그 뒤에 붙인다

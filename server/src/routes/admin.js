@@ -1019,7 +1019,7 @@ router.post('/question-type-samples/upload', upload.single('file'), async (req, 
 
     res.json({
       success: true,
-      message: `${insertedCount}개의 유형 샘플이 추가되었습니다`,
+      message: `${insertedCount}개의 시험지유형이 추가되었습니다`,
       insertedCount,
       skippedCount,
       totalRows: data.length,

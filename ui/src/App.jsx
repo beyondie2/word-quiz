@@ -4478,7 +4478,7 @@ function App() {
               className={`sub-tab-button ${adminSubTab === 'questionTypeSamples' ? 'active' : ''}`}
               onClick={() => setAdminSubTab('questionTypeSamples')}
             >
-              유형 샘플 관리
+              시험지유형 관리
             </button>
             <button
               className={`sub-tab-button ${adminSubTab === 'stats' ? 'active' : ''}`}
@@ -5034,7 +5034,7 @@ function App() {
           {adminSubTab === 'questionTypeSamples' && (
             <div className="admin-books">
               <div className="upload-section">
-                <h3>엑셀 파일로 유형 샘플 추가</h3>
+                <h3>엑셀 파일로 시험지유형 추가</h3>
                 <div className="upload-info">
                   <p>엑셀 파일 형식: 첫 번째 행에 컬럼명이 있어야 합니다.</p>
                   <p><strong>필수 컬럼:</strong> 유형, 문제</p>
@@ -5086,9 +5086,9 @@ function App() {
               </div>
 
               <div className="books-list">
-                <h3>유형 샘플 목록 ({adminQuestionTypeSamples.length}개 유형)</h3>
+                <h3>시험지유형 목록 ({adminQuestionTypeSamples.length}개 유형)</h3>
                 {adminQuestionTypeSamples.length === 0 ? (
-                  <div className="no-records">등록된 유형 샘플이 없습니다</div>
+                  <div className="no-records">등록된 시험지유형이 없습니다</div>
                 ) : (
                   <table className="admin-table">
                     <thead>
