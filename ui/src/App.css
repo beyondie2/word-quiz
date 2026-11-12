@@ -486,8 +486,13 @@
   color: #E8F4FD;
 }
 
-.select-button.primary:hover {
+.select-button.primary:hover:not(:disabled) {
   background-color: #4D8A9C;
+}
+
+.select-button.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* 환영 메시지 */

@@ -4400,9 +4400,13 @@ function App() {
                   <button
                     className="select-button primary"
                     onClick={handleAnalyzeNewExam}
-                    disabled={isAnalyzingNewExam || (newExamImageFiles.length === 0 && !newExamPdfFile)}
+                    disabled={newExamAnalysis.length > 0 || isAnalyzingNewExam || (newExamImageFiles.length === 0 && !newExamPdfFile)}
                   >
-                    {isAnalyzingNewExam ? '분석 중... (1분 정도 걸릴 수 있습니다)' : '분석하기'}
+                    {isAnalyzingNewExam
+                      ? '분석 중... (1분 정도 걸릴 수 있습니다)'
+                      : newExamAnalysis.length > 0
+                        ? '분석완료'
+                        : '분석하기'}
                   </button>
                   {newExamAnalysisError && <p className="exam-generate-error">{newExamAnalysisError}</p>}
                   {newExamAnalysis.length > 0 && (
