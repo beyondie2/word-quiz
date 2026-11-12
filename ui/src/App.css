@@ -2092,12 +2092,34 @@
 .new-exam-analysis-list {
   width: 100%;
   margin: 8px 0 0;
-  padding: 16px 20px;
+  padding: 8px 12px;
   list-style: none;
   text-align: left;
   background-color: #0D2535;
   border-radius: 8px;
   color: #E8F4FD;
   font-size: 1rem;
-  line-height: 1.9;
+}
+
+.new-exam-analysis-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 8px;
+}
+
+.new-exam-analysis-item:has(.new-exam-source-menu) {
+  z-index: 2;
+}
+
+.new-exam-source-dropdown {
+  flex-shrink: 0;
+}
+
+.new-exam-source-menu {
+  left: auto;
+  right: 0;
+  min-width: 140px;
 }

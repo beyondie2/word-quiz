@@ -8,6 +8,9 @@ const API_BASE = import.meta.env.VITE_API_URL || '/api'
 const SURVEY_FORM_URL = import.meta.env.VITE_SURVEY_FORM_URL
   || 'https://docs.google.com/forms/d/e/1FAIpQLSfzz-h-1GOWdS_2nkRPot7ZLvAoeI8SCbBbihEIBbGkc57xUg/viewform?usp=header'
 
+// 분석하기 결과에서 문항마다 고르는 지문 출처
+const NEW_EXAM_SOURCE_OPTIONS = ['교과서', '모의고사', '부교재', '자작', '외부지문']
+
 // 휴대폰 사진은 커서 AI 전송 한도(장당 5MB)를 넘을 수 있으므로, 긴 변 2000px JPEG로 줄인다
 async function shrinkImageForUpload(file, maxSide = 2000) {
   try {
@@ -184,6 +187,8 @@ function App() {
   const [isAnalyzingNewExam, setIsAnalyzingNewExam] = useState(false)
   const [newExamAnalysis, setNewExamAnalysis] = useState([]) // 문항별 유형 분석 결과
   const [newExamAnalysisError, setNewExamAnalysisError] = useState('')
+  const [newExamSources, setNewExamSources] = useState({}) // 문항별 지문 출처
+  const [openNewExamSourceIndex, setOpenNewExamSourceIndex] = useState(null)
   const [examSheets, setExamSheets] = useState([])
   const [selectedExamSheet, setSelectedExamSheet] = useState('')
   const [showExamSheetDropdown, setShowExamSheetDropdown] = useState(false)
@@ -1999,6 +2004,8 @@ function App() {
     setIsAnalyzingNewExam(true)
     setNewExamAnalysis([])
     setNewExamAnalysisError('')
+    setNewExamSources({})
+    setOpenNewExamSourceIndex(null)
 
     try {
       const formData = new FormData()
@@ -4323,8 +4330,33 @@ function App() {
                   {newExamAnalysis.length > 0 && (
                     <ul className="new-exam-analysis-list">
                       {newExamAnalysis.map((item, index) => (
-                        <li key={`${item.number}-${index}`}>
-                          {item.number}. {item.question_type}
+                        <li key={`${item.number}-${index}`} className="new-exam-analysis-item">
+                          <span>{item.number}. {item.question_type}</span>
+                          <div className="dropdown-container new-exam-source-dropdown">
+                            <button
+                              type="button"
+                              className="select-button"
+                              onClick={() => setOpenNewExamSourceIndex(openNewExamSourceIndex === index ? null : index)}
+                            >
+                              {newExamSources[index] || '출처'}
+                            </button>
+                            {openNewExamSourceIndex === index && (
+                              <div className="dropdown-menu new-exam-source-menu">
+                                {NEW_EXAM_SOURCE_OPTIONS.map((option) => (
+                                  <div
+                                    key={option}
+                                    className="dropdown-item"
+                                    onClick={() => {
+                                      setNewExamSources((prev) => ({ ...prev, [index]: option }))
+                                      setOpenNewExamSourceIndex(null)
+                                    }}
+                                  >
+                                    {option}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </li>
                       ))}
                     </ul>
