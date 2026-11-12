@@ -182,6 +182,16 @@ CREATE TABLE IF NOT EXISTS webbook_progress (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Schools 테이블: 고등학교 목록
+CREATE TABLE IF NOT EXISTS schools (
+    id SERIAL PRIMARY KEY,
+    sido VARCHAR(100) NOT NULL,              -- 시도
+    sigungu VARCHAR(100) NOT NULL,           -- 시군구
+    school_name VARCHAR(200) NOT NULL,       -- 학교명
+    created_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT schools_sido_sigungu_school_name_key UNIQUE (sido, sigungu, school_name)
+);
+
 -- 인덱스 생성
 CREATE INDEX IF NOT EXISTS idx_exam_questions_exam_scope ON exam_questions(exam_scope);
 CREATE INDEX IF NOT EXISTS idx_exam_questions_question_type ON exam_questions(question_type);
@@ -214,6 +224,8 @@ CREATE INDEX IF NOT EXISTS idx_grammar_progress_created_at ON grammar_progress(c
 CREATE INDEX IF NOT EXISTS idx_blocks_progress_user_id ON blocks_progress(user_id);
 CREATE INDEX IF NOT EXISTS idx_blocks_progress_blocks_id ON blocks_progress(blocks_id);
 CREATE INDEX IF NOT EXISTS idx_blocks_progress_created_at ON blocks_progress(created_at);
+CREATE INDEX IF NOT EXISTS idx_schools_sido ON schools(sido);
+CREATE INDEX IF NOT EXISTS idx_schools_school_name ON schools(school_name);
 
 -- 샘플 데이터 (테스트용)
 INSERT INTO users (username, is_admin) VALUES 
