@@ -13,6 +13,7 @@ import blocksRouter from './routes/blocks.js';
 import spokenRouter from './routes/spoken.js';
 import examPapersRouter from './routes/examPapers.js';
 import examAnalysisRouter from './routes/examAnalysis.js';
+import schoolsRouter from './routes/schools.js';
 
 // 환경 변수 로드
 dotenv.config();
@@ -36,6 +37,7 @@ app.use('/api/blocks', blocksRouter);
 app.use('/api/spoken', spokenRouter);
 app.use('/api/exam-papers', examPapersRouter);
 app.use('/api/exam-analysis', examAnalysisRouter);
+app.use('/api/schools', schoolsRouter);
 
 // 헬스 체크
 app.get('/api/health', (req, res) => {

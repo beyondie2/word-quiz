@@ -2089,6 +2089,22 @@
   background-color: #3D7A8C;
 }
 
+.new-exam-school-select {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.new-exam-school-menu {
+  min-width: 240px;
+}
+
 .new-exam-analysis-list {
   width: 100%;
   margin: 8px 0 0;

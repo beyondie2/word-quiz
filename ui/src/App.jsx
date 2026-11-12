@@ -189,6 +189,18 @@ function App() {
   const [newExamAnalysisError, setNewExamAnalysisError] = useState('')
   const [newExamSources, setNewExamSources] = useState({}) // 문항별 지문 출처
   const [openNewExamSourceIndex, setOpenNewExamSourceIndex] = useState(null)
+  // 문항 분석: schools 테이블의 시도 → 시군구 → 학교명
+  const [schoolSidoList, setSchoolSidoList] = useState([])
+  const [schoolSigunguList, setSchoolSigunguList] = useState([])
+  const [schoolNameList, setSchoolNameList] = useState([])
+  const [selectedSchoolSido, setSelectedSchoolSido] = useState('')
+  const [selectedSchoolSigungu, setSelectedSchoolSigungu] = useState('')
+  const [selectedSchoolName, setSelectedSchoolName] = useState('')
+  const [showSchoolSidoDropdown, setShowSchoolSidoDropdown] = useState(false)
+  const [showSchoolSigunguDropdown, setShowSchoolSigunguDropdown] = useState(false)
+  const [showSchoolNameDropdown, setShowSchoolNameDropdown] = useState(false)
+  const [isSchoolSigunguLoading, setIsSchoolSigunguLoading] = useState(false)
+  const [isSchoolNameLoading, setIsSchoolNameLoading] = useState(false)
   const [examSheets, setExamSheets] = useState([])
   const [selectedExamSheet, setSelectedExamSheet] = useState('')
   const [showExamSheetDropdown, setShowExamSheetDropdown] = useState(false)
@@ -1989,6 +2001,13 @@ function App() {
     }
   }, [activeTab, isVerified])
 
+  // 문항 분석 목록이 보이면 시도 목록을 불러온다
+  useEffect(() => {
+    if (activeTab === 'createProblem' && isVerified && newExamAnalysis.length > 0) {
+      fetchSchoolSido()
+    }
+  }, [activeTab, isVerified, newExamAnalysis.length])
+
   const fetchExamSchools = async () => {
     try {
       const response = await fetch(`${API_BASE}/exam-papers/schools`)
@@ -1997,6 +2016,65 @@ function App() {
     } catch (error) {
       console.error('Error fetching exam schools:', error)
     }
+  }
+
+  const fetchSchoolSido = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/schools/sido`)
+      const data = await response.json()
+      setSchoolSidoList(data.sido || [])
+    } catch (error) {
+      console.error('Error fetching sido:', error)
+    }
+  }
+
+  const handleSchoolSidoSelect = async (sido) => {
+    setSelectedSchoolSido(sido)
+    setShowSchoolSidoDropdown(false)
+    setSelectedSchoolSigungu('')
+    setSchoolSigunguList([])
+    setSelectedSchoolName('')
+    setSchoolNameList([])
+    setShowSchoolSigunguDropdown(false)
+    setShowSchoolNameDropdown(false)
+    setIsSchoolSigunguLoading(true)
+    setIsSchoolNameLoading(false)
+
+    try {
+      const response = await fetch(`${API_BASE}/schools/sigungu?sido=${encodeURIComponent(sido)}`)
+      const data = await response.json()
+      setSchoolSigunguList(data.sigungu || [])
+    } catch (error) {
+      console.error('Error fetching sigungu:', error)
+    } finally {
+      setIsSchoolSigunguLoading(false)
+    }
+  }
+
+  const handleSchoolSigunguSelect = async (sigungu) => {
+    setSelectedSchoolSigungu(sigungu)
+    setShowSchoolSigunguDropdown(false)
+    setSelectedSchoolName('')
+    setSchoolNameList([])
+    setShowSchoolNameDropdown(false)
+    setIsSchoolNameLoading(true)
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/schools/names?sido=${encodeURIComponent(selectedSchoolSido)}&sigungu=${encodeURIComponent(sigungu)}`
+      )
+      const data = await response.json()
+      setSchoolNameList(data.schools || [])
+    } catch (error) {
+      console.error('Error fetching school names:', error)
+    } finally {
+      setIsSchoolNameLoading(false)
+    }
+  }
+
+  const handleSchoolNameSelect = (schoolName) => {
+    setSelectedSchoolName(schoolName)
+    setShowSchoolNameDropdown(false)
   }
 
   // 새로 만들기: 올린 시험지를 서버로 보내 문항별 유형 분석
@@ -4328,6 +4406,104 @@ function App() {
                   </button>
                   {newExamAnalysisError && <p className="exam-generate-error">{newExamAnalysisError}</p>}
                   {newExamAnalysis.length > 0 && (
+                    <>
+                    <div className="new-exam-school-select">
+                      <div className="dropdown-container">
+                        <button
+                          className="select-button"
+                          onClick={() => {
+                            setShowSchoolSidoDropdown(!showSchoolSidoDropdown)
+                            setShowSchoolSigunguDropdown(false)
+                            setShowSchoolNameDropdown(false)
+                          }}
+                        >
+                          {selectedSchoolSido || '시도'}
+                        </button>
+                        {showSchoolSidoDropdown && (
+                          <div className="dropdown-menu">
+                            {schoolSidoList.length === 0 ? (
+                              <div className="dropdown-item">등록된 시도가 없습니다</div>
+                            ) : (
+                              schoolSidoList.map((sido) => (
+                                <div
+                                  key={sido}
+                                  className="dropdown-item"
+                                  onClick={() => handleSchoolSidoSelect(sido)}
+                                >
+                                  {sido}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {selectedSchoolSido && (
+                        <div className="dropdown-container">
+                          <button
+                            className="select-button"
+                            onClick={() => {
+                              setShowSchoolSigunguDropdown(!showSchoolSigunguDropdown)
+                              setShowSchoolSidoDropdown(false)
+                              setShowSchoolNameDropdown(false)
+                            }}
+                          >
+                            {selectedSchoolSigungu || '시군구'}
+                          </button>
+                          {showSchoolSigunguDropdown && (
+                            <div className="dropdown-menu">
+                              {isSchoolSigunguLoading ? (
+                                <div className="dropdown-item">불러오는 중...</div>
+                              ) : schoolSigunguList.length === 0 ? (
+                                <div className="dropdown-item">등록된 시군구가 없습니다</div>
+                              ) : (
+                                schoolSigunguList.map((sigungu) => (
+                                  <div
+                                    key={sigungu}
+                                    className="dropdown-item"
+                                    onClick={() => handleSchoolSigunguSelect(sigungu)}
+                                  >
+                                    {sigungu}
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {selectedSchoolSigungu && (
+                        <div className="dropdown-container">
+                          <button
+                            className="select-button"
+                            onClick={() => {
+                              setShowSchoolNameDropdown(!showSchoolNameDropdown)
+                              setShowSchoolSidoDropdown(false)
+                              setShowSchoolSigunguDropdown(false)
+                            }}
+                          >
+                            {selectedSchoolName || '학교'}
+                          </button>
+                          {showSchoolNameDropdown && (
+                            <div className="dropdown-menu new-exam-school-menu">
+                              {isSchoolNameLoading ? (
+                                <div className="dropdown-item">불러오는 중...</div>
+                              ) : schoolNameList.length === 0 ? (
+                                <div className="dropdown-item">등록된 학교가 없습니다</div>
+                              ) : (
+                                schoolNameList.map((schoolName) => (
+                                  <div
+                                    key={schoolName}
+                                    className="dropdown-item"
+                                    onClick={() => handleSchoolNameSelect(schoolName)}
+                                  >
+                                    {schoolName}
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                     <ul className="new-exam-analysis-list">
                       {newExamAnalysis.map((item, index) => (
                         <li key={`${item.number}-${index}`} className="new-exam-analysis-item">
@@ -4360,6 +4536,7 @@ function App() {
                         </li>
                       ))}
                     </ul>
+                    </>
                   )}
                 </div>
               ) : (
