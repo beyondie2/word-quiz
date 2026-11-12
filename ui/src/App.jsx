@@ -4408,6 +4408,7 @@ function App() {
                   {newExamAnalysis.length > 0 && (
                     <>
                     <div className="new-exam-school-select">
+                      <span className="new-exam-school-label">학교</span>
                       <div className="dropdown-container">
                         <button
                           className="select-button"

@@ -2101,6 +2101,12 @@
   margin-top: 8px;
 }
 
+.new-exam-school-label {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: #A0C4D8;
+}
+
 .new-exam-school-menu {
   min-width: 240px;
 }
