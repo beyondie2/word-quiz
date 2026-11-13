@@ -208,6 +208,15 @@ CREATE TABLE IF NOT EXISTS mock_exams (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- SupplementaryBooks 테이블: 부교재 책 이름과 하위범위
+CREATE TABLE IF NOT EXISTS supplementary_books (
+    id SERIAL PRIMARY KEY,
+    book_name VARCHAR(200) NOT NULL,         -- 책 이름
+    sub_scope VARCHAR(100) NOT NULL,         -- 하위범위 (1장, 2장 등)
+    created_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT supplementary_books_book_name_sub_scope_key UNIQUE (book_name, sub_scope)
+);
+
 -- 인덱스 생성
 CREATE INDEX IF NOT EXISTS idx_exam_questions_exam_scope ON exam_questions(exam_scope);
 CREATE INDEX IF NOT EXISTS idx_exam_questions_question_type ON exam_questions(question_type);
@@ -243,6 +252,7 @@ CREATE INDEX IF NOT EXISTS idx_blocks_progress_created_at ON blocks_progress(cre
 CREATE INDEX IF NOT EXISTS idx_schools_sido ON schools(sido);
 CREATE INDEX IF NOT EXISTS idx_schools_school_name ON schools(school_name);
 CREATE INDEX IF NOT EXISTS idx_textbooks_title ON textbooks(title);
+CREATE INDEX IF NOT EXISTS idx_supplementary_books_book_name ON supplementary_books(book_name);
 
 -- 샘플 데이터 (테스트용)
 INSERT INTO users (username, is_admin) VALUES 
