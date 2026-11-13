@@ -2150,10 +2150,42 @@
 .new-exam-analysis-item {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  padding: 6px 8px;
+  padding: 8px;
+}
+
+.new-exam-question-label {
+  flex-shrink: 0;
+  padding-top: 8px;
+  white-space: nowrap;
+}
+
+.new-exam-question-edit {
+  flex: 1;
+  min-width: 0;
+  min-height: 2.6rem;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border: 1px solid #3D7A8C;
+  border-radius: 8px;
+  background-color: #153045;
+  color: #E8F4FD;
+  font: inherit;
+  line-height: 1.45;
+  text-align: left;
+  resize: vertical;
+  overflow-y: hidden;
+}
+
+.new-exam-question-edit:focus {
+  outline: none;
+  border-color: #5BA3B5;
+}
+
+.new-exam-question-edit::placeholder {
+  color: #6B9AAD;
 }
 
 .new-exam-analysis-item:has(.new-exam-source-menu) {

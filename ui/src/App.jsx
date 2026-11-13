@@ -33,6 +33,13 @@ async function shrinkImageForUpload(file, maxSide = 2000) {
   }
 }
 
+function fitExamQuestionField(element) {
+  if (!element) return
+  element.style.height = 'auto'
+  const border = element.offsetHeight - element.clientHeight
+  element.style.height = `${element.scrollHeight + border}px`
+}
+
 function toSurveyEmbedUrl(url) {
   const value = String(url ?? '').trim()
   if (!value) return ''
@@ -2106,8 +2113,12 @@ function App() {
       const data = await response.json()
 
       if (response.ok) {
-        setNewExamAnalysis(data.questions || [])
-        if (!data.questions || data.questions.length === 0) {
+        const questions = (data.questions || []).map((item) => ({
+          ...item,
+          question: item.question ?? item.instruction ?? '',
+        }))
+        setNewExamAnalysis(questions)
+        if (questions.length === 0) {
           setNewExamAnalysisError('시험지에서 문항을 찾지 못했습니다')
         }
       } else if (response.status === 401 || response.status === 403) {
@@ -4553,7 +4564,23 @@ function App() {
                     <ul className="new-exam-analysis-list">
                       {newExamAnalysis.map((item, index) => (
                         <li key={`${item.number}-${index}`} className="new-exam-analysis-item">
-                          <span>{item.number}. {item.question_type}</span>
+                          <span className="new-exam-question-label">{item.number}. {item.question_type}</span>
+                          <textarea
+                            className="new-exam-question-edit"
+                            value={item.question ?? ''}
+                            rows={2}
+                            spellCheck={false}
+                            aria-label={`${item.number}번 문제`}
+                            placeholder="인식된 문제"
+                            onChange={(e) => {
+                              const next = e.target.value
+                              fitExamQuestionField(e.target)
+                              setNewExamAnalysis((prev) => prev.map((row, rowIndex) => (
+                                rowIndex === index ? { ...row, question: next } : row
+                              )))
+                            }}
+                            ref={(element) => fitExamQuestionField(element)}
+                          />
                           <div className="dropdown-container new-exam-source-dropdown">
                             <button
                               type="button"
