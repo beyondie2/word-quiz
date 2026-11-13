@@ -201,6 +201,13 @@ CREATE TABLE IF NOT EXISTS textbooks (
     CONSTRAINT textbooks_title_unit_key UNIQUE (title, unit)
 );
 
+-- MockExams 테이블: 모의고사 이름 목록
+CREATE TABLE IF NOT EXISTS mock_exams (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(200) NOT NULL UNIQUE,       -- 모의고사 이름
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
 -- 인덱스 생성
 CREATE INDEX IF NOT EXISTS idx_exam_questions_exam_scope ON exam_questions(exam_scope);
 CREATE INDEX IF NOT EXISTS idx_exam_questions_question_type ON exam_questions(question_type);

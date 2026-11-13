@@ -4675,7 +4675,7 @@ function App() {
                               setOpenNewExamSourceIndex(null)
                             }}
                           >
-                            {selectedTextbookTitle || '교과서'}
+                            {selectedTextbookTitle || '교과서 선택'}
                           </button>
                           {showTextbookDropdown && (
                             <div className="dropdown-menu new-exam-textbook-menu">
