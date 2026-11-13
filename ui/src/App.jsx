@@ -213,6 +213,13 @@ function App() {
   const [showNewExamPeriodDropdown, setShowNewExamPeriodDropdown] = useState(false)
   const [isSchoolSigunguLoading, setIsSchoolSigunguLoading] = useState(false)
   const [isSchoolNameLoading, setIsSchoolNameLoading] = useState(false)
+  // 문항 분석: 교과서 시험범위
+  const [textbookTitleList, setTextbookTitleList] = useState([])
+  const [selectedTextbookTitle, setSelectedTextbookTitle] = useState('')
+  const [showTextbookDropdown, setShowTextbookDropdown] = useState(false)
+  const [textbookUnitList, setTextbookUnitList] = useState([])
+  const [selectedTextbookUnits, setSelectedTextbookUnits] = useState([])
+  const [isTextbookUnitsLoading, setIsTextbookUnitsLoading] = useState(false)
   const [examSheets, setExamSheets] = useState([])
   const [selectedExamSheet, setSelectedExamSheet] = useState('')
   const [showExamSheetDropdown, setShowExamSheetDropdown] = useState(false)
@@ -2013,10 +2020,11 @@ function App() {
     }
   }, [activeTab, isVerified])
 
-  // 문항 분석 목록이 보이면 시도 목록을 불러온다
+  // 문항 분석 목록이 보이면 시도와 교과서 목록을 불러온다
   useEffect(() => {
     if (activeTab === 'createProblem' && isVerified && newExamAnalysis.length > 0) {
       fetchSchoolSido()
+      fetchTextbookTitles()
     }
   }, [activeTab, isVerified, newExamAnalysis.length])
 
@@ -2038,6 +2046,40 @@ function App() {
     } catch (error) {
       console.error('Error fetching sido:', error)
     }
+  }
+
+  const fetchTextbookTitles = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/textbooks/titles`)
+      const data = await response.json()
+      setTextbookTitleList(data.titles || [])
+    } catch (error) {
+      console.error('Error fetching textbook titles:', error)
+    }
+  }
+
+  const handleTextbookTitleSelect = async (title) => {
+    setSelectedTextbookTitle(title)
+    setShowTextbookDropdown(false)
+    setSelectedTextbookUnits([])
+    setTextbookUnitList([])
+    setIsTextbookUnitsLoading(true)
+
+    try {
+      const response = await fetch(`${API_BASE}/textbooks/units?title=${encodeURIComponent(title)}`)
+      const data = await response.json()
+      setTextbookUnitList(data.units || [])
+    } catch (error) {
+      console.error('Error fetching textbook units:', error)
+    } finally {
+      setIsTextbookUnitsLoading(false)
+    }
+  }
+
+  const handleTextbookUnitToggle = (unit) => {
+    setSelectedTextbookUnits((prev) => (
+      prev.includes(unit) ? prev.filter((item) => item !== unit) : [...prev, unit]
+    ))
   }
 
   const handleSchoolSidoSelect = async (sido) => {
@@ -4437,6 +4479,7 @@ function App() {
                             setShowSchoolSigunguDropdown(false)
                             setShowSchoolNameDropdown(false)
                             setShowNewExamPeriodDropdown(false)
+                            setShowTextbookDropdown(false)
                           }}
                         >
                           {selectedSchoolSido || '시도'}
@@ -4468,6 +4511,7 @@ function App() {
                               setShowSchoolSidoDropdown(false)
                               setShowSchoolNameDropdown(false)
                               setShowNewExamPeriodDropdown(false)
+                              setShowTextbookDropdown(false)
                             }}
                           >
                             {selectedSchoolSigungu || '시군구'}
@@ -4502,6 +4546,7 @@ function App() {
                               setShowSchoolSidoDropdown(false)
                               setShowSchoolSigunguDropdown(false)
                               setShowNewExamPeriodDropdown(false)
+                              setShowTextbookDropdown(false)
                             }}
                           >
                             {selectedSchoolName || '학교'}
@@ -4539,6 +4584,7 @@ function App() {
                             setShowSchoolSigunguDropdown(false)
                             setShowSchoolNameDropdown(false)
                             setOpenNewExamSourceIndex(null)
+                            setShowTextbookDropdown(false)
                           }}
                         >
                           시기별
@@ -4585,7 +4631,10 @@ function App() {
                             <button
                               type="button"
                               className="select-button"
-                              onClick={() => setOpenNewExamSourceIndex(openNewExamSourceIndex === index ? null : index)}
+                              onClick={() => {
+                                setOpenNewExamSourceIndex(openNewExamSourceIndex === index ? null : index)
+                                setShowTextbookDropdown(false)
+                              }}
                             >
                               {newExamSources[index] || '출처'}
                             </button>
@@ -4609,6 +4658,65 @@ function App() {
                         </li>
                       ))}
                     </ul>
+                    <section className="new-exam-scope">
+                      <h3>시험범위</h3>
+                      <div className="new-exam-scope-row">
+                        <span className="new-exam-school-label">교과서</span>
+                        <div className="dropdown-container">
+                          <button
+                            type="button"
+                            className="select-button new-exam-textbook-button"
+                            onClick={() => {
+                              setShowTextbookDropdown(!showTextbookDropdown)
+                              setShowSchoolSidoDropdown(false)
+                              setShowSchoolSigunguDropdown(false)
+                              setShowSchoolNameDropdown(false)
+                              setShowNewExamPeriodDropdown(false)
+                              setOpenNewExamSourceIndex(null)
+                            }}
+                          >
+                            {selectedTextbookTitle || '교과서'}
+                          </button>
+                          {showTextbookDropdown && (
+                            <div className="dropdown-menu new-exam-textbook-menu">
+                              {textbookTitleList.length === 0 ? (
+                                <div className="dropdown-item">등록된 교과서가 없습니다</div>
+                              ) : (
+                                textbookTitleList.map((title) => (
+                                  <div
+                                    key={title}
+                                    className={`dropdown-item${selectedTextbookTitle === title ? ' is-selected' : ''}`}
+                                    onClick={() => handleTextbookTitleSelect(title)}
+                                  >
+                                    {title}
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {selectedTextbookTitle && (
+                        <div className="new-exam-unit-list">
+                          {isTextbookUnitsLoading ? (
+                            <p>단원을 불러오는 중...</p>
+                          ) : textbookUnitList.length === 0 ? (
+                            <p>등록된 단원이 없습니다</p>
+                          ) : (
+                            textbookUnitList.map((unit) => (
+                              <label key={unit} className="checkbox-label">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedTextbookUnits.includes(unit)}
+                                  onChange={() => handleTextbookUnitToggle(unit)}
+                                />
+                                {unit}
+                              </label>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </section>
                     </>
                   )}
                 </div>

@@ -2201,3 +2201,58 @@
   right: 0;
   min-width: 140px;
 }
+
+.new-exam-scope {
+  position: relative;
+  z-index: 4;
+  width: 100%;
+  margin-top: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+  background-color: #0D2535;
+  border-radius: 8px;
+}
+
+.new-exam-scope h3 {
+  margin: 0;
+  color: #E8F4FD;
+  font-size: 1.05rem;
+}
+
+.new-exam-scope-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.new-exam-textbook-button {
+  max-width: 100%;
+  white-space: normal;
+  text-align: left;
+}
+
+.new-exam-textbook-menu {
+  min-width: 280px;
+}
+
+.new-exam-textbook-menu .dropdown-item.is-selected {
+  background-color: #2E5A6B;
+}
+
+.new-exam-unit-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.new-exam-unit-list p {
+  margin: 0;
+  color: #A0C4D8;
+}
