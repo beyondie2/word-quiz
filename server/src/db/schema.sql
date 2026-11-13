@@ -192,6 +192,14 @@ CREATE TABLE IF NOT EXISTS schools (
     CONSTRAINT schools_sido_sigungu_school_name_key UNIQUE (sido, sigungu, school_name)
 );
 
+-- Textbooks 테이블: 교과서 제목과 단원
+CREATE TABLE IF NOT EXISTS textbooks (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(200) NOT NULL UNIQUE,      -- 교과서 제목
+    unit VARCHAR(100),                       -- 단원
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
 -- 인덱스 생성
 CREATE INDEX IF NOT EXISTS idx_exam_questions_exam_scope ON exam_questions(exam_scope);
 CREATE INDEX IF NOT EXISTS idx_exam_questions_question_type ON exam_questions(question_type);
