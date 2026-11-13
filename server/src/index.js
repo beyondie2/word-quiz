@@ -15,6 +15,7 @@ import examPapersRouter from './routes/examPapers.js';
 import examAnalysisRouter from './routes/examAnalysis.js';
 import schoolsRouter from './routes/schools.js';
 import textbooksRouter from './routes/textbooks.js';
+import mockExamsRouter from './routes/mockExams.js';
 
 // 환경 변수 로드
 dotenv.config();
@@ -40,6 +41,7 @@ app.use('/api/exam-papers', examPapersRouter);
 app.use('/api/exam-analysis', examAnalysisRouter);
 app.use('/api/schools', schoolsRouter);
 app.use('/api/textbooks', textbooksRouter);
+app.use('/api/mock-exams', mockExamsRouter);
 
 // 헬스 체크
 app.get('/api/health', (req, res) => {

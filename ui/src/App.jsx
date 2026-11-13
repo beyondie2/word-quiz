@@ -220,6 +220,8 @@ function App() {
   const [textbookUnitList, setTextbookUnitList] = useState([])
   const [selectedTextbookUnits, setSelectedTextbookUnits] = useState([])
   const [isTextbookUnitsLoading, setIsTextbookUnitsLoading] = useState(false)
+  const [mockExamList, setMockExamList] = useState([])
+  const [selectedMockExams, setSelectedMockExams] = useState([])
   const [examSheets, setExamSheets] = useState([])
   const [selectedExamSheet, setSelectedExamSheet] = useState('')
   const [showExamSheetDropdown, setShowExamSheetDropdown] = useState(false)
@@ -2020,11 +2022,12 @@ function App() {
     }
   }, [activeTab, isVerified])
 
-  // 문항 분석 목록이 보이면 시도와 교과서 목록을 불러온다
+  // 문항 분석 목록이 보이면 시도, 교과서, 모의고사 목록을 불러온다
   useEffect(() => {
     if (activeTab === 'createProblem' && isVerified && newExamAnalysis.length > 0) {
       fetchSchoolSido()
       fetchTextbookTitles()
+      fetchMockExams()
     }
   }, [activeTab, isVerified, newExamAnalysis.length])
 
@@ -2079,6 +2082,22 @@ function App() {
   const handleTextbookUnitToggle = (unit) => {
     setSelectedTextbookUnits((prev) => (
       prev.includes(unit) ? prev.filter((item) => item !== unit) : [...prev, unit]
+    ))
+  }
+
+  const fetchMockExams = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/mock-exams`)
+      const data = await response.json()
+      setMockExamList(data.mockExams || [])
+    } catch (error) {
+      console.error('Error fetching mock exams:', error)
+    }
+  }
+
+  const handleMockExamToggle = (name) => {
+    setSelectedMockExams((prev) => (
+      prev.includes(name) ? prev.filter((item) => item !== name) : [...prev, name]
     ))
   }
 
@@ -4716,6 +4735,25 @@ function App() {
                           )}
                         </div>
                       )}
+                      <div className="new-exam-mock-block">
+                        <span className="new-exam-school-label">모의고사</span>
+                        <div className="new-exam-unit-list new-exam-mock-list">
+                          {mockExamList.length === 0 ? (
+                            <p>등록된 모의고사가 없습니다</p>
+                          ) : (
+                            mockExamList.map((name) => (
+                              <label key={name} className="checkbox-label">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedMockExams.includes(name)}
+                                  onChange={() => handleMockExamToggle(name)}
+                                />
+                                {name}
+                              </label>
+                            ))
+                          )}
+                        </div>
+                      </div>
                     </section>
                     </>
                   )}
