@@ -2096,7 +2096,7 @@
 
 .new-exam-school-select {
   position: relative;
-  z-index: 3;
+  z-index: 4;
   width: 100%;
   display: flex;
   flex-wrap: wrap;
@@ -2114,6 +2114,25 @@
 
 .new-exam-school-menu {
   min-width: 240px;
+}
+
+.new-exam-sheet-select {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+}
+
+.new-exam-period-menu {
+  min-width: 240px;
+}
+
+.new-exam-period-menu .dropdown-item.is-selected {
+  background-color: #2E5A6B;
 }
 
 .new-exam-analysis-list {

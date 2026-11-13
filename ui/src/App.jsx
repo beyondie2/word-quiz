@@ -11,6 +11,9 @@ const SURVEY_FORM_URL = import.meta.env.VITE_SURVEY_FORM_URL
 // 분석하기 결과에서 문항마다 고르는 지문 출처
 const NEW_EXAM_SOURCE_OPTIONS = ['교과서', '모의고사', '부교재', '자작', '외부지문']
 
+// 문항 분석에서 고르는 시기별 시험지
+const NEW_EXAM_PERIOD_OPTIONS = ['26년1학년2학기중간', '26년2학년2학기중간', '26년3학년2학기중간']
+
 // 휴대폰 사진은 커서 AI 전송 한도(장당 5MB)를 넘을 수 있으므로, 긴 변 2000px JPEG로 줄인다
 async function shrinkImageForUpload(file, maxSide = 2000) {
   try {
@@ -199,6 +202,8 @@ function App() {
   const [showSchoolSidoDropdown, setShowSchoolSidoDropdown] = useState(false)
   const [showSchoolSigunguDropdown, setShowSchoolSigunguDropdown] = useState(false)
   const [showSchoolNameDropdown, setShowSchoolNameDropdown] = useState(false)
+  const [selectedNewExamPeriod, setSelectedNewExamPeriod] = useState('')
+  const [showNewExamPeriodDropdown, setShowNewExamPeriodDropdown] = useState(false)
   const [isSchoolSigunguLoading, setIsSchoolSigunguLoading] = useState(false)
   const [isSchoolNameLoading, setIsSchoolNameLoading] = useState(false)
   const [examSheets, setExamSheets] = useState([])
@@ -4420,6 +4425,7 @@ function App() {
                             setShowSchoolSidoDropdown(!showSchoolSidoDropdown)
                             setShowSchoolSigunguDropdown(false)
                             setShowSchoolNameDropdown(false)
+                            setShowNewExamPeriodDropdown(false)
                           }}
                         >
                           {selectedSchoolSido || '시도'}
@@ -4450,6 +4456,7 @@ function App() {
                               setShowSchoolSigunguDropdown(!showSchoolSigunguDropdown)
                               setShowSchoolSidoDropdown(false)
                               setShowSchoolNameDropdown(false)
+                              setShowNewExamPeriodDropdown(false)
                             }}
                           >
                             {selectedSchoolSigungu || '시군구'}
@@ -4483,6 +4490,7 @@ function App() {
                               setShowSchoolNameDropdown(!showSchoolNameDropdown)
                               setShowSchoolSidoDropdown(false)
                               setShowSchoolSigunguDropdown(false)
+                              setShowNewExamPeriodDropdown(false)
                             }}
                           >
                             {selectedSchoolName || '학교'}
@@ -4508,6 +4516,39 @@ function App() {
                           )}
                         </div>
                       )}
+                    </div>
+                    <div className="new-exam-sheet-select">
+                      <span className="new-exam-school-label">시험지</span>
+                      <div className="dropdown-container">
+                        <button
+                          className="select-button"
+                          onClick={() => {
+                            setShowNewExamPeriodDropdown(!showNewExamPeriodDropdown)
+                            setShowSchoolSidoDropdown(false)
+                            setShowSchoolSigunguDropdown(false)
+                            setShowSchoolNameDropdown(false)
+                            setOpenNewExamSourceIndex(null)
+                          }}
+                        >
+                          시기별
+                        </button>
+                        {showNewExamPeriodDropdown && (
+                          <div className="dropdown-menu new-exam-period-menu">
+                            {NEW_EXAM_PERIOD_OPTIONS.map((period) => (
+                              <div
+                                key={period}
+                                className={`dropdown-item${selectedNewExamPeriod === period ? ' is-selected' : ''}`}
+                                onClick={() => {
+                                  setSelectedNewExamPeriod(period)
+                                  setShowNewExamPeriodDropdown(false)
+                                }}
+                              >
+                                {period}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <ul className="new-exam-analysis-list">
                       {newExamAnalysis.map((item, index) => (
