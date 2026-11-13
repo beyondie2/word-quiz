@@ -222,6 +222,12 @@ function App() {
   const [isTextbookUnitsLoading, setIsTextbookUnitsLoading] = useState(false)
   const [mockExamList, setMockExamList] = useState([])
   const [selectedMockExams, setSelectedMockExams] = useState([])
+  const [supplementaryBookList, setSupplementaryBookList] = useState([])
+  const [selectedSupplementaryBook, setSelectedSupplementaryBook] = useState('')
+  const [showSupplementaryDropdown, setShowSupplementaryDropdown] = useState(false)
+  const [supplementaryScopeList, setSupplementaryScopeList] = useState([])
+  const [selectedSupplementaryScopes, setSelectedSupplementaryScopes] = useState([])
+  const [isSupplementaryScopesLoading, setIsSupplementaryScopesLoading] = useState(false)
   const [examSheets, setExamSheets] = useState([])
   const [selectedExamSheet, setSelectedExamSheet] = useState('')
   const [showExamSheetDropdown, setShowExamSheetDropdown] = useState(false)
@@ -2022,12 +2028,13 @@ function App() {
     }
   }, [activeTab, isVerified])
 
-  // 문항 분석 목록이 보이면 시도, 교과서, 모의고사 목록을 불러온다
+  // 문항 분석 목록이 보이면 시도, 교과서, 모의고사, 부교재 목록을 불러온다
   useEffect(() => {
     if (activeTab === 'createProblem' && isVerified && newExamAnalysis.length > 0) {
       fetchSchoolSido()
       fetchTextbookTitles()
       fetchMockExams()
+      fetchSupplementaryBooks()
     }
   }, [activeTab, isVerified, newExamAnalysis.length])
 
@@ -2064,6 +2071,7 @@ function App() {
   const handleTextbookTitleSelect = async (title) => {
     setSelectedTextbookTitle(title)
     setShowTextbookDropdown(false)
+    setShowSupplementaryDropdown(false)
     setSelectedTextbookUnits([])
     setTextbookUnitList([])
     setIsTextbookUnitsLoading(true)
@@ -2098,6 +2106,42 @@ function App() {
   const handleMockExamToggle = (name) => {
     setSelectedMockExams((prev) => (
       prev.includes(name) ? prev.filter((item) => item !== name) : [...prev, name]
+    ))
+  }
+
+  const fetchSupplementaryBooks = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/supplementary-books/names`)
+      const data = await response.json()
+      setSupplementaryBookList(data.bookNames || [])
+    } catch (error) {
+      console.error('Error fetching supplementary books:', error)
+    }
+  }
+
+  const handleSupplementaryBookSelect = async (bookName) => {
+    setSelectedSupplementaryBook(bookName)
+    setShowSupplementaryDropdown(false)
+    setSelectedSupplementaryScopes([])
+    setSupplementaryScopeList([])
+    setIsSupplementaryScopesLoading(true)
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/supplementary-books/scopes?bookName=${encodeURIComponent(bookName)}`
+      )
+      const data = await response.json()
+      setSupplementaryScopeList(data.scopes || [])
+    } catch (error) {
+      console.error('Error fetching supplementary scopes:', error)
+    } finally {
+      setIsSupplementaryScopesLoading(false)
+    }
+  }
+
+  const handleSupplementaryScopeToggle = (scope) => {
+    setSelectedSupplementaryScopes((prev) => (
+      prev.includes(scope) ? prev.filter((item) => item !== scope) : [...prev, scope]
     ))
   }
 
@@ -4499,6 +4543,7 @@ function App() {
                             setShowSchoolNameDropdown(false)
                             setShowNewExamPeriodDropdown(false)
                             setShowTextbookDropdown(false)
+                            setShowSupplementaryDropdown(false)
                           }}
                         >
                           {selectedSchoolSido || '시도'}
@@ -4531,6 +4576,7 @@ function App() {
                               setShowSchoolNameDropdown(false)
                               setShowNewExamPeriodDropdown(false)
                               setShowTextbookDropdown(false)
+                              setShowSupplementaryDropdown(false)
                             }}
                           >
                             {selectedSchoolSigungu || '시군구'}
@@ -4566,6 +4612,7 @@ function App() {
                               setShowSchoolSigunguDropdown(false)
                               setShowNewExamPeriodDropdown(false)
                               setShowTextbookDropdown(false)
+                              setShowSupplementaryDropdown(false)
                             }}
                           >
                             {selectedSchoolName || '학교'}
@@ -4604,6 +4651,7 @@ function App() {
                             setShowSchoolNameDropdown(false)
                             setOpenNewExamSourceIndex(null)
                             setShowTextbookDropdown(false)
+                            setShowSupplementaryDropdown(false)
                           }}
                         >
                           시기별
@@ -4653,6 +4701,7 @@ function App() {
                               onClick={() => {
                                 setOpenNewExamSourceIndex(openNewExamSourceIndex === index ? null : index)
                                 setShowTextbookDropdown(false)
+                                setShowSupplementaryDropdown(false)
                               }}
                             >
                               {newExamSources[index] || '출처'}
@@ -4692,6 +4741,7 @@ function App() {
                               setShowSchoolNameDropdown(false)
                               setShowNewExamPeriodDropdown(false)
                               setOpenNewExamSourceIndex(null)
+                              setShowSupplementaryDropdown(false)
                             }}
                           >
                             {selectedTextbookTitle || '교과서 선택'}
@@ -4754,6 +4804,63 @@ function App() {
                           )}
                         </div>
                       </div>
+                      <div className="new-exam-scope-row">
+                        <span className="new-exam-school-label">부교재</span>
+                        <div className="dropdown-container">
+                          <button
+                            type="button"
+                            className="select-button new-exam-textbook-button"
+                            onClick={() => {
+                              setShowSupplementaryDropdown(!showSupplementaryDropdown)
+                              setShowTextbookDropdown(false)
+                              setShowSchoolSidoDropdown(false)
+                              setShowSchoolSigunguDropdown(false)
+                              setShowSchoolNameDropdown(false)
+                              setShowNewExamPeriodDropdown(false)
+                              setOpenNewExamSourceIndex(null)
+                            }}
+                          >
+                            {selectedSupplementaryBook || '부교재 선택'}
+                          </button>
+                          {showSupplementaryDropdown && (
+                            <div className="dropdown-menu new-exam-textbook-menu new-exam-supplementary-menu">
+                              {supplementaryBookList.length === 0 ? (
+                                <div className="dropdown-item">등록된 부교재가 없습니다</div>
+                              ) : (
+                                supplementaryBookList.map((bookName) => (
+                                  <div
+                                    key={bookName}
+                                    className={`dropdown-item${selectedSupplementaryBook === bookName ? ' is-selected' : ''}`}
+                                    onClick={() => handleSupplementaryBookSelect(bookName)}
+                                  >
+                                    {bookName}
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {selectedSupplementaryBook && (
+                        <div className="new-exam-unit-list">
+                          {isSupplementaryScopesLoading ? (
+                            <p>하위범위를 불러오는 중...</p>
+                          ) : supplementaryScopeList.length === 0 ? (
+                            <p>등록된 하위범위가 없습니다</p>
+                          ) : (
+                            supplementaryScopeList.map((scope) => (
+                              <label key={scope} className="checkbox-label">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedSupplementaryScopes.includes(scope)}
+                                  onChange={() => handleSupplementaryScopeToggle(scope)}
+                                />
+                                {scope}
+                              </label>
+                            ))
+                          )}
+                        </div>
+                      )}
                     </section>
                     </>
                   )}
