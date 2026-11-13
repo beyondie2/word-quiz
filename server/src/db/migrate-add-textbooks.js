@@ -9,15 +9,20 @@ async function migrate() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS textbooks (
         id SERIAL PRIMARY KEY,
-        title VARCHAR(200) NOT NULL UNIQUE,
-        unit VARCHAR(100),
-        created_at TIMESTAMP DEFAULT NOW()
+        title VARCHAR(200) NOT NULL,
+        unit VARCHAR(100) NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        CONSTRAINT textbooks_title_unit_key UNIQUE (title, unit)
       )
     `);
 
     await client.query(`
       ALTER TABLE textbooks
       ADD COLUMN IF NOT EXISTS unit VARCHAR(100)
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_textbooks_title ON textbooks(title)
     `);
 
     console.log('textbooks 테이블 준비 완료');

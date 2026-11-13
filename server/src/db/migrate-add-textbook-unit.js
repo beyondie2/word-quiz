@@ -11,11 +11,7 @@ async function migrate() {
       ADD COLUMN IF NOT EXISTS unit VARCHAR(100)
     `);
 
-    const deleted = await client.query('DELETE FROM textbooks');
-    await client.query('ALTER SEQUENCE textbooks_id_seq RESTART WITH 1');
-
-    const count = await client.query('SELECT COUNT(*)::int AS count FROM textbooks');
-    console.log(`제목 ${deleted.rowCount}건 삭제, 남은 행 ${count.rows[0].count}건`);
+    console.log('textbooks 단원 열 준비 완료');
   } catch (error) {
     console.error('Migration failed:', error);
     process.exitCode = 1;

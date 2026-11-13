@@ -195,9 +195,10 @@ CREATE TABLE IF NOT EXISTS schools (
 -- Textbooks 테이블: 교과서 제목과 단원
 CREATE TABLE IF NOT EXISTS textbooks (
     id SERIAL PRIMARY KEY,
-    title VARCHAR(200) NOT NULL UNIQUE,      -- 교과서 제목
-    unit VARCHAR(100),                       -- 단원
-    created_at TIMESTAMP DEFAULT NOW()
+    title VARCHAR(200) NOT NULL,             -- 교과서 제목
+    unit VARCHAR(100) NOT NULL,              -- 단원
+    created_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT textbooks_title_unit_key UNIQUE (title, unit)
 );
 
 -- 인덱스 생성
@@ -234,6 +235,7 @@ CREATE INDEX IF NOT EXISTS idx_blocks_progress_blocks_id ON blocks_progress(bloc
 CREATE INDEX IF NOT EXISTS idx_blocks_progress_created_at ON blocks_progress(created_at);
 CREATE INDEX IF NOT EXISTS idx_schools_sido ON schools(sido);
 CREATE INDEX IF NOT EXISTS idx_schools_school_name ON schools(school_name);
+CREATE INDEX IF NOT EXISTS idx_textbooks_title ON textbooks(title);
 
 -- 샘플 데이터 (테스트용)
 INSERT INTO users (username, is_admin) VALUES 
