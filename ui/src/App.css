@@ -2135,6 +2135,10 @@
   gap: 12px;
 }
 
+.new-exam-sheet-select.is-open {
+  z-index: 6;
+}
+
 .new-exam-period-menu {
   min-width: 240px;
 }

@@ -4714,7 +4714,7 @@ function App() {
                         </div>
                       )}
                     </div>
-                    <div className="new-exam-sheet-select">
+                    <div className={`new-exam-sheet-select${showNewExamPeriodDropdown ? ' is-open' : ''}`}>
                       <span className="new-exam-school-label">시험지</span>
                       <div className="dropdown-container">
                         <button
@@ -4729,7 +4729,7 @@ function App() {
                             setShowSupplementaryDropdown(false)
                           }}
                         >
-                          시기별
+                          {selectedNewExamPeriod || '시기별'}
                         </button>
                         {showNewExamPeriodDropdown && (
                           <div className="dropdown-menu new-exam-period-menu">
