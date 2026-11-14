@@ -2214,6 +2214,11 @@
   margin-top: 8px;
 }
 
+.new-exam-model-message {
+  margin: 0;
+  color: #A0C4D8;
+}
+
 .new-exam-scope {
   position: relative;
   z-index: 4;

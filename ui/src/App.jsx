@@ -236,6 +236,9 @@ function App() {
   const [isDownloadingExam, setIsDownloadingExam] = useState(false)
   const [examGenerateError, setExamGenerateError] = useState('')
   const [examPdfError, setExamPdfError] = useState('')
+  const [isSavingExamModel, setIsSavingExamModel] = useState(false)
+  const [examModelMessage, setExamModelMessage] = useState('')
+  const [examModelError, setExamModelError] = useState('')
   const examBuildRequestRef = useRef(0)
 
   // 블럭 영작 학습 관련 상태
@@ -2237,6 +2240,77 @@ function App() {
       setNewExamAnalysisError('서버 연결에 실패했습니다')
     } finally {
       setIsAnalyzingNewExam(false)
+    }
+  }
+
+  const examModelSources = (sourceType) => {
+    if (sourceType === '교과서') return selectedTextbookUnits
+    if (sourceType === '모의고사') return selectedMockExams
+    if (sourceType === '부교재') return selectedSupplementaryScopes
+    return []
+  }
+
+  const handleCreateExamModel = async () => {
+    if (isSavingExamModel) return
+    setExamModelMessage('')
+    setExamModelError('')
+
+    if (!selectedSchoolName) {
+      setExamModelError('학교를 선택해주세요')
+      return
+    }
+    if (!selectedNewExamPeriod) {
+      setExamModelError('시기별 시험지를 선택해주세요')
+      return
+    }
+
+    const items = []
+    for (let index = 0; index < newExamAnalysis.length; index++) {
+      const item = newExamAnalysis[index]
+      const sourceType = newExamSources[index]
+      if (!sourceType) {
+        setExamModelError(`${index + 1}번 문항의 출처를 선택해주세요`)
+        return
+      }
+      items.push({
+        compositionNo: String(item.number ?? index + 1).trim(),
+        sourceType,
+        sources: examModelSources(sourceType),
+        question: item.question ?? '',
+        answerFormat: item.answer_format ?? '',
+        questionType: item.question_type ?? '',
+      })
+    }
+
+    setIsSavingExamModel(true)
+    try {
+      const response = await fetch(`${API_BASE}/exam-papers/model`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`,
+        },
+        body: JSON.stringify({
+          school: selectedSchoolName,
+          examSheet: selectedNewExamPeriod,
+          items,
+        }),
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setExamModelError(data.error || '시험지모델을 저장하지 못했습니다')
+        return
+      }
+      setExamModelMessage(
+        data.updated
+          ? `시험지모델을 수정했습니다. 시험지id ${data.paperId}`
+          : `시험지모델을 저장했습니다. 시험지id ${data.paperId}`
+      )
+    } catch (error) {
+      console.error('Create exam model error:', error)
+      setExamModelError('서버 연결에 실패했습니다')
+    } finally {
+      setIsSavingExamModel(false)
     }
   }
 
@@ -4863,9 +4937,16 @@ function App() {
                         </div>
                       )}
                     </section>
-                    <button type="button" className="select-button primary new-exam-model-button">
-                      시험지모델 만들기
+                    <button
+                      type="button"
+                      className="select-button primary new-exam-model-button"
+                      onClick={handleCreateExamModel}
+                      disabled={isSavingExamModel}
+                    >
+                      {isSavingExamModel ? '저장 중...' : '시험지모델 만들기'}
                     </button>
+                    {examModelError && <p className="exam-generate-error">{examModelError}</p>}
+                    {examModelMessage && <p className="new-exam-model-message">{examModelMessage}</p>}
                     </>
                   )}
                 </div>
