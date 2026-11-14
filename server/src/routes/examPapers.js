@@ -9,14 +9,13 @@ const SOURCE_TYPES = ['교과서', '모의고사', '부교재', '자작', '외�
 const router = express.Router();
 
 // GET /api/exam-papers/schools - exam_papers.school 고유 목록
+// 기본 시험지와 사용자가 저장한 시험지 학교를 모두 보여 준다.
 router.get('/schools', async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT DISTINCT school
       FROM exam_papers
-      WHERE paper_id IS NULL
-        AND user_id IS NULL
-        AND school IS NOT NULL AND TRIM(school) != ''
+      WHERE school IS NOT NULL AND TRIM(school) != ''
       ORDER BY school
     `);
     const rows = trimStringFields(result.rows);
@@ -39,9 +38,7 @@ router.get('/sheets', async (req, res) => {
     const result = await pool.query(`
       SELECT DISTINCT exam_sheet
       FROM exam_papers
-      WHERE paper_id IS NULL
-        AND user_id IS NULL
-        AND school = $1 AND exam_sheet IS NOT NULL AND TRIM(exam_sheet) != ''
+      WHERE school = $1 AND exam_sheet IS NOT NULL AND TRIM(exam_sheet) != ''
       ORDER BY exam_sheet
     `, [String(school).trim()]);
     const rows = trimStringFields(result.rows);
@@ -88,7 +85,7 @@ router.get('/build', async (req, res) => {
   }
 
   try {
-    const papersResult = await pool.query(`
+    let papersResult = await pool.query(`
       SELECT order_no, composition_no, sources, source_type, question, answer_format, question_type
       FROM exam_papers
       WHERE paper_id IS NULL
@@ -96,6 +93,20 @@ router.get('/build', async (req, res) => {
         AND school = $1 AND exam_sheet = $2
       ORDER BY order_no ASC
     `, [school, examSheet]);
+
+    if (papersResult.rows.length === 0) {
+      papersResult = await pool.query(`
+        SELECT order_no, composition_no, sources, source_type, question, answer_format, question_type
+        FROM exam_papers
+        WHERE school = $1 AND exam_sheet = $2
+          AND paper_id = (
+            SELECT MAX(paper_id)
+            FROM exam_papers
+            WHERE school = $1 AND exam_sheet = $2 AND paper_id IS NOT NULL
+          )
+        ORDER BY order_no ASC
+      `, [school, examSheet]);
+    }
 
     const papers = trimStringFields(papersResult.rows);
     const usedQuestionIds = new Set();
