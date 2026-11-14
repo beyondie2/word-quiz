@@ -121,18 +121,23 @@ CREATE TABLE IF NOT EXISTS exam_questions (
     CONSTRAINT exam_questions_answer_format_check CHECK (answer_format IN ('객관식', '주관식'))
 );
 
--- ExamPapers 테이블: 시험지 구성 (학교, 시험별시험지, 순서, 구성, 출처, 객주, 유형)
+-- ExamPapers 테이블: 시험지 구성 (학교, 시험별시험지, 순서, 구성, 출처구분, 출처들, 문제, 객주, 유형)
 CREATE TABLE IF NOT EXISTS exam_papers (
     id SERIAL PRIMARY KEY,
     school VARCHAR(100) NOT NULL,            -- 학교
     exam_sheet VARCHAR(200) NOT NULL,        -- 시험별시험지
     order_no INTEGER NOT NULL,               -- 순서번호
     composition_no VARCHAR(50) NOT NULL,     -- 구성번호 (숫자, 서답형, 단답형)
-    sources TEXT NOT NULL,                   -- 출처들
+    sources TEXT NOT NULL,                   -- 출처들 (시험범위 이름, 쉼표로 구분)
+    source_type VARCHAR(20),                 -- 출처 구분: 교과서 | 모의고사 | 부교재 | 자작 | 외부지문
+    question TEXT,                           -- 문제 본문. 있으면 시험지를 만들 때 이 문제를 쓴다
     answer_format VARCHAR(20) NOT NULL,      -- 객주: 객관식 | 주관식
     question_type VARCHAR(100) NOT NULL,     -- 유형
     created_at TIMESTAMP DEFAULT NOW(),
     CONSTRAINT exam_papers_answer_format_check CHECK (answer_format IN ('객관식', '주관식')),
+    CONSTRAINT exam_papers_source_type_check CHECK (
+        source_type IS NULL OR source_type IN ('교과서', '모의고사', '부교재', '자작', '외부지문')
+    ),
     CONSTRAINT exam_papers_school_sheet_order_key UNIQUE (school, exam_sheet, order_no)
 );
 
@@ -315,3 +320,30 @@ VALUES
     ('센텀여고', '26학년도2학년2학기중간', 31, '24', '24년10월2,25년10월2,26년10월2', '객관식', '요약'),
     ('센텀여고', '26학년도2학년2학기중간', 32, '서답형 6', '국어영작', '주관식', '국어영작')
 ON CONFLICT (school, exam_sheet, order_no) DO NOTHING;
+
+-- 샘플 시험지의 출처 구분. 이미 값이 있으면 건드리지 않는다.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'exam_papers'
+      AND column_name = 'source_type'
+  ) THEN
+    UPDATE exam_papers
+    SET source_type = '모의고사'
+    WHERE source_type IS NULL
+      AND sources = '24년10월2,25년10월2,26년10월2';
+
+    UPDATE exam_papers
+    SET source_type = '교과서'
+    WHERE source_type IS NULL
+      AND sources = '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과';
+
+    UPDATE exam_papers
+    SET source_type = '외부지문'
+    WHERE source_type IS NULL
+      AND sources = '외부';
+  END IF;
+END $$;

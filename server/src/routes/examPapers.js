@@ -68,7 +68,7 @@ router.get('/build', async (req, res) => {
 
   try {
     const papersResult = await pool.query(`
-      SELECT order_no, composition_no, sources, answer_format, question_type
+      SELECT order_no, composition_no, sources, source_type, question, answer_format, question_type
       FROM exam_papers
       WHERE school = $1 AND exam_sheet = $2
       ORDER BY order_no ASC
@@ -80,9 +80,10 @@ router.get('/build', async (req, res) => {
 
     for (const paper of papers) {
       const sources = parseSources(paper.sources);
+      const storedQuestion = String(paper.question || '').trim();
       let picked = null;
 
-      if (sources.length > 0) {
+      if (!storedQuestion && sources.length > 0) {
         const questionsResult = await pool.query(`
           SELECT id, exam_scope, question
           FROM exam_questions
@@ -105,11 +106,12 @@ router.get('/build', async (req, res) => {
         orderNo: paper.order_no,
         compositionNo: paper.composition_no,
         sources,
+        sourceType: paper.source_type || null,
         questionType: paper.question_type,
         answerFormat: paper.answer_format,
-        questionId: picked ? picked.id : null,
-        examScope: picked ? picked.exam_scope : null,
-        question: picked ? picked.question : null
+        questionId: storedQuestion ? null : (picked ? picked.id : null),
+        examScope: storedQuestion ? null : (picked ? picked.exam_scope : null),
+        question: storedQuestion || (picked ? picked.question : null)
       });
     }
 

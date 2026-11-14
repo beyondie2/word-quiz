@@ -1098,6 +1098,13 @@ const EXAM_PAPER_COLUMNS = {
   question_type: ['question_type', '유형', '문제유형', '문제 유형'],
 };
 
+const EXAM_PAPER_OPTIONAL_COLUMNS = {
+  source_type: ['source_type', '출처구분', '출처 구분'],
+  question: ['question', '문제', '문제본문'],
+};
+
+const EXAM_PAPER_SOURCE_TYPES = ['교과서', '모의고사', '부교재', '자작', '외부지문'];
+
 function examPaperOrderNo(row) {
   const raw = examQuestionCell(row, EXAM_PAPER_COLUMNS.order_no);
   if (!raw) return null;
@@ -1140,9 +1147,12 @@ router.post('/exam-papers/upload', upload.single('file'), async (req, res) => {
     if (missingColumns.length > 0) {
       return res.status(400).json({
         error: `필수 컬럼이 누락되었습니다: ${missingColumns.join(', ')}`,
-        hint: '첫 번째 행에 학교, 시험별시험지, 순서번호, 구성번호, 출처들, 객주(객관식|주관식), 유형 컬럼명이 있어야 합니다',
+        hint: '첫 번째 행에 학교, 시험별시험지, 순서번호, 구성번호, 출처들, 객주(객관식|주관식), 유형 컬럼명이 있어야 합니다. 출처구분(교과서|모의고사|부교재|자작|외부지문)과 문제는 선택입니다',
       });
     }
+
+    const hasSourceType = examQuestionHasColumn(data[0], EXAM_PAPER_OPTIONAL_COLUMNS.source_type);
+    const hasQuestion = examQuestionHasColumn(data[0], EXAM_PAPER_OPTIONAL_COLUMNS.question);
 
     let insertedCount = 0;
     let updatedCount = 0;
@@ -1160,6 +1170,12 @@ router.post('/exam-papers/upload', upload.single('file'), async (req, res) => {
       const sources = examQuestionCell(row, EXAM_PAPER_COLUMNS.sources);
       const answer_format = examQuestionCell(row, EXAM_PAPER_COLUMNS.answer_format);
       const question_type = examQuestionCell(row, EXAM_PAPER_COLUMNS.question_type);
+      const source_type = hasSourceType
+        ? (examQuestionCell(row, EXAM_PAPER_OPTIONAL_COLUMNS.source_type) || null)
+        : null;
+      const question = hasQuestion
+        ? (examQuestionCell(row, EXAM_PAPER_OPTIONAL_COLUMNS.question) || null)
+        : null;
 
       if (!school || !exam_sheet || order_no == null || !composition_no || !sources || !answer_format || !question_type) {
         skippedCount++;
@@ -1173,6 +1189,12 @@ router.post('/exam-papers/upload', upload.single('file'), async (req, res) => {
         continue;
       }
 
+      if (source_type && !EXAM_PAPER_SOURCE_TYPES.includes(source_type)) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: 출처구분은 ${EXAM_PAPER_SOURCE_TYPES.join(', ')} 중 하나여야 합니다`);
+        continue;
+      }
+
       if (school.length > 100 || exam_sheet.length > 200 || composition_no.length > 50 || question_type.length > 100) {
         skippedCount++;
         errors.push(`행 ${rowNum}: 학교는 100자, 시험별시험지는 200자, 구성번호는 50자, 유형은 100자 이하여야 합니다`);
@@ -1180,11 +1202,27 @@ router.post('/exam-papers/upload', upload.single('file'), async (req, res) => {
       }
 
       try {
+        const sets = [
+          'composition_no = $4',
+          'sources = $5',
+          'answer_format = $6',
+          'question_type = $7',
+        ];
+        const params = [school, exam_sheet, order_no, composition_no, sources, answer_format, question_type];
+        if (hasSourceType) {
+          params.push(source_type);
+          sets.push(`source_type = $${params.length}`);
+        }
+        if (hasQuestion) {
+          params.push(question);
+          sets.push(`question = $${params.length}`);
+        }
+
         const updated = await pool.query(
           `UPDATE exam_papers
-           SET composition_no = $4, sources = $5, answer_format = $6, question_type = $7
+           SET ${sets.join(', ')}
            WHERE school = $1 AND exam_sheet = $2 AND order_no = $3`,
-          [school, exam_sheet, order_no, composition_no, sources, answer_format, question_type]
+          params
         );
 
         if (updated.rowCount > 0) {
@@ -1194,9 +1232,9 @@ router.post('/exam-papers/upload', upload.single('file'), async (req, res) => {
 
         await pool.query(
           `INSERT INTO exam_papers
-             (school, exam_sheet, order_no, composition_no, sources, answer_format, question_type)
-           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-          [school, exam_sheet, order_no, composition_no, sources, answer_format, question_type]
+             (school, exam_sheet, order_no, composition_no, sources, source_type, question, answer_format, question_type)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+          [school, exam_sheet, order_no, composition_no, sources, source_type, question, answer_format, question_type]
         );
         insertedCount++;
       } catch (dbError) {
@@ -1254,6 +1292,8 @@ router.get('/exam-papers', async (req, res) => {
         order_no,
         composition_no,
         sources,
+        source_type,
+        question,
         answer_format,
         question_type
       FROM exam_papers

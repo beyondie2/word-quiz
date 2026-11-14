@@ -5649,7 +5649,10 @@ function App() {
                 <div className="upload-info">
                   <p>엑셀 파일 형식: 첫 번째 행에 컬럼명이 있어야 합니다.</p>
                   <p><strong>필수 컬럼:</strong> 학교, 시험별시험지, 순서번호, 구성번호, 출처들, 객주, 유형</p>
+                  <p><strong>선택 컬럼:</strong> 출처구분, 문제</p>
                   <p><strong>객주</strong> 값은 <strong>객관식</strong> 또는 <strong>주관식</strong>만 가능합니다.</p>
+                  <p><strong>출처구분</strong> 값은 <strong>교과서</strong>, <strong>모의고사</strong>, <strong>부교재</strong>, <strong>자작</strong>, <strong>외부지문</strong>만 가능합니다. 비우면 구분하지 않습니다.</p>
+                  <p><strong>문제</strong>에 본문을 넣으면 시험지를 만들 때 그 문제를 그대로 씁니다. 비우면 출처·유형·객주에 맞는 문제를 고릅니다.</p>
                   <p>같은 학교, 시험별시험지, 순서번호가 이미 있으면 해당 행을 수정합니다.</p>
                 </div>
                 <div className="upload-form">
@@ -5751,7 +5754,9 @@ function App() {
                           <th>시험별시험지</th>
                           <th>순서번호</th>
                           <th>구성번호</th>
+                          <th>출처구분</th>
                           <th>출처들</th>
+                          <th>문제</th>
                           <th>객주</th>
                           <th>유형</th>
                         </tr>
@@ -5763,7 +5768,9 @@ function App() {
                             <td>{item.exam_sheet}</td>
                             <td>{item.order_no}</td>
                             <td>{item.composition_no}</td>
+                            <td>{item.source_type || ''}</td>
                             <td className="exam-paper-sources">{item.sources}</td>
+                            <td className="exam-paper-question">{item.question || ''}</td>
                             <td>{item.answer_format}</td>
                             <td>{item.question_type}</td>
                           </tr>

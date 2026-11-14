@@ -889,7 +889,7 @@
 }
 
 .exam-paper-detail {
-  min-width: 980px;
+  min-width: 1280px;
 }
 
 .exam-paper-sources {
@@ -897,6 +897,14 @@
   max-width: 460px;
   white-space: normal;
   word-break: break-all;
+  line-height: 1.45;
+}
+
+.exam-paper-question {
+  min-width: 240px;
+  max-width: 420px;
+  white-space: pre-wrap;
+  word-break: break-word;
   line-height: 1.45;
 }
 
