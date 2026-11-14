@@ -12,6 +12,7 @@ router.get('/schools', async (req, res) => {
       SELECT DISTINCT school
       FROM exam_papers
       WHERE paper_id IS NULL
+        AND user_id IS NULL
         AND school IS NOT NULL AND TRIM(school) != ''
       ORDER BY school
     `);
@@ -36,6 +37,7 @@ router.get('/sheets', async (req, res) => {
       SELECT DISTINCT exam_sheet
       FROM exam_papers
       WHERE paper_id IS NULL
+        AND user_id IS NULL
         AND school = $1 AND exam_sheet IS NOT NULL AND TRIM(exam_sheet) != ''
       ORDER BY exam_sheet
     `, [String(school).trim()]);
@@ -73,6 +75,7 @@ router.get('/build', async (req, res) => {
       SELECT order_no, composition_no, sources, source_type, question, answer_format, question_type
       FROM exam_papers
       WHERE paper_id IS NULL
+        AND user_id IS NULL
         AND school = $1 AND exam_sheet = $2
       ORDER BY order_no ASC
     `, [school, examSheet]);

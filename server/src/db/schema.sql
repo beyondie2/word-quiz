@@ -134,8 +134,10 @@ CREATE TABLE IF NOT EXISTS exam_papers (
     answer_format VARCHAR(20) NOT NULL,      -- 객주: 객관식 | 주관식
     question_type VARCHAR(100) NOT NULL,     -- 유형
     paper_id INTEGER,                        -- 사용자가 제작한 시험지 id. 같은 시험지의 문항은 같은 값을 가진다
+    user_id INTEGER,                         -- 시험지를 만든 사용자. 기준 시험지는 비어 있다
     created_at TIMESTAMP DEFAULT NOW(),
     CONSTRAINT exam_papers_answer_format_check CHECK (answer_format IN ('객관식', '주관식')),
+    CONSTRAINT exam_papers_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     CONSTRAINT exam_papers_source_type_check CHECK (
         source_type IS NULL OR source_type IN ('교과서', '모의고사', '부교재', '자작', '외부지문')
     )
@@ -248,7 +250,20 @@ CREATE UNIQUE INDEX IF NOT EXISTS exam_papers_user_paper_order_key
   WHERE paper_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_exam_papers_paper_id ON exam_papers(paper_id);
 CREATE INDEX IF NOT EXISTS idx_exam_paper_owners_user_id ON exam_paper_owners(user_id);
+ALTER TABLE exam_papers ADD COLUMN IF NOT EXISTS user_id INTEGER;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'exam_papers_user_id_fkey'
+  ) THEN
+    ALTER TABLE exam_papers
+      ADD CONSTRAINT exam_papers_user_id_fkey
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+  END IF;
+END $$;
+CREATE INDEX IF NOT EXISTS idx_exam_papers_user_id ON exam_papers(user_id);
 COMMENT ON COLUMN exam_papers.paper_id IS '사용자가 제작한 시험지를 구분하는 시험지id. 같은 시험지의 문항은 같은 값을 가진다';
+COMMENT ON COLUMN exam_papers.user_id IS '시험지를 만든 사용자 id. 기준 시험지는 비어 있다';
 CREATE INDEX IF NOT EXISTS idx_question_type_samples_question_type ON question_type_samples(question_type);
 CREATE INDEX IF NOT EXISTS idx_spoken_sentence_book ON spoken_sentence(book);
 CREATE INDEX IF NOT EXISTS idx_spoken_sentence_book_section_unit ON spoken_sentence(book, section, unit);
