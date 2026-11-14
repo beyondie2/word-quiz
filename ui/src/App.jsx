@@ -1955,9 +1955,10 @@ function App() {
     }
   }
 
-  // 학교+시험별시험지 단위 삭제
-  const handleDeleteExamPaper = async (school, examSheet) => {
-    if (!confirm(`"${school} / ${examSheet}" 시험지를 삭제하시겠습니까?\n해당 시험지의 모든 항목이 삭제됩니다.`)) {
+  // 학교+시험별시험지+시험지id 단위 삭제
+  const handleDeleteExamPaper = async (school, examSheet, paperId) => {
+    const paperLabel = paperId ? ` (시험지id ${paperId})` : ''
+    if (!confirm(`"${school} / ${examSheet}${paperLabel}" 시험지를 삭제하시겠습니까?\n해당 시험지의 모든 항목이 삭제됩니다.`)) {
       return
     }
 
@@ -1965,7 +1966,7 @@ function App() {
       const response = await fetch(`${API_BASE}/admin/exam-papers`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adminId: userId, school, examSheet })
+        body: JSON.stringify({ adminId: userId, school, examSheet, paperId: paperId ?? null })
       })
       const data = await response.json()
 
@@ -5649,11 +5650,12 @@ function App() {
                 <div className="upload-info">
                   <p>엑셀 파일 형식: 첫 번째 행에 컬럼명이 있어야 합니다.</p>
                   <p><strong>필수 컬럼:</strong> 학교, 시험별시험지, 순서번호, 구성번호, 출처들, 객주, 유형</p>
-                  <p><strong>선택 컬럼:</strong> 출처구분, 문제</p>
+                  <p><strong>선택 컬럼:</strong> 출처구분, 문제, 시험지id</p>
                   <p><strong>객주</strong> 값은 <strong>객관식</strong> 또는 <strong>주관식</strong>만 가능합니다.</p>
                   <p><strong>출처구분</strong> 값은 <strong>교과서</strong>, <strong>모의고사</strong>, <strong>부교재</strong>, <strong>자작</strong>, <strong>외부지문</strong>만 가능합니다. 비우면 구분하지 않습니다.</p>
                   <p><strong>문제</strong>에 본문을 넣으면 시험지를 만들 때 그 문제를 그대로 씁니다. 비우면 출처·유형·객주에 맞는 문제를 고릅니다.</p>
-                  <p>같은 학교, 시험별시험지, 순서번호가 이미 있으면 해당 행을 수정합니다.</p>
+                  <p><strong>시험지id</strong>는 사용자가 만든 시험지를 구분하는 1 이상의 정수입니다. 같은 시험지의 문항은 같은 번호를 씁니다. 비우면 기준 시험지입니다.</p>
+                  <p>같은 학교, 시험별시험지, 순서번호, 시험지id가 이미 있으면 해당 행을 수정합니다.</p>
                 </div>
                 <div className="upload-form">
                   <input
@@ -5709,6 +5711,7 @@ function App() {
                     <table className="admin-table">
                       <thead>
                         <tr>
+                          <th>시험지id</th>
                           <th>학교</th>
                           <th>시험별시험지</th>
                           <th>객관식</th>
@@ -5719,7 +5722,8 @@ function App() {
                       </thead>
                       <tbody>
                         {adminExamPapers.map((item) => (
-                          <tr key={`${item.school}-${item.exam_sheet}`}>
+                          <tr key={`${item.paper_id ?? 'base'}-${item.school}-${item.exam_sheet}`}>
+                            <td>{item.paper_id ?? ''}</td>
                             <td>{item.school}</td>
                             <td>{item.exam_sheet}</td>
                             <td>{item.multiple_choice_count}</td>
@@ -5728,7 +5732,7 @@ function App() {
                             <td>
                               <button
                                 className="delete-btn"
-                                onClick={() => handleDeleteExamPaper(item.school, item.exam_sheet)}
+                                onClick={() => handleDeleteExamPaper(item.school, item.exam_sheet, item.paper_id)}
                               >
                                 삭제
                               </button>
@@ -5750,6 +5754,7 @@ function App() {
                     <table className="admin-table exam-paper-detail">
                       <thead>
                         <tr>
+                          <th>시험지id</th>
                           <th>학교</th>
                           <th>시험별시험지</th>
                           <th>순서번호</th>
@@ -5764,6 +5769,7 @@ function App() {
                       <tbody>
                         {adminExamPaperItems.map((item) => (
                           <tr key={item.id}>
+                            <td>{item.paper_id ?? ''}</td>
                             <td>{item.school}</td>
                             <td>{item.exam_sheet}</td>
                             <td>{item.order_no}</td>

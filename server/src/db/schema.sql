@@ -133,12 +133,12 @@ CREATE TABLE IF NOT EXISTS exam_papers (
     question TEXT,                           -- 문제 본문. 있으면 시험지를 만들 때 이 문제를 쓴다
     answer_format VARCHAR(20) NOT NULL,      -- 객주: 객관식 | 주관식
     question_type VARCHAR(100) NOT NULL,     -- 유형
+    paper_id INTEGER,                        -- 사용자가 제작한 시험지 id. 같은 시험지의 문항은 같은 값을 가진다
     created_at TIMESTAMP DEFAULT NOW(),
     CONSTRAINT exam_papers_answer_format_check CHECK (answer_format IN ('객관식', '주관식')),
     CONSTRAINT exam_papers_source_type_check CHECK (
         source_type IS NULL OR source_type IN ('교과서', '모의고사', '부교재', '자작', '외부지문')
-    ),
-    CONSTRAINT exam_papers_school_sheet_order_key UNIQUE (school, exam_sheet, order_no)
+    )
 );
 
 -- QuestionTypeSamples 테이블: 유형별 예시 문제 (업로드된 시험지의 문항 유형 분석에 사용)
@@ -227,6 +227,16 @@ CREATE INDEX IF NOT EXISTS idx_exam_questions_exam_scope ON exam_questions(exam_
 CREATE INDEX IF NOT EXISTS idx_exam_questions_question_type ON exam_questions(question_type);
 CREATE INDEX IF NOT EXISTS idx_exam_questions_answer_format ON exam_questions(answer_format);
 CREATE INDEX IF NOT EXISTS idx_exam_papers_school_sheet ON exam_papers(school, exam_sheet);
+ALTER TABLE exam_papers ADD COLUMN IF NOT EXISTS paper_id INTEGER;
+ALTER TABLE exam_papers DROP CONSTRAINT IF EXISTS exam_papers_school_sheet_order_key;
+CREATE UNIQUE INDEX IF NOT EXISTS exam_papers_template_order_key
+  ON exam_papers (school, exam_sheet, order_no)
+  WHERE paper_id IS NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS exam_papers_user_paper_order_key
+  ON exam_papers (paper_id, order_no)
+  WHERE paper_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_exam_papers_paper_id ON exam_papers(paper_id);
+COMMENT ON COLUMN exam_papers.paper_id IS '사용자가 제작한 시험지를 구분하는 시험지id. 같은 시험지의 문항은 같은 값을 가진다';
 CREATE INDEX IF NOT EXISTS idx_question_type_samples_question_type ON question_type_samples(question_type);
 CREATE INDEX IF NOT EXISTS idx_spoken_sentence_book ON spoken_sentence(book);
 CREATE INDEX IF NOT EXISTS idx_spoken_sentence_book_section_unit ON spoken_sentence(book, section, unit);
@@ -319,7 +329,7 @@ VALUES
     ('센텀여고', '26학년도2학년2학기중간', 30, '23', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '요지'),
     ('센텀여고', '26학년도2학년2학기중간', 31, '24', '24년10월2,25년10월2,26년10월2', '객관식', '요약'),
     ('센텀여고', '26학년도2학년2학기중간', 32, '서답형 6', '국어영작', '주관식', '국어영작')
-ON CONFLICT (school, exam_sheet, order_no) DO NOTHING;
+ON CONFLICT (school, exam_sheet, order_no) WHERE paper_id IS NULL DO NOTHING;
 
 -- 샘플 시험지의 출처 구분. 이미 값이 있으면 건드리지 않는다.
 DO $$

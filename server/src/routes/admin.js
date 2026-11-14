@@ -1101,6 +1101,7 @@ const EXAM_PAPER_COLUMNS = {
 const EXAM_PAPER_OPTIONAL_COLUMNS = {
   source_type: ['source_type', '출처구분', '출처 구분'],
   question: ['question', '문제', '문제본문'],
+  paper_id: ['paper_id', '시험지id', '시험지ID', '시험지 아이디'],
 };
 
 const EXAM_PAPER_SOURCE_TYPES = ['교과서', '모의고사', '부교재', '자작', '외부지문'];
@@ -1110,6 +1111,14 @@ function examPaperOrderNo(row) {
   if (!raw) return null;
   const value = Number(raw);
   if (!Number.isInteger(value) || value <= 0) return null;
+  return value;
+}
+
+function examPaperId(row) {
+  const raw = examQuestionCell(row, EXAM_PAPER_OPTIONAL_COLUMNS.paper_id);
+  if (!raw) return null;
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value <= 0) return undefined;
   return value;
 }
 
@@ -1147,12 +1156,13 @@ router.post('/exam-papers/upload', upload.single('file'), async (req, res) => {
     if (missingColumns.length > 0) {
       return res.status(400).json({
         error: `필수 컬럼이 누락되었습니다: ${missingColumns.join(', ')}`,
-        hint: '첫 번째 행에 학교, 시험별시험지, 순서번호, 구성번호, 출처들, 객주(객관식|주관식), 유형 컬럼명이 있어야 합니다. 출처구분(교과서|모의고사|부교재|자작|외부지문)과 문제는 선택입니다',
+        hint: '첫 번째 행에 학교, 시험별시험지, 순서번호, 구성번호, 출처들, 객주(객관식|주관식), 유형 컬럼명이 있어야 합니다. 출처구분(교과서|모의고사|부교재|자작|외부지문), 문제, 시험지id는 선택입니다',
       });
     }
 
     const hasSourceType = examQuestionHasColumn(data[0], EXAM_PAPER_OPTIONAL_COLUMNS.source_type);
     const hasQuestion = examQuestionHasColumn(data[0], EXAM_PAPER_OPTIONAL_COLUMNS.question);
+    const hasPaperId = examQuestionHasColumn(data[0], EXAM_PAPER_OPTIONAL_COLUMNS.paper_id);
 
     let insertedCount = 0;
     let updatedCount = 0;
@@ -1176,6 +1186,7 @@ router.post('/exam-papers/upload', upload.single('file'), async (req, res) => {
       const question = hasQuestion
         ? (examQuestionCell(row, EXAM_PAPER_OPTIONAL_COLUMNS.question) || null)
         : null;
+      const paper_id = hasPaperId ? examPaperId(row) : null;
 
       if (!school || !exam_sheet || order_no == null || !composition_no || !sources || !answer_format || !question_type) {
         skippedCount++;
@@ -1192,6 +1203,12 @@ router.post('/exam-papers/upload', upload.single('file'), async (req, res) => {
       if (source_type && !EXAM_PAPER_SOURCE_TYPES.includes(source_type)) {
         skippedCount++;
         errors.push(`행 ${rowNum}: 출처구분은 ${EXAM_PAPER_SOURCE_TYPES.join(', ')} 중 하나여야 합니다`);
+        continue;
+      }
+
+      if (paper_id === undefined) {
+        skippedCount++;
+        errors.push(`행 ${rowNum}: 시험지id는 1 이상의 정수여야 합니다`);
         continue;
       }
 
@@ -1217,11 +1234,18 @@ router.post('/exam-papers/upload', upload.single('file'), async (req, res) => {
           params.push(question);
           sets.push(`question = $${params.length}`);
         }
+        if (hasPaperId) {
+          params.push(paper_id);
+          sets.push(`paper_id = $${params.length}`);
+        }
+        params.push(hasPaperId ? paper_id : null);
+        const paperIdParam = `$${params.length}`;
 
         const updated = await pool.query(
           `UPDATE exam_papers
            SET ${sets.join(', ')}
-           WHERE school = $1 AND exam_sheet = $2 AND order_no = $3`,
+           WHERE school = $1 AND exam_sheet = $2 AND order_no = $3
+             AND paper_id IS NOT DISTINCT FROM ${paperIdParam}`,
           params
         );
 
@@ -1232,9 +1256,9 @@ router.post('/exam-papers/upload', upload.single('file'), async (req, res) => {
 
         await pool.query(
           `INSERT INTO exam_papers
-             (school, exam_sheet, order_no, composition_no, sources, source_type, question, answer_format, question_type)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-          [school, exam_sheet, order_no, composition_no, sources, source_type, question, answer_format, question_type]
+             (school, exam_sheet, order_no, composition_no, sources, source_type, question, answer_format, question_type, paper_id)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+          [school, exam_sheet, order_no, composition_no, sources, source_type, question, answer_format, question_type, paper_id]
         );
         insertedCount++;
       } catch (dbError) {
@@ -1278,10 +1302,11 @@ router.get('/exam-papers', async (req, res) => {
         exam_sheet,
         COUNT(*) FILTER (WHERE answer_format = '객관식')::int AS multiple_choice_count,
         COUNT(*) FILTER (WHERE answer_format = '주관식')::int AS short_answer_count,
-        COUNT(*)::int AS item_count
+        COUNT(*)::int AS item_count,
+        paper_id
       FROM exam_papers
-      GROUP BY school, exam_sheet
-      ORDER BY school, exam_sheet
+      GROUP BY school, exam_sheet, paper_id
+      ORDER BY paper_id NULLS FIRST, school, exam_sheet
     `);
 
     const items = await pool.query(`
@@ -1295,9 +1320,10 @@ router.get('/exam-papers', async (req, res) => {
         source_type,
         question,
         answer_format,
-        question_type
+        question_type,
+        paper_id
       FROM exam_papers
-      ORDER BY school, exam_sheet, order_no, id
+      ORDER BY paper_id NULLS FIRST, school, exam_sheet, order_no, id
     `);
 
     res.json({
@@ -1313,6 +1339,14 @@ router.get('/exam-papers', async (req, res) => {
 // DELETE /api/admin/exam-papers - 학교+시험별시험지 단위 삭제
 router.delete('/exam-papers', async (req, res) => {
   const { adminId, school, examSheet } = req.body;
+  const paperIdRaw = req.body?.paperId;
+  let paperId = null;
+  if (paperIdRaw != null && paperIdRaw !== '') {
+    paperId = Number(paperIdRaw);
+    if (!Number.isInteger(paperId) || paperId <= 0) {
+      return res.status(400).json({ error: '시험지id는 1 이상의 정수여야 합니다' });
+    }
+  }
 
   try {
     const adminCheck = await pool.query(
@@ -1329,8 +1363,10 @@ router.delete('/exam-papers', async (req, res) => {
     }
 
     const result = await pool.query(
-      'DELETE FROM exam_papers WHERE school = $1 AND exam_sheet = $2',
-      [school, examSheet]
+      `DELETE FROM exam_papers
+       WHERE school = $1 AND exam_sheet = $2
+         AND paper_id IS NOT DISTINCT FROM $3`,
+      [school, examSheet, paperId]
     );
 
     res.json({

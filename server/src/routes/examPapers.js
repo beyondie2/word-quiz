@@ -11,7 +11,8 @@ router.get('/schools', async (req, res) => {
     const result = await pool.query(`
       SELECT DISTINCT school
       FROM exam_papers
-      WHERE school IS NOT NULL AND TRIM(school) != ''
+      WHERE paper_id IS NULL
+        AND school IS NOT NULL AND TRIM(school) != ''
       ORDER BY school
     `);
     const rows = trimStringFields(result.rows);
@@ -34,7 +35,8 @@ router.get('/sheets', async (req, res) => {
     const result = await pool.query(`
       SELECT DISTINCT exam_sheet
       FROM exam_papers
-      WHERE school = $1 AND exam_sheet IS NOT NULL AND TRIM(exam_sheet) != ''
+      WHERE paper_id IS NULL
+        AND school = $1 AND exam_sheet IS NOT NULL AND TRIM(exam_sheet) != ''
       ORDER BY exam_sheet
     `, [String(school).trim()]);
     const rows = trimStringFields(result.rows);
@@ -70,7 +72,8 @@ router.get('/build', async (req, res) => {
     const papersResult = await pool.query(`
       SELECT order_no, composition_no, sources, source_type, question, answer_format, question_type
       FROM exam_papers
-      WHERE school = $1 AND exam_sheet = $2
+      WHERE paper_id IS NULL
+        AND school = $1 AND exam_sheet = $2
       ORDER BY order_no ASC
     `, [school, examSheet]);
 
