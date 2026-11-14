@@ -4863,6 +4863,9 @@ function App() {
                         </div>
                       )}
                     </section>
+                    <button type="button" className="select-button primary new-exam-model-button">
+                      시험지모델 만들기
+                    </button>
                     </>
                   )}
                 </div>

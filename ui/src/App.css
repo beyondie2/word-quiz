@@ -2210,6 +2210,10 @@
   min-width: 140px;
 }
 
+.new-exam-model-button {
+  margin-top: 8px;
+}
+
 .new-exam-scope {
   position: relative;
   z-index: 4;
