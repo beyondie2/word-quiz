@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS blocks_progress (
 -- ExamQuestions 테이블: 시험 문제 (범위, 유형, 객주, 문제, 해답)
 CREATE TABLE IF NOT EXISTS exam_questions (
     id SERIAL PRIMARY KEY,
-    exam_scope VARCHAR(200) NOT NULL,       -- 시험범위 (예: 지학(신상근)2고1과, 24년10월2)
+    exam_scope VARCHAR(200) NOT NULL,       -- 시험범위 (예: Lesson 2 The Future on Our Plates, 2024학년도 10월 고2 전국연합학력평가)
     question_type VARCHAR(100) NOT NULL,    -- 문제 유형 (예: 주제, 일치, 국어영작)
     answer_format VARCHAR(20) NOT NULL,     -- 객주: 객관식 | 주관식
     question TEXT NOT NULL,                 -- 문제
@@ -324,37 +324,37 @@ ON CONFLICT DO NOTHING;
 -- 센텀여고 26학년도 2학년 2학기 중간 시험지
 INSERT INTO exam_papers (school, exam_sheet, order_no, composition_no, sources, answer_format, question_type)
 VALUES
-    ('센텀여고', '26학년도2학년2학기중간', 1, '1', '24년10월2,25년10월2,26년10월2', '객관식', '주제'),
-    ('센텀여고', '26학년도2학년2학기중간', 2, '2', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '일치'),
-    ('센텀여고', '26학년도2학년2학기중간', 3, '서답형 1', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '주관식', '국어영작'),
+    ('센텀여고', '26학년도2학년2학기중간', 1, '1', '2024학년도 10월 고2 전국연합학력평가,2025학년도 10월 고2 전국연합학력평가,2026학년도 10월 고2 전국연합학력평가', '객관식', '주제'),
+    ('센텀여고', '26학년도2학년2학기중간', 2, '2', 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors', '객관식', '일치'),
+    ('센텀여고', '26학년도2학년2학기중간', 3, '서답형 1', 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors', '주관식', '국어영작'),
     ('센텀여고', '26학년도2학년2학기중간', 4, '3', '외부', '객관식', '어법'),
-    ('센텀여고', '26학년도2학년2학기중간', 5, '4', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '낱말'),
-    ('센텀여고', '26학년도2학년2학기중간', 6, '5', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '제목'),
-    ('센텀여고', '26학년도2학년2학기중간', 7, '단답형 1', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '주관식', '국어낱말'),
-    ('센텀여고', '26학년도2학년2학기중간', 8, '6', '24년10월2,25년10월2,26년10월2', '객관식', '낱말'),
-    ('센텀여고', '26학년도2학년2학기중간', 9, '서답형 2', '24년10월2,25년10월2,26년10월2', '주관식', '국어영작'),
-    ('센텀여고', '26학년도2학년2학기중간', 10, '7', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '삽입'),
-    ('센텀여고', '26학년도2학년2학기중간', 11, '8', '24년10월2,25년10월2,26년10월2', '객관식', '삽입'),
-    ('센텀여고', '26학년도2학년2학기중간', 12, '단답형 2', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '주관식', '주관식요약'),
-    ('센텀여고', '26학년도2학년2학기중간', 13, '9', '24년10월2,25년10월2,26년10월2', '객관식', '어법'),
-    ('센텀여고', '26학년도2학년2학기중간', 14, '서답형 3', '24년10월2,25년10월2,26년10월2', '주관식', '추론영작'),
-    ('센텀여고', '26학년도2학년2학기중간', 15, '10', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '주제'),
-    ('센텀여고', '26학년도2학년2학기중간', 16, '11', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '어법'),
+    ('센텀여고', '26학년도2학년2학기중간', 5, '4', 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors', '객관식', '낱말'),
+    ('센텀여고', '26학년도2학년2학기중간', 6, '5', 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors', '객관식', '제목'),
+    ('센텀여고', '26학년도2학년2학기중간', 7, '단답형 1', 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors', '주관식', '국어낱말'),
+    ('센텀여고', '26학년도2학년2학기중간', 8, '6', '2024학년도 10월 고2 전국연합학력평가,2025학년도 10월 고2 전국연합학력평가,2026학년도 10월 고2 전국연합학력평가', '객관식', '낱말'),
+    ('센텀여고', '26학년도2학년2학기중간', 9, '서답형 2', '2024학년도 10월 고2 전국연합학력평가,2025학년도 10월 고2 전국연합학력평가,2026학년도 10월 고2 전국연합학력평가', '주관식', '국어영작'),
+    ('센텀여고', '26학년도2학년2학기중간', 10, '7', 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors', '객관식', '삽입'),
+    ('센텀여고', '26학년도2학년2학기중간', 11, '8', '2024학년도 10월 고2 전국연합학력평가,2025학년도 10월 고2 전국연합학력평가,2026학년도 10월 고2 전국연합학력평가', '객관식', '삽입'),
+    ('센텀여고', '26학년도2학년2학기중간', 12, '단답형 2', 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors', '주관식', '주관식요약'),
+    ('센텀여고', '26학년도2학년2학기중간', 13, '9', '2024학년도 10월 고2 전국연합학력평가,2025학년도 10월 고2 전국연합학력평가,2026학년도 10월 고2 전국연합학력평가', '객관식', '어법'),
+    ('센텀여고', '26학년도2학년2학기중간', 14, '서답형 3', '2024학년도 10월 고2 전국연합학력평가,2025학년도 10월 고2 전국연합학력평가,2026학년도 10월 고2 전국연합학력평가', '주관식', '추론영작'),
+    ('센텀여고', '26학년도2학년2학기중간', 15, '10', 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors', '객관식', '주제'),
+    ('센텀여고', '26학년도2학년2학기중간', 16, '11', 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors', '객관식', '어법'),
     ('센텀여고', '26학년도2학년2학기중간', 17, '12', '외부', '객관식', '순서'),
-    ('센텀여고', '26학년도2학년2학기중간', 18, '13', '24년10월2,25년10월2,26년10월2', '객관식', '순서'),
-    ('센텀여고', '26학년도2학년2학기중간', 19, '서답형 4', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '주관식', '국어영작'),
-    ('센텀여고', '26학년도2학년2학기중간', 20, '14', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '빈칸'),
+    ('센텀여고', '26학년도2학년2학기중간', 18, '13', '2024학년도 10월 고2 전국연합학력평가,2025학년도 10월 고2 전국연합학력평가,2026학년도 10월 고2 전국연합학력평가', '객관식', '순서'),
+    ('센텀여고', '26학년도2학년2학기중간', 19, '서답형 4', 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors', '주관식', '국어영작'),
+    ('센텀여고', '26학년도2학년2학기중간', 20, '14', 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors', '객관식', '빈칸'),
     ('센텀여고', '26학년도2학년2학기중간', 21, '15', '외부', '객관식', '빈칸'),
-    ('센텀여고', '26학년도2학년2학기중간', 22, '16', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '빈칸'),
-    ('센텀여고', '26학년도2학년2학기중간', 23, '17', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '빈칸'),
-    ('센텀여고', '26학년도2학년2학기중간', 24, '18', '24년10월2,25년10월2,26년10월2', '객관식', '빈칸'),
-    ('센텀여고', '26학년도2학년2학기중간', 25, '19', '24년10월2,25년10월2,26년10월2', '객관식', '빈칸'),
-    ('센텀여고', '26학년도2학년2학기중간', 26, '20', '24년10월2,25년10월2,26년10월2', '객관식', '삽입'),
-    ('센텀여고', '26학년도2학년2학기중간', 27, '서답형 5', '24년10월2,25년10월2,26년10월2', '주관식', '추론영작'),
-    ('센텀여고', '26학년도2학년2학기중간', 28, '21', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '요약'),
-    ('센텀여고', '26학년도2학년2학기중간', 29, '22', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '순서'),
-    ('센텀여고', '26학년도2학년2학기중간', 30, '23', '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과', '객관식', '요지'),
-    ('센텀여고', '26학년도2학년2학기중간', 31, '24', '24년10월2,25년10월2,26년10월2', '객관식', '요약'),
+    ('센텀여고', '26학년도2학년2학기중간', 22, '16', 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors', '객관식', '빈칸'),
+    ('센텀여고', '26학년도2학년2학기중간', 23, '17', 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors', '객관식', '빈칸'),
+    ('센텀여고', '26학년도2학년2학기중간', 24, '18', '2024학년도 10월 고2 전국연합학력평가,2025학년도 10월 고2 전국연합학력평가,2026학년도 10월 고2 전국연합학력평가', '객관식', '빈칸'),
+    ('센텀여고', '26학년도2학년2학기중간', 25, '19', '2024학년도 10월 고2 전국연합학력평가,2025학년도 10월 고2 전국연합학력평가,2026학년도 10월 고2 전국연합학력평가', '객관식', '빈칸'),
+    ('센텀여고', '26학년도2학년2학기중간', 26, '20', '2024학년도 10월 고2 전국연합학력평가,2025학년도 10월 고2 전국연합학력평가,2026학년도 10월 고2 전국연합학력평가', '객관식', '삽입'),
+    ('센텀여고', '26학년도2학년2학기중간', 27, '서답형 5', '2024학년도 10월 고2 전국연합학력평가,2025학년도 10월 고2 전국연합학력평가,2026학년도 10월 고2 전국연합학력평가', '주관식', '추론영작'),
+    ('센텀여고', '26학년도2학년2학기중간', 28, '21', 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors', '객관식', '요약'),
+    ('센텀여고', '26학년도2학년2학기중간', 29, '22', 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors', '객관식', '순서'),
+    ('센텀여고', '26학년도2학년2학기중간', 30, '23', 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors', '객관식', '요지'),
+    ('센텀여고', '26학년도2학년2학기중간', 31, '24', '2024학년도 10월 고2 전국연합학력평가,2025학년도 10월 고2 전국연합학력평가,2026학년도 10월 고2 전국연합학력평가', '객관식', '요약'),
     ('센텀여고', '26학년도2학년2학기중간', 32, '서답형 6', '국어영작', '주관식', '국어영작')
 ON CONFLICT (school, exam_sheet, order_no) WHERE paper_id IS NULL DO NOTHING;
 
@@ -371,12 +371,12 @@ BEGIN
     UPDATE exam_papers
     SET source_type = '모의고사'
     WHERE source_type IS NULL
-      AND sources = '24년10월2,25년10월2,26년10월2';
+      AND sources = '2024학년도 10월 고2 전국연합학력평가,2025학년도 10월 고2 전국연합학력평가,2026학년도 10월 고2 전국연합학력평가';
 
     UPDATE exam_papers
     SET source_type = '교과서'
     WHERE source_type IS NULL
-      AND sources = '지학(신상근)2고2과,지학(신상근)2고3과,지학(신상근)2고4과';
+      AND sources = 'Lesson 2 The Future on Our Plates,Lesson 3 Mathematics Is More Than Just Numbers,Lesson 4 Colorful Stories of Colors';
 
     UPDATE exam_papers
     SET source_type = '외부지문'
