@@ -141,6 +141,17 @@ CREATE TABLE IF NOT EXISTS exam_papers (
     )
 );
 
+-- ExamPaperOwners 테이블: 사용자가 제작한 시험지의 소유자
+-- paper_id는 exam_papers.paper_id와 같은 시험지 번호다. 문항마다 행이 나뉘어 있어 외래 키로 묶지 않는다.
+CREATE TABLE IF NOT EXISTS exam_paper_owners (
+    id SERIAL PRIMARY KEY,
+    paper_id INTEGER NOT NULL,               -- 시험지id (exam_papers.paper_id)
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- 소유자
+    created_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT exam_paper_owners_paper_id_positive CHECK (paper_id > 0),
+    CONSTRAINT exam_paper_owners_paper_id_key UNIQUE (paper_id)
+);
+
 -- QuestionTypeSamples 테이블: 유형별 예시 문제 (업로드된 시험지의 문항 유형 분석에 사용)
 CREATE TABLE IF NOT EXISTS question_type_samples (
     id SERIAL PRIMARY KEY,
@@ -236,6 +247,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS exam_papers_user_paper_order_key
   ON exam_papers (paper_id, order_no)
   WHERE paper_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_exam_papers_paper_id ON exam_papers(paper_id);
+CREATE INDEX IF NOT EXISTS idx_exam_paper_owners_user_id ON exam_paper_owners(user_id);
 COMMENT ON COLUMN exam_papers.paper_id IS '사용자가 제작한 시험지를 구분하는 시험지id. 같은 시험지의 문항은 같은 값을 가진다';
 CREATE INDEX IF NOT EXISTS idx_question_type_samples_question_type ON question_type_samples(question_type);
 CREATE INDEX IF NOT EXISTS idx_spoken_sentence_book ON spoken_sentence(book);
