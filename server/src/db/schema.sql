@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS exam_papers (
     order_no INTEGER NOT NULL,               -- 순서번호
     composition_no VARCHAR(50) NOT NULL,     -- 구성번호 (숫자, 서답형, 단답형)
     sources TEXT NOT NULL,                   -- 출처들 (시험범위 이름, 쉼표로 구분)
-    source_type VARCHAR(20),                 -- 출처 구분: 교과서 | 모의고사 | 부교재 | 자작 | 외부지문
+    source_type VARCHAR(20),                 -- 출처 구분: 교과서 | 모의고사 | 부교재 | 자작 | 외부지문 | 기타
     question TEXT,                           -- 문제 본문. 있으면 시험지를 만들 때 이 문제를 쓴다
     answer_format VARCHAR(20) NOT NULL,      -- 객주: 객관식 | 주관식
     question_type VARCHAR(100) NOT NULL,     -- 유형
@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS exam_papers (
     CONSTRAINT exam_papers_answer_format_check CHECK (answer_format IN ('객관식', '주관식')),
     CONSTRAINT exam_papers_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     CONSTRAINT exam_papers_source_type_check CHECK (
-        source_type IS NULL OR source_type IN ('교과서', '모의고사', '부교재', '자작', '외부지문')
+        source_type IS NULL OR source_type IN ('교과서', '모의고사', '부교재', '자작', '외부지문', '기타')
     )
 );
 
@@ -266,6 +266,9 @@ END $$;
 CREATE INDEX IF NOT EXISTS idx_exam_papers_user_id ON exam_papers(user_id);
 COMMENT ON COLUMN exam_papers.paper_id IS '사용자가 제작한 시험지를 구분하는 시험지id. 같은 시험지의 문항은 같은 값을 가진다';
 COMMENT ON COLUMN exam_papers.user_id IS '시험지를 만든 사용자 id. 기준 시험지는 비어 있다';
+ALTER TABLE exam_papers DROP CONSTRAINT IF EXISTS exam_papers_source_type_check;
+ALTER TABLE exam_papers ADD CONSTRAINT exam_papers_source_type_check
+  CHECK (source_type IS NULL OR source_type IN ('교과서', '모의고사', '부교재', '자작', '외부지문', '기타'));
 CREATE INDEX IF NOT EXISTS idx_question_type_samples_question_type ON question_type_samples(question_type);
 CREATE INDEX IF NOT EXISTS idx_spoken_sentence_book ON spoken_sentence(book);
 CREATE INDEX IF NOT EXISTS idx_spoken_sentence_book_section_unit ON spoken_sentence(book, section, unit);

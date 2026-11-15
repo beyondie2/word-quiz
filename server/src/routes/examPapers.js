@@ -4,7 +4,7 @@ import { trimStringFields } from '../utils/trimHelper.js';
 import { buildExamSheetPdf } from '../utils/examSheetPdf.js';
 import { authenticateToken } from '../middleware/auth.js';
 
-const SOURCE_TYPES = ['교과서', '모의고사', '부교재', '자작', '외부지문'];
+const SOURCE_TYPES = ['교과서', '모의고사', '부교재', '자작', '외부지문', '기타'];
 
 const router = express.Router();
 

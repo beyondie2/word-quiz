@@ -8,9 +8,6 @@ const API_BASE = import.meta.env.VITE_API_URL || '/api'
 const SURVEY_FORM_URL = import.meta.env.VITE_SURVEY_FORM_URL
   || 'https://docs.google.com/forms/d/e/1FAIpQLSfzz-h-1GOWdS_2nkRPot7ZLvAoeI8SCbBbihEIBbGkc57xUg/viewform?usp=header'
 
-// 분석하기 결과에서 문항마다 고르는 지문 출처
-const NEW_EXAM_SOURCE_OPTIONS = ['교과서', '모의고사', '부교재', '자작', '외부지문']
-
 // 문항 분석에서 고르는 시기별 시험지
 const NEW_EXAM_PERIOD_OPTIONS = ['26년1학년2학기중간', '26년2학년2학기중간', '26년3학년2학기중간']
 
@@ -197,8 +194,6 @@ function App() {
   const [isAnalyzingNewExam, setIsAnalyzingNewExam] = useState(false)
   const [newExamAnalysis, setNewExamAnalysis] = useState([]) // 문항별 유형 분석 결과
   const [newExamAnalysisError, setNewExamAnalysisError] = useState('')
-  const [newExamSources, setNewExamSources] = useState({}) // 문항별 지문 출처
-  const [openNewExamSourceIndex, setOpenNewExamSourceIndex] = useState(null)
   // 문항 분석: schools 테이블의 시도 → 시군구 → 학교명
   const [schoolSidoList, setSchoolSidoList] = useState([])
   const [schoolSigunguList, setSchoolSigunguList] = useState([])
@@ -2257,8 +2252,6 @@ function App() {
     setIsAnalyzingNewExam(true)
     setNewExamAnalysis([])
     setNewExamAnalysisError('')
-    setNewExamSources({})
-    setOpenNewExamSourceIndex(null)
 
     try {
       const formData = new FormData()
@@ -2267,6 +2260,17 @@ function App() {
         formData.append('images', resized, resized.name)
       }
       if (newExamPdfFile) formData.append('pdf', newExamPdfFile)
+      formData.append('scope', JSON.stringify({
+        textbook: {
+          title: selectedTextbookTitle,
+          units: selectedTextbookUnits,
+        },
+        mockExams: selectedMockExams,
+        supplementary: {
+          bookName: selectedSupplementaryBook,
+          scopes: selectedSupplementaryScopes,
+        },
+      }))
 
       const response = await fetch(`${API_BASE}/exam-analysis/analyze`, {
         method: 'POST',
@@ -2297,13 +2301,6 @@ function App() {
     }
   }
 
-  const examModelSources = (sourceType) => {
-    if (sourceType === '교과서') return selectedTextbookUnits
-    if (sourceType === '모의고사') return selectedMockExams
-    if (sourceType === '부교재') return selectedSupplementaryScopes
-    return []
-  }
-
   const handleCreateExamModel = async () => {
     if (isSavingExamModel) return
     setExamModelMessage('')
@@ -2321,15 +2318,16 @@ function App() {
     const items = []
     for (let index = 0; index < newExamAnalysis.length; index++) {
       const item = newExamAnalysis[index]
-      const sourceType = newExamSources[index]
-      if (!sourceType) {
-        setExamModelError(`${index + 1}번 문항의 출처를 선택해주세요`)
+      const sourceType = String(item.source_kind || '').trim()
+      const sourceDetail = String(item.source_detail || '').trim()
+      if (!['교과서', '모의고사', '부교재', '기타'].includes(sourceType)) {
+        setExamModelError(`${index + 1}번 문항의 출처를 알 수 없습니다`)
         return
       }
       items.push({
         compositionNo: String(item.number ?? index + 1).trim(),
         sourceType,
-        sources: examModelSources(sourceType),
+        sources: sourceDetail ? [sourceDetail] : [],
         question: item.question ?? '',
         answerFormat: item.answer_format ?? '',
         questionType: item.question_type ?? '',
@@ -4702,7 +4700,6 @@ function App() {
                           setShowSchoolSidoDropdown(false)
                           setShowSchoolSigunguDropdown(false)
                           setShowSchoolNameDropdown(false)
-                          setOpenNewExamSourceIndex(null)
                           setShowTextbookDropdown(false)
                           setShowTextbookCategoryDropdown(false)
                           setShowMockGradeDropdown(false)
@@ -4745,7 +4742,6 @@ function App() {
                           setShowSchoolSigunguDropdown(false)
                           setShowSchoolNameDropdown(false)
                           setShowNewExamPeriodDropdown(false)
-                          setOpenNewExamSourceIndex(null)
                           setShowSupplementaryDropdown(false)
                         }}
                       >
@@ -4783,7 +4779,6 @@ function App() {
                             setShowSchoolSigunguDropdown(false)
                             setShowSchoolNameDropdown(false)
                             setShowNewExamPeriodDropdown(false)
-                            setOpenNewExamSourceIndex(null)
                             setShowSupplementaryDropdown(false)
                           }}
                         >
@@ -4846,7 +4841,6 @@ function App() {
                           setShowSchoolSigunguDropdown(false)
                           setShowSchoolNameDropdown(false)
                           setShowNewExamPeriodDropdown(false)
-                          setOpenNewExamSourceIndex(null)
                           setShowSupplementaryDropdown(false)
                         }}
                       >
@@ -4907,7 +4901,6 @@ function App() {
                           setShowSchoolSigunguDropdown(false)
                           setShowSchoolNameDropdown(false)
                           setShowNewExamPeriodDropdown(false)
-                          setOpenNewExamSourceIndex(null)
                         }}
                       >
                         {selectedSupplementaryBook || '책 이름'}
@@ -5039,55 +5032,26 @@ function App() {
                     <ul className="new-exam-analysis-list">
                       {newExamAnalysis.map((item, index) => (
                         <li key={`${item.number}-${index}`} className="new-exam-analysis-item">
-                          <span className="new-exam-question-label">{item.number}. {item.question_type}</span>
-                          <textarea
-                            className="new-exam-question-edit"
-                            value={item.question ?? ''}
-                            rows={2}
-                            spellCheck={false}
-                            aria-label={`${item.number}번 문제`}
-                            placeholder="인식된 문제"
-                            onChange={(e) => {
-                              const next = e.target.value
-                              fitExamQuestionField(e.target)
-                              setNewExamAnalysis((prev) => prev.map((row, rowIndex) => (
-                                rowIndex === index ? { ...row, question: next } : row
-                              )))
-                            }}
-                            ref={(element) => fitExamQuestionField(element)}
-                          />
-                          <div className="dropdown-container new-exam-source-dropdown">
-                            <button
-                              type="button"
-                              className="select-button"
-                              onClick={() => {
-                                setOpenNewExamSourceIndex(openNewExamSourceIndex === index ? null : index)
-                                setShowTextbookDropdown(false)
-                          setShowTextbookCategoryDropdown(false)
-                          setShowMockGradeDropdown(false)
-                          setShowMockExamDropdown(false)
-                                setShowSupplementaryDropdown(false)
+                          <div className="new-exam-analysis-main">
+                            <span className="new-exam-question-label">{item.number}. {item.question_type}</span>
+                            <textarea
+                              className="new-exam-question-edit"
+                              value={item.question ?? ''}
+                              rows={2}
+                              spellCheck={false}
+                              aria-label={`${item.number}번 문제`}
+                              placeholder="인식된 문제"
+                              onChange={(e) => {
+                                const next = e.target.value
+                                fitExamQuestionField(e.target)
+                                setNewExamAnalysis((prev) => prev.map((row, rowIndex) => (
+                                  rowIndex === index ? { ...row, question: next } : row
+                                )))
                               }}
-                            >
-                              {newExamSources[index] || '출처'}
-                            </button>
-                            {openNewExamSourceIndex === index && (
-                              <div className="dropdown-menu new-exam-source-menu">
-                                {NEW_EXAM_SOURCE_OPTIONS.map((option) => (
-                                  <div
-                                    key={option}
-                                    className="dropdown-item"
-                                    onClick={() => {
-                                      setNewExamSources((prev) => ({ ...prev, [index]: option }))
-                                      setOpenNewExamSourceIndex(null)
-                                    }}
-                                  >
-                                    {option}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                              ref={(element) => fitExamQuestionField(element)}
+                            />
                           </div>
+                          <p className="new-exam-source-line">{item.source_label || '기타 출처를 찾지 못함'}</p>
                         </li>
                       ))}
                     </ul>
@@ -5890,7 +5854,7 @@ function App() {
                   <p><strong>필수 컬럼:</strong> 학교, 시험별시험지, 순서번호, 구성번호, 출처들, 객주, 유형</p>
                   <p><strong>선택 컬럼:</strong> 출처구분, 문제, 시험지id, 사용자id</p>
                   <p><strong>객주</strong> 값은 <strong>객관식</strong> 또는 <strong>주관식</strong>만 가능합니다.</p>
-                  <p><strong>출처구분</strong> 값은 <strong>교과서</strong>, <strong>모의고사</strong>, <strong>부교재</strong>, <strong>자작</strong>, <strong>외부지문</strong>만 가능합니다. 비우면 구분하지 않습니다.</p>
+                  <p><strong>출처구분</strong> 값은 <strong>교과서</strong>, <strong>모의고사</strong>, <strong>부교재</strong>, <strong>자작</strong>, <strong>외부지문</strong>, <strong>기타</strong>만 가능합니다. 비우면 구분하지 않습니다.</p>
                   <p><strong>문제</strong>에 본문을 넣으면 시험지를 만들 때 그 문제를 그대로 씁니다. 비우면 출처·유형·객주에 맞는 문제를 고릅니다.</p>
                   <p><strong>시험지id</strong>는 사용자가 만든 시험지를 구분하는 1 이상의 정수입니다. 같은 시험지의 문항은 같은 번호를 씁니다. 비우면 기준 시험지입니다.</p>
                   <p><strong>사용자id</strong>는 시험지를 만든 사용자의 번호입니다. 등록된 사용자만 넣을 수 있고, 비우면 기준 시험지입니다.</p>

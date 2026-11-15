@@ -1105,7 +1105,7 @@ const EXAM_PAPER_OPTIONAL_COLUMNS = {
   user_id: ['user_id', '사용자id', '사용자ID', '사용자 아이디'],
 };
 
-const EXAM_PAPER_SOURCE_TYPES = ['교과서', '모의고사', '부교재', '자작', '외부지문'];
+const EXAM_PAPER_SOURCE_TYPES = ['교과서', '모의고사', '부교재', '자작', '외부지문', '기타'];
 
 function examPaperOrderNo(row) {
   const raw = examQuestionCell(row, EXAM_PAPER_COLUMNS.order_no);
@@ -1165,7 +1165,7 @@ router.post('/exam-papers/upload', upload.single('file'), async (req, res) => {
     if (missingColumns.length > 0) {
       return res.status(400).json({
         error: `필수 컬럼이 누락되었습니다: ${missingColumns.join(', ')}`,
-        hint: '첫 번째 행에 학교, 시험별시험지, 순서번호, 구성번호, 출처들, 객주(객관식|주관식), 유형 컬럼명이 있어야 합니다. 출처구분(교과서|모의고사|부교재|자작|외부지문), 문제, 시험지id, 사용자id는 선택입니다',
+        hint: '첫 번째 행에 학교, 시험별시험지, 순서번호, 구성번호, 출처들, 객주(객관식|주관식), 유형 컬럼명이 있어야 합니다. 출처구분(교과서|모의고사|부교재|자작|외부지문|기타), 문제, 시험지id, 사용자id는 선택입니다',
       });
     }
 

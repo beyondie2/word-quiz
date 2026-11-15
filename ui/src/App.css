@@ -2211,10 +2211,16 @@
 .new-exam-analysis-item {
   position: relative;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
   padding: 8px;
+}
+
+.new-exam-analysis-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .new-exam-question-label {
@@ -2249,18 +2255,11 @@
   color: #6B9AAD;
 }
 
-.new-exam-analysis-item:has(.new-exam-source-menu) {
-  z-index: 2;
-}
-
-.new-exam-source-dropdown {
-  flex-shrink: 0;
-}
-
-.new-exam-source-menu {
-  left: auto;
-  right: 0;
-  min-width: 140px;
+.new-exam-source-line {
+  margin: 0;
+  color: #E8F4FD;
+  line-height: 1.5;
+  white-space: pre-wrap;
 }
 
 .new-exam-model-button {

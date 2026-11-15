@@ -76,6 +76,14 @@ function buildSystemPrompt(byType) {
     '',
     '하나의 지문에 여러 문항이 딸린 경우에도 문항마다 따로 적습니다. 문항을 빠뜨리거나 합치지 마세요.',
     '',
+    '각 문항의 지문이 어디서 왔는지도 정합니다. 사용자가 적어 준 시험범위(교과서 단원, 모의고사, 부교재 하위범위)와 지문을 비교합니다.',
+    '- 지정한 교과서 단원의 지문이면 source_kind는 "교과서"입니다. source_detail에는 그 책 제목과 단원 이름을 지정한 글자 그대로 적습니다.',
+    '- 지정한 모의고사의 지문이면 source_kind는 "모의고사"입니다. source_detail에는 그 모의고사 이름을 지정한 글자 그대로 적습니다.',
+    '- 지정한 부교재 하위범위의 지문이면 source_kind는 "부교재"입니다. source_detail에는 그 책 이름과 하위범위를 지정한 글자 그대로 적습니다.',
+    '- 지정한 범위 어디에도 없으면 source_kind는 "기타"입니다. source_detail에는 그 지문이 실제로 실린 책과 장·단원·회차를 적습니다. 예: "EBS 수능특강 영어 3강", "능률 영어독해 5과". 책이나 장을 특정할 수 없으면 "출처를 찾지 못함"이라고 적습니다.',
+    '- source_detail에는 "교과서", "모의고사", "부교재", "기타"라는 분류 단어를 넣지 않습니다.',
+    '한 지문에 여러 문항이 있으면 문항마다 같은 출처를 적습니다. 지문이 없는 문항도 가능하면 출처를 찾고, 판단할 수 없으면 기타와 "출처를 찾지 못함"을 적습니다.',
+    '',
     '<question_types>',
     ...sections,
     '</question_types>',
@@ -96,8 +104,10 @@ function buildOutputSchema(typeNames) {
             answer_format: { type: 'string', enum: ['객관식', '주관식'] },
             instruction: { type: 'string' },
             question: { type: 'string' },
+            source_kind: { type: 'string', enum: ['교과서', '모의고사', '부교재', '기타'] },
+            source_detail: { type: 'string' },
           },
-          required: ['number', 'question_type', 'answer_format', 'instruction', 'question'],
+          required: ['number', 'question_type', 'answer_format', 'instruction', 'question', 'source_kind', 'source_detail'],
           additionalProperties: false,
         },
       },
@@ -105,6 +115,116 @@ function buildOutputSchema(typeNames) {
     required: ['questions'],
     additionalProperties: false,
   };
+}
+
+const SOURCE_KINDS = ['교과서', '모의고사', '부교재', '기타'];
+
+function cleanScopeText(value, maxLen) {
+  return String(value ?? '').trim().replace(/\s+/g, ' ').slice(0, maxLen);
+}
+
+function cleanScopeList(value, maxItems, maxLen) {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set();
+  const items = [];
+  for (const entry of value) {
+    const text = cleanScopeText(entry, maxLen);
+    if (!text || seen.has(text)) continue;
+    seen.add(text);
+    items.push(text);
+    if (items.length >= maxItems) break;
+  }
+  return items;
+}
+
+function readScope(body) {
+  let parsed = {};
+  try {
+    parsed = JSON.parse(String(body?.scope || '{}'));
+  } catch {
+    parsed = {};
+  }
+  if (!parsed || typeof parsed !== 'object') parsed = {};
+  const textbook = parsed.textbook && typeof parsed.textbook === 'object' ? parsed.textbook : {};
+  const supplementary = parsed.supplementary && typeof parsed.supplementary === 'object' ? parsed.supplementary : {};
+  return {
+    textbook: {
+      title: cleanScopeText(textbook.title, 200),
+      units: cleanScopeList(textbook.units, 40, 100),
+    },
+    mockExams: cleanScopeList(parsed.mockExams, 40, 200),
+    supplementary: {
+      bookName: cleanScopeText(supplementary.bookName, 200),
+      scopes: cleanScopeList(supplementary.scopes, 40, 100),
+    },
+  };
+}
+
+function compactText(value) {
+  return String(value || '').replace(/\s+/g, '');
+}
+
+function longestMatch(detail, names) {
+  const haystack = compactText(detail);
+  let best = '';
+  for (const name of names) {
+    const needle = compactText(name);
+    if (!needle || !haystack.includes(needle)) continue;
+    if (needle.length > compactText(best).length) best = name;
+  }
+  return best;
+}
+
+function scopePrompt(scope) {
+  const lines = ['사용자가 지정한 시험범위입니다. 이 범위에 없는 지문은 기타로 분류합니다.'];
+  if (scope.textbook.title && scope.textbook.units.length > 0) {
+    lines.push(`교과서: ${scope.textbook.title}`);
+    for (const unit of scope.textbook.units) lines.push(`- ${unit}`);
+  } else {
+    lines.push('교과서: 지정한 단원 없음');
+  }
+  if (scope.mockExams.length > 0) {
+    lines.push('모의고사:');
+    for (const name of scope.mockExams) lines.push(`- ${name}`);
+  } else {
+    lines.push('모의고사: 지정한 시험 없음');
+  }
+  if (scope.supplementary.bookName && scope.supplementary.scopes.length > 0) {
+    lines.push(`부교재: ${scope.supplementary.bookName}`);
+    for (const subScope of scope.supplementary.scopes) lines.push(`- ${subScope}`);
+  } else {
+    lines.push('부교재: 지정한 하위범위 없음');
+  }
+  return lines.join('\n');
+}
+
+function normalizeSource(raw, scope) {
+  let kind = cleanScopeText(raw?.source_kind, 20);
+  let detail = cleanScopeText(raw?.source_detail, 200);
+  if (!SOURCE_KINDS.includes(kind)) kind = '기타';
+
+  if (kind === '교과서') {
+    const unit = longestMatch(detail, scope.textbook.units);
+    if (unit && scope.textbook.title) detail = `${scope.textbook.title} ${unit}`;
+    else kind = '기타';
+  } else if (kind === '모의고사') {
+    const name = longestMatch(detail, scope.mockExams);
+    if (name) detail = name;
+    else kind = '기타';
+  } else if (kind === '부교재') {
+    const subScope = longestMatch(detail, scope.supplementary.scopes);
+    if (subScope && scope.supplementary.bookName) detail = `${scope.supplementary.bookName} ${subScope}`;
+    else kind = '기타';
+  }
+
+  if (kind === '기타') {
+    detail = detail.replace(/^(교과서|모의고사|부교재|기타)\s*/, '').trim();
+    if (!detail) detail = '출처를 찾지 못함';
+  }
+
+  detail = detail.slice(0, 200);
+  const sourceLabel = kind === '기타' ? `기타 ${detail}` : `${kind} ${detail}`;
+  return { source_kind: kind, source_detail: detail, source_label: sourceLabel };
 }
 
 // POST /api/exam-analysis/analyze - 시험지 파일을 받아 문항별 유형 분석
@@ -145,6 +265,8 @@ router.post('/analyze', authenticateToken, (req, res, next) => {
         : []),
     ];
 
+    const scope = readScope(req.body);
+
     const stream = getClient().beta.messages.stream({
       model: MODEL,
       max_tokens: 32000,
@@ -161,7 +283,7 @@ router.post('/analyze', authenticateToken, (req, res, next) => {
           role: 'user',
           content: [
             ...fileBlocks,
-            { type: 'text', text: '이 시험지의 모든 문항을 순서대로 찾아 유형을 매칭해주세요.' },
+            { type: 'text', text: `이 시험지의 모든 문항을 순서대로 찾아 유형을 매칭하고, 각 문항 지문의 출처를 적어주세요.\n\n${scopePrompt(scope)}` },
           ],
         },
       ],
@@ -182,7 +304,12 @@ router.post('/analyze', authenticateToken, (req, res, next) => {
     }
 
     const { questions } = JSON.parse(textBlock.text);
-    res.json({ questions });
+    res.json({
+      questions: (Array.isArray(questions) ? questions : []).map((question) => ({
+        ...question,
+        ...normalizeSource(question, scope),
+      })),
+    });
   } catch (error) {
     console.error('Exam analysis error:', error);
     if (error instanceof Anthropic.AuthenticationError) {
