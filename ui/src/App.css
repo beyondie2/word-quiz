@@ -2154,6 +2154,21 @@
   z-index: 8;
 }
 
+.new-exam-mock-select {
+  position: relative;
+  z-index: 4;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+}
+
+.new-exam-mock-select.is-open {
+  z-index: 9;
+}
+
 .new-exam-period-menu {
   min-width: 240px;
 }

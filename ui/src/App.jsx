@@ -224,7 +224,13 @@ function App() {
   const [textbookUnitList, setTextbookUnitList] = useState([])
   const [selectedTextbookUnits, setSelectedTextbookUnits] = useState([])
   const [isTextbookUnitsLoading, setIsTextbookUnitsLoading] = useState(false)
+  const [mockExamGradeList, setMockExamGradeList] = useState([])
+  const [selectedMockExamGrade, setSelectedMockExamGrade] = useState('')
+  const [showMockGradeDropdown, setShowMockGradeDropdown] = useState(false)
   const [mockExamList, setMockExamList] = useState([])
+  const [selectedMockExamName, setSelectedMockExamName] = useState('')
+  const [showMockExamDropdown, setShowMockExamDropdown] = useState(false)
+  const [isMockExamNamesLoading, setIsMockExamNamesLoading] = useState(false)
   const [selectedMockExams, setSelectedMockExams] = useState([])
   const [supplementaryBookList, setSupplementaryBookList] = useState([])
   const [selectedSupplementaryBook, setSelectedSupplementaryBook] = useState('')
@@ -2041,7 +2047,7 @@ function App() {
     if (activeTab === 'createProblem' && isVerified && isNewExamMode) {
       fetchSchoolSido()
       fetchTextbookCategories()
-      fetchMockExams()
+      fetchMockExamGrades()
       fetchSupplementaryBooks()
     }
   }, [activeTab, isVerified, isNewExamMode])
@@ -2079,6 +2085,8 @@ function App() {
   const handleTextbookCategorySelect = async (category) => {
     setSelectedTextbookCategory(category)
     setShowTextbookCategoryDropdown(false)
+                          setShowMockGradeDropdown(false)
+                          setShowMockExamDropdown(false)
     setSelectedTextbookTitle('')
     setShowTextbookDropdown(false)
     setSelectedTextbookUnits([])
@@ -2101,6 +2109,8 @@ function App() {
     setSelectedTextbookTitle(title)
     setShowTextbookDropdown(false)
     setShowTextbookCategoryDropdown(false)
+                          setShowMockGradeDropdown(false)
+                          setShowMockExamDropdown(false)
     setShowSupplementaryDropdown(false)
     setSelectedTextbookUnits([])
     setTextbookUnitList([])
@@ -2123,20 +2133,41 @@ function App() {
     ))
   }
 
-  const fetchMockExams = async () => {
+  const fetchMockExamGrades = async () => {
     try {
-      const response = await fetch(`${API_BASE}/mock-exams`)
+      const response = await fetch(`${API_BASE}/mock-exams/grades`)
+      const data = await response.json()
+      setMockExamGradeList(data.grades || [])
+    } catch (error) {
+      console.error('Error fetching mock exam grades:', error)
+    }
+  }
+
+  const handleMockExamGradeSelect = async (grade) => {
+    setSelectedMockExamGrade(grade)
+    setShowMockGradeDropdown(false)
+    setSelectedMockExamName('')
+    setShowMockExamDropdown(false)
+    setSelectedMockExams([])
+    setMockExamList([])
+    setIsMockExamNamesLoading(true)
+
+    try {
+      const response = await fetch(`${API_BASE}/mock-exams?grade=${encodeURIComponent(grade)}`)
       const data = await response.json()
       setMockExamList(data.mockExams || [])
     } catch (error) {
       console.error('Error fetching mock exams:', error)
+    } finally {
+      setIsMockExamNamesLoading(false)
     }
   }
 
-  const handleMockExamToggle = (name) => {
-    setSelectedMockExams((prev) => (
-      prev.includes(name) ? prev.filter((item) => item !== name) : [...prev, name]
-    ))
+  const handleMockExamNameSelect = (name) => {
+    setSelectedMockExamName(name)
+    setShowMockExamDropdown(false)
+    setShowMockGradeDropdown(false)
+    setSelectedMockExams([name])
   }
 
   const fetchSupplementaryBooks = async () => {
@@ -4560,6 +4591,8 @@ function App() {
                           setShowNewExamPeriodDropdown(false)
                           setShowTextbookDropdown(false)
                           setShowTextbookCategoryDropdown(false)
+                          setShowMockGradeDropdown(false)
+                          setShowMockExamDropdown(false)
                           setShowSupplementaryDropdown(false)
                         }}
                       >
@@ -4594,6 +4627,8 @@ function App() {
                             setShowNewExamPeriodDropdown(false)
                             setShowTextbookDropdown(false)
                           setShowTextbookCategoryDropdown(false)
+                          setShowMockGradeDropdown(false)
+                          setShowMockExamDropdown(false)
                             setShowSupplementaryDropdown(false)
                           }}
                         >
@@ -4631,6 +4666,8 @@ function App() {
                             setShowNewExamPeriodDropdown(false)
                             setShowTextbookDropdown(false)
                           setShowTextbookCategoryDropdown(false)
+                          setShowMockGradeDropdown(false)
+                          setShowMockExamDropdown(false)
                             setShowSupplementaryDropdown(false)
                           }}
                         >
@@ -4671,6 +4708,8 @@ function App() {
                           setOpenNewExamSourceIndex(null)
                           setShowTextbookDropdown(false)
                           setShowTextbookCategoryDropdown(false)
+                          setShowMockGradeDropdown(false)
+                          setShowMockExamDropdown(false)
                           setShowSupplementaryDropdown(false)
                         }}
                       >
@@ -4703,6 +4742,8 @@ function App() {
                         onClick={() => {
                           setShowTextbookCategoryDropdown(!showTextbookCategoryDropdown)
                           setShowTextbookDropdown(false)
+                          setShowMockGradeDropdown(false)
+                          setShowMockExamDropdown(false)
                           setShowSchoolSidoDropdown(false)
                           setShowSchoolSigunguDropdown(false)
                           setShowSchoolNameDropdown(false)
@@ -4739,6 +4780,8 @@ function App() {
                           onClick={() => {
                             setShowTextbookDropdown(!showTextbookDropdown)
                             setShowTextbookCategoryDropdown(false)
+                          setShowMockGradeDropdown(false)
+                          setShowMockExamDropdown(false)
                             setShowSchoolSidoDropdown(false)
                             setShowSchoolSigunguDropdown(false)
                             setShowSchoolNameDropdown(false)
@@ -4763,6 +4806,87 @@ function App() {
                                   onClick={() => handleTextbookTitleSelect(title)}
                                 >
                                   {title}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className={`new-exam-mock-select${showMockGradeDropdown || showMockExamDropdown ? ' is-open' : ''}`}>
+                    <span className="new-exam-school-label">모의고사</span>
+                    <div className="dropdown-container">
+                      <button
+                        type="button"
+                        className="select-button"
+                        onClick={() => {
+                          setShowMockGradeDropdown(!showMockGradeDropdown)
+                          setShowMockExamDropdown(false)
+                          setShowTextbookCategoryDropdown(false)
+                          setShowTextbookDropdown(false)
+                          setShowSchoolSidoDropdown(false)
+                          setShowSchoolSigunguDropdown(false)
+                          setShowSchoolNameDropdown(false)
+                          setShowNewExamPeriodDropdown(false)
+                          setOpenNewExamSourceIndex(null)
+                          setShowSupplementaryDropdown(false)
+                        }}
+                      >
+                        {selectedMockExamGrade || '학년'}
+                      </button>
+                      {showMockGradeDropdown && (
+                        <div className="dropdown-menu new-exam-period-menu">
+                          {mockExamGradeList.length === 0 ? (
+                            <div className="dropdown-item">등록된 학년이 없습니다</div>
+                          ) : (
+                            mockExamGradeList.map((grade) => (
+                              <div
+                                key={grade}
+                                className={`dropdown-item${selectedMockExamGrade === grade ? ' is-selected' : ''}`}
+                                onClick={() => handleMockExamGradeSelect(grade)}
+                              >
+                                {grade}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    {selectedMockExamGrade && (
+                      <div className="dropdown-container">
+                        <button
+                          type="button"
+                          className="select-button new-exam-textbook-button"
+                          onClick={() => {
+                            setShowMockExamDropdown(!showMockExamDropdown)
+                            setShowMockGradeDropdown(false)
+                            setShowTextbookCategoryDropdown(false)
+                            setShowTextbookDropdown(false)
+                            setShowSchoolSidoDropdown(false)
+                            setShowSchoolSigunguDropdown(false)
+                            setShowSchoolNameDropdown(false)
+                            setShowNewExamPeriodDropdown(false)
+                            setOpenNewExamSourceIndex(null)
+                            setShowSupplementaryDropdown(false)
+                          }}
+                        >
+                          {isMockExamNamesLoading ? '불러오는 중...' : (selectedMockExamName || '이름')}
+                        </button>
+                        {showMockExamDropdown && (
+                          <div className="dropdown-menu new-exam-textbook-menu">
+                            {isMockExamNamesLoading ? (
+                              <div className="dropdown-item">불러오는 중...</div>
+                            ) : mockExamList.length === 0 ? (
+                              <div className="dropdown-item">등록된 모의고사가 없습니다</div>
+                            ) : (
+                              mockExamList.map((name) => (
+                                <div
+                                  key={name}
+                                  className={`dropdown-item${selectedMockExamName === name ? ' is-selected' : ''}`}
+                                  onClick={() => handleMockExamNameSelect(name)}
+                                >
+                                  {name}
                                 </div>
                               ))
                             )}
@@ -4797,24 +4921,9 @@ function App() {
                         )}
                       </div>
                     )}
-                    <div className="new-exam-mock-block">
+                    <div className="new-exam-scope-row">
                       <span className="new-exam-school-label">모의고사</span>
-                      <div className="new-exam-unit-list new-exam-mock-list">
-                        {mockExamList.length === 0 ? (
-                          <p>등록된 모의고사가 없습니다</p>
-                        ) : (
-                          mockExamList.map((name) => (
-                            <label key={name} className="checkbox-label">
-                              <input
-                                type="checkbox"
-                                checked={selectedMockExams.includes(name)}
-                                onChange={() => handleMockExamToggle(name)}
-                              />
-                              {name}
-                            </label>
-                          ))
-                        )}
-                      </div>
+                      {selectedMockExamName && <span>{selectedMockExamName}</span>}
                     </div>
                     <div className="new-exam-scope-row">
                       <span className="new-exam-school-label">부교재</span>
@@ -4826,6 +4935,8 @@ function App() {
                             setShowSupplementaryDropdown(!showSupplementaryDropdown)
                             setShowTextbookDropdown(false)
                           setShowTextbookCategoryDropdown(false)
+                          setShowMockGradeDropdown(false)
+                          setShowMockExamDropdown(false)
                             setShowSchoolSidoDropdown(false)
                             setShowSchoolSigunguDropdown(false)
                             setShowSchoolNameDropdown(false)
@@ -4988,6 +5099,8 @@ function App() {
                                 setOpenNewExamSourceIndex(openNewExamSourceIndex === index ? null : index)
                                 setShowTextbookDropdown(false)
                           setShowTextbookCategoryDropdown(false)
+                          setShowMockGradeDropdown(false)
+                          setShowMockExamDropdown(false)
                                 setShowSupplementaryDropdown(false)
                               }}
                             >
