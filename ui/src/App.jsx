@@ -2032,15 +2032,15 @@ function App() {
     }
   }, [activeTab, isVerified])
 
-  // 문항 분석 목록이 보이면 시도, 교과서, 모의고사, 부교재 목록을 불러온다
+  // 새로 만들기 화면이 열리면 시도, 교과서, 모의고사, 부교재 목록을 불러온다
   useEffect(() => {
-    if (activeTab === 'createProblem' && isVerified && newExamAnalysis.length > 0) {
+    if (activeTab === 'createProblem' && isVerified && isNewExamMode) {
       fetchSchoolSido()
       fetchTextbookTitles()
       fetchMockExams()
       fetchSupplementaryBooks()
     }
-  }, [activeTab, isVerified, newExamAnalysis.length])
+  }, [activeTab, isVerified, isNewExamMode])
 
   const fetchExamSchools = async () => {
     try {
@@ -4522,6 +4522,284 @@ function App() {
               {isNewExamMode ? (
                 <div className="create-problem-area">
                   <h2>새로 만들기</h2>
+                  <div className="new-exam-school-select">
+                    <span className="new-exam-school-label">학교</span>
+                    <div className="dropdown-container">
+                      <button
+                        className="select-button"
+                        onClick={() => {
+                          setShowSchoolSidoDropdown(!showSchoolSidoDropdown)
+                          setShowSchoolSigunguDropdown(false)
+                          setShowSchoolNameDropdown(false)
+                          setShowNewExamPeriodDropdown(false)
+                          setShowTextbookDropdown(false)
+                          setShowSupplementaryDropdown(false)
+                        }}
+                      >
+                        {selectedSchoolSido || '시도'}
+                      </button>
+                      {showSchoolSidoDropdown && (
+                        <div className="dropdown-menu">
+                          {schoolSidoList.length === 0 ? (
+                            <div className="dropdown-item">등록된 시도가 없습니다</div>
+                          ) : (
+                            schoolSidoList.map((sido) => (
+                              <div
+                                key={sido}
+                                className="dropdown-item"
+                                onClick={() => handleSchoolSidoSelect(sido)}
+                              >
+                                {sido}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    {selectedSchoolSido && (
+                      <div className="dropdown-container">
+                        <button
+                          className="select-button"
+                          onClick={() => {
+                            setShowSchoolSigunguDropdown(!showSchoolSigunguDropdown)
+                            setShowSchoolSidoDropdown(false)
+                            setShowSchoolNameDropdown(false)
+                            setShowNewExamPeriodDropdown(false)
+                            setShowTextbookDropdown(false)
+                            setShowSupplementaryDropdown(false)
+                          }}
+                        >
+                          {selectedSchoolSigungu || '시군구'}
+                        </button>
+                        {showSchoolSigunguDropdown && (
+                          <div className="dropdown-menu">
+                            {isSchoolSigunguLoading ? (
+                              <div className="dropdown-item">불러오는 중...</div>
+                            ) : schoolSigunguList.length === 0 ? (
+                              <div className="dropdown-item">등록된 시군구가 없습니다</div>
+                            ) : (
+                              schoolSigunguList.map((sigungu) => (
+                                <div
+                                  key={sigungu}
+                                  className="dropdown-item"
+                                  onClick={() => handleSchoolSigunguSelect(sigungu)}
+                                >
+                                  {sigungu}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {selectedSchoolSigungu && (
+                      <div className="dropdown-container">
+                        <button
+                          className="select-button"
+                          onClick={() => {
+                            setShowSchoolNameDropdown(!showSchoolNameDropdown)
+                            setShowSchoolSidoDropdown(false)
+                            setShowSchoolSigunguDropdown(false)
+                            setShowNewExamPeriodDropdown(false)
+                            setShowTextbookDropdown(false)
+                            setShowSupplementaryDropdown(false)
+                          }}
+                        >
+                          {selectedSchoolName || '학교'}
+                        </button>
+                        {showSchoolNameDropdown && (
+                          <div className="dropdown-menu new-exam-school-menu">
+                            {isSchoolNameLoading ? (
+                              <div className="dropdown-item">불러오는 중...</div>
+                            ) : schoolNameList.length === 0 ? (
+                              <div className="dropdown-item">등록된 학교가 없습니다</div>
+                            ) : (
+                              schoolNameList.map((schoolName) => (
+                                <div
+                                  key={schoolName}
+                                  className="dropdown-item"
+                                  onClick={() => handleSchoolNameSelect(schoolName)}
+                                >
+                                  {schoolName}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className={`new-exam-sheet-select${showNewExamPeriodDropdown ? ' is-open' : ''}`}>
+                    <span className="new-exam-school-label">시험지</span>
+                    <div className="dropdown-container">
+                      <button
+                        className="select-button"
+                        onClick={() => {
+                          setShowNewExamPeriodDropdown(!showNewExamPeriodDropdown)
+                          setShowSchoolSidoDropdown(false)
+                          setShowSchoolSigunguDropdown(false)
+                          setShowSchoolNameDropdown(false)
+                          setOpenNewExamSourceIndex(null)
+                          setShowTextbookDropdown(false)
+                          setShowSupplementaryDropdown(false)
+                        }}
+                      >
+                        {selectedNewExamPeriod || '시기별'}
+                      </button>
+                      {showNewExamPeriodDropdown && (
+                        <div className="dropdown-menu new-exam-period-menu">
+                          {NEW_EXAM_PERIOD_OPTIONS.map((period) => (
+                            <div
+                              key={period}
+                              className={`dropdown-item${selectedNewExamPeriod === period ? ' is-selected' : ''}`}
+                              onClick={() => {
+                                setSelectedNewExamPeriod(period)
+                                setShowNewExamPeriodDropdown(false)
+                              }}
+                            >
+                              {period}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <section className="new-exam-scope">
+                    <h3>시험범위</h3>
+                    <div className="new-exam-scope-row">
+                      <span className="new-exam-school-label">교과서</span>
+                      <div className="dropdown-container">
+                        <button
+                          type="button"
+                          className="select-button new-exam-textbook-button"
+                          onClick={() => {
+                            setShowTextbookDropdown(!showTextbookDropdown)
+                            setShowSchoolSidoDropdown(false)
+                            setShowSchoolSigunguDropdown(false)
+                            setShowSchoolNameDropdown(false)
+                            setShowNewExamPeriodDropdown(false)
+                            setOpenNewExamSourceIndex(null)
+                            setShowSupplementaryDropdown(false)
+                          }}
+                        >
+                          {selectedTextbookTitle || '교과서 선택'}
+                        </button>
+                        {showTextbookDropdown && (
+                          <div className="dropdown-menu new-exam-textbook-menu">
+                            {textbookTitleList.length === 0 ? (
+                              <div className="dropdown-item">등록된 교과서가 없습니다</div>
+                            ) : (
+                              textbookTitleList.map((title) => (
+                                <div
+                                  key={title}
+                                  className={`dropdown-item${selectedTextbookTitle === title ? ' is-selected' : ''}`}
+                                  onClick={() => handleTextbookTitleSelect(title)}
+                                >
+                                  {title}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {selectedTextbookTitle && (
+                      <div className="new-exam-unit-list">
+                        {isTextbookUnitsLoading ? (
+                          <p>단원을 불러오는 중...</p>
+                        ) : textbookUnitList.length === 0 ? (
+                          <p>등록된 단원이 없습니다</p>
+                        ) : (
+                          textbookUnitList.map((unit) => (
+                            <label key={unit} className="checkbox-label">
+                              <input
+                                type="checkbox"
+                                checked={selectedTextbookUnits.includes(unit)}
+                                onChange={() => handleTextbookUnitToggle(unit)}
+                              />
+                              {unit}
+                            </label>
+                          ))
+                        )}
+                      </div>
+                    )}
+                    <div className="new-exam-mock-block">
+                      <span className="new-exam-school-label">모의고사</span>
+                      <div className="new-exam-unit-list new-exam-mock-list">
+                        {mockExamList.length === 0 ? (
+                          <p>등록된 모의고사가 없습니다</p>
+                        ) : (
+                          mockExamList.map((name) => (
+                            <label key={name} className="checkbox-label">
+                              <input
+                                type="checkbox"
+                                checked={selectedMockExams.includes(name)}
+                                onChange={() => handleMockExamToggle(name)}
+                              />
+                              {name}
+                            </label>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                    <div className="new-exam-scope-row">
+                      <span className="new-exam-school-label">부교재</span>
+                      <div className="dropdown-container">
+                        <button
+                          type="button"
+                          className="select-button new-exam-textbook-button"
+                          onClick={() => {
+                            setShowSupplementaryDropdown(!showSupplementaryDropdown)
+                            setShowTextbookDropdown(false)
+                            setShowSchoolSidoDropdown(false)
+                            setShowSchoolSigunguDropdown(false)
+                            setShowSchoolNameDropdown(false)
+                            setShowNewExamPeriodDropdown(false)
+                            setOpenNewExamSourceIndex(null)
+                          }}
+                        >
+                          {selectedSupplementaryBook || '부교재 선택'}
+                        </button>
+                        {showSupplementaryDropdown && (
+                          <div className="dropdown-menu new-exam-textbook-menu new-exam-supplementary-menu">
+                            {supplementaryBookList.length === 0 ? (
+                              <div className="dropdown-item">등록된 부교재가 없습니다</div>
+                            ) : (
+                              supplementaryBookList.map((bookName) => (
+                                <div
+                                  key={bookName}
+                                  className={`dropdown-item${selectedSupplementaryBook === bookName ? ' is-selected' : ''}`}
+                                  onClick={() => handleSupplementaryBookSelect(bookName)}
+                                >
+                                  {bookName}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {selectedSupplementaryBook && (
+                      <div className="new-exam-unit-list">
+                        {isSupplementaryScopesLoading ? (
+                          <p>하위범위를 불러오는 중...</p>
+                        ) : supplementaryScopeList.length === 0 ? (
+                          <p>등록된 하위범위가 없습니다</p>
+                        ) : (
+                          supplementaryScopeList.map((scope) => (
+                            <label key={scope} className="checkbox-label">
+                              <input
+                                type="checkbox"
+                                checked={selectedSupplementaryScopes.includes(scope)}
+                                onChange={() => handleSupplementaryScopeToggle(scope)}
+                              />
+                              {scope}
+                            </label>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </section>
                   <p>문제지를 사진으로 찍어 올리거나 PDF 파일을 올려주세요.</p>
                   <div className="new-exam-upload">
                     <div className="new-exam-upload-panel">
@@ -4607,148 +4885,6 @@ function App() {
                   {newExamAnalysisError && <p className="exam-generate-error">{newExamAnalysisError}</p>}
                   {newExamAnalysis.length > 0 && (
                     <>
-                    <div className="new-exam-school-select">
-                      <span className="new-exam-school-label">학교</span>
-                      <div className="dropdown-container">
-                        <button
-                          className="select-button"
-                          onClick={() => {
-                            setShowSchoolSidoDropdown(!showSchoolSidoDropdown)
-                            setShowSchoolSigunguDropdown(false)
-                            setShowSchoolNameDropdown(false)
-                            setShowNewExamPeriodDropdown(false)
-                            setShowTextbookDropdown(false)
-                            setShowSupplementaryDropdown(false)
-                          }}
-                        >
-                          {selectedSchoolSido || '시도'}
-                        </button>
-                        {showSchoolSidoDropdown && (
-                          <div className="dropdown-menu">
-                            {schoolSidoList.length === 0 ? (
-                              <div className="dropdown-item">등록된 시도가 없습니다</div>
-                            ) : (
-                              schoolSidoList.map((sido) => (
-                                <div
-                                  key={sido}
-                                  className="dropdown-item"
-                                  onClick={() => handleSchoolSidoSelect(sido)}
-                                >
-                                  {sido}
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      {selectedSchoolSido && (
-                        <div className="dropdown-container">
-                          <button
-                            className="select-button"
-                            onClick={() => {
-                              setShowSchoolSigunguDropdown(!showSchoolSigunguDropdown)
-                              setShowSchoolSidoDropdown(false)
-                              setShowSchoolNameDropdown(false)
-                              setShowNewExamPeriodDropdown(false)
-                              setShowTextbookDropdown(false)
-                              setShowSupplementaryDropdown(false)
-                            }}
-                          >
-                            {selectedSchoolSigungu || '시군구'}
-                          </button>
-                          {showSchoolSigunguDropdown && (
-                            <div className="dropdown-menu">
-                              {isSchoolSigunguLoading ? (
-                                <div className="dropdown-item">불러오는 중...</div>
-                              ) : schoolSigunguList.length === 0 ? (
-                                <div className="dropdown-item">등록된 시군구가 없습니다</div>
-                              ) : (
-                                schoolSigunguList.map((sigungu) => (
-                                  <div
-                                    key={sigungu}
-                                    className="dropdown-item"
-                                    onClick={() => handleSchoolSigunguSelect(sigungu)}
-                                  >
-                                    {sigungu}
-                                  </div>
-                                ))
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      {selectedSchoolSigungu && (
-                        <div className="dropdown-container">
-                          <button
-                            className="select-button"
-                            onClick={() => {
-                              setShowSchoolNameDropdown(!showSchoolNameDropdown)
-                              setShowSchoolSidoDropdown(false)
-                              setShowSchoolSigunguDropdown(false)
-                              setShowNewExamPeriodDropdown(false)
-                              setShowTextbookDropdown(false)
-                              setShowSupplementaryDropdown(false)
-                            }}
-                          >
-                            {selectedSchoolName || '학교'}
-                          </button>
-                          {showSchoolNameDropdown && (
-                            <div className="dropdown-menu new-exam-school-menu">
-                              {isSchoolNameLoading ? (
-                                <div className="dropdown-item">불러오는 중...</div>
-                              ) : schoolNameList.length === 0 ? (
-                                <div className="dropdown-item">등록된 학교가 없습니다</div>
-                              ) : (
-                                schoolNameList.map((schoolName) => (
-                                  <div
-                                    key={schoolName}
-                                    className="dropdown-item"
-                                    onClick={() => handleSchoolNameSelect(schoolName)}
-                                  >
-                                    {schoolName}
-                                  </div>
-                                ))
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    <div className={`new-exam-sheet-select${showNewExamPeriodDropdown ? ' is-open' : ''}`}>
-                      <span className="new-exam-school-label">시험지</span>
-                      <div className="dropdown-container">
-                        <button
-                          className="select-button"
-                          onClick={() => {
-                            setShowNewExamPeriodDropdown(!showNewExamPeriodDropdown)
-                            setShowSchoolSidoDropdown(false)
-                            setShowSchoolSigunguDropdown(false)
-                            setShowSchoolNameDropdown(false)
-                            setOpenNewExamSourceIndex(null)
-                            setShowTextbookDropdown(false)
-                            setShowSupplementaryDropdown(false)
-                          }}
-                        >
-                          {selectedNewExamPeriod || '시기별'}
-                        </button>
-                        {showNewExamPeriodDropdown && (
-                          <div className="dropdown-menu new-exam-period-menu">
-                            {NEW_EXAM_PERIOD_OPTIONS.map((period) => (
-                              <div
-                                key={period}
-                                className={`dropdown-item${selectedNewExamPeriod === period ? ' is-selected' : ''}`}
-                                onClick={() => {
-                                  setSelectedNewExamPeriod(period)
-                                  setShowNewExamPeriodDropdown(false)
-                                }}
-                              >
-                                {period}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
                     <ul className="new-exam-analysis-list">
                       {newExamAnalysis.map((item, index) => (
                         <li key={`${item.number}-${index}`} className="new-exam-analysis-item">
@@ -4801,142 +4937,6 @@ function App() {
                         </li>
                       ))}
                     </ul>
-                    <section className="new-exam-scope">
-                      <h3>시험범위</h3>
-                      <div className="new-exam-scope-row">
-                        <span className="new-exam-school-label">교과서</span>
-                        <div className="dropdown-container">
-                          <button
-                            type="button"
-                            className="select-button new-exam-textbook-button"
-                            onClick={() => {
-                              setShowTextbookDropdown(!showTextbookDropdown)
-                              setShowSchoolSidoDropdown(false)
-                              setShowSchoolSigunguDropdown(false)
-                              setShowSchoolNameDropdown(false)
-                              setShowNewExamPeriodDropdown(false)
-                              setOpenNewExamSourceIndex(null)
-                              setShowSupplementaryDropdown(false)
-                            }}
-                          >
-                            {selectedTextbookTitle || '교과서 선택'}
-                          </button>
-                          {showTextbookDropdown && (
-                            <div className="dropdown-menu new-exam-textbook-menu">
-                              {textbookTitleList.length === 0 ? (
-                                <div className="dropdown-item">등록된 교과서가 없습니다</div>
-                              ) : (
-                                textbookTitleList.map((title) => (
-                                  <div
-                                    key={title}
-                                    className={`dropdown-item${selectedTextbookTitle === title ? ' is-selected' : ''}`}
-                                    onClick={() => handleTextbookTitleSelect(title)}
-                                  >
-                                    {title}
-                                  </div>
-                                ))
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      {selectedTextbookTitle && (
-                        <div className="new-exam-unit-list">
-                          {isTextbookUnitsLoading ? (
-                            <p>단원을 불러오는 중...</p>
-                          ) : textbookUnitList.length === 0 ? (
-                            <p>등록된 단원이 없습니다</p>
-                          ) : (
-                            textbookUnitList.map((unit) => (
-                              <label key={unit} className="checkbox-label">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedTextbookUnits.includes(unit)}
-                                  onChange={() => handleTextbookUnitToggle(unit)}
-                                />
-                                {unit}
-                              </label>
-                            ))
-                          )}
-                        </div>
-                      )}
-                      <div className="new-exam-mock-block">
-                        <span className="new-exam-school-label">모의고사</span>
-                        <div className="new-exam-unit-list new-exam-mock-list">
-                          {mockExamList.length === 0 ? (
-                            <p>등록된 모의고사가 없습니다</p>
-                          ) : (
-                            mockExamList.map((name) => (
-                              <label key={name} className="checkbox-label">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedMockExams.includes(name)}
-                                  onChange={() => handleMockExamToggle(name)}
-                                />
-                                {name}
-                              </label>
-                            ))
-                          )}
-                        </div>
-                      </div>
-                      <div className="new-exam-scope-row">
-                        <span className="new-exam-school-label">부교재</span>
-                        <div className="dropdown-container">
-                          <button
-                            type="button"
-                            className="select-button new-exam-textbook-button"
-                            onClick={() => {
-                              setShowSupplementaryDropdown(!showSupplementaryDropdown)
-                              setShowTextbookDropdown(false)
-                              setShowSchoolSidoDropdown(false)
-                              setShowSchoolSigunguDropdown(false)
-                              setShowSchoolNameDropdown(false)
-                              setShowNewExamPeriodDropdown(false)
-                              setOpenNewExamSourceIndex(null)
-                            }}
-                          >
-                            {selectedSupplementaryBook || '부교재 선택'}
-                          </button>
-                          {showSupplementaryDropdown && (
-                            <div className="dropdown-menu new-exam-textbook-menu new-exam-supplementary-menu">
-                              {supplementaryBookList.length === 0 ? (
-                                <div className="dropdown-item">등록된 부교재가 없습니다</div>
-                              ) : (
-                                supplementaryBookList.map((bookName) => (
-                                  <div
-                                    key={bookName}
-                                    className={`dropdown-item${selectedSupplementaryBook === bookName ? ' is-selected' : ''}`}
-                                    onClick={() => handleSupplementaryBookSelect(bookName)}
-                                  >
-                                    {bookName}
-                                  </div>
-                                ))
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      {selectedSupplementaryBook && (
-                        <div className="new-exam-unit-list">
-                          {isSupplementaryScopesLoading ? (
-                            <p>하위범위를 불러오는 중...</p>
-                          ) : supplementaryScopeList.length === 0 ? (
-                            <p>등록된 하위범위가 없습니다</p>
-                          ) : (
-                            supplementaryScopeList.map((scope) => (
-                              <label key={scope} className="checkbox-label">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedSupplementaryScopes.includes(scope)}
-                                  onChange={() => handleSupplementaryScopeToggle(scope)}
-                                />
-                                {scope}
-                              </label>
-                            ))
-                          )}
-                        </div>
-                      )}
-                    </section>
                     <button
                       type="button"
                       className="select-button primary new-exam-model-button"

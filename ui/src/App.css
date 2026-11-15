@@ -2104,7 +2104,7 @@
 
 .new-exam-school-select {
   position: relative;
-  z-index: 4;
+  z-index: 6;
   width: 100%;
   display: flex;
   flex-wrap: wrap;
@@ -2126,7 +2126,7 @@
 
 .new-exam-sheet-select {
   position: relative;
-  z-index: 3;
+  z-index: 5;
   width: 100%;
   display: flex;
   flex-wrap: wrap;
@@ -2136,7 +2136,7 @@
 }
 
 .new-exam-sheet-select.is-open {
-  z-index: 6;
+  z-index: 7;
 }
 
 .new-exam-period-menu {
@@ -2292,9 +2292,3 @@
   padding-right: 4px;
 }
 
-.new-exam-supplementary-menu {
-  top: auto;
-  bottom: 100%;
-  margin-top: 0;
-  margin-bottom: 5px;
-}
