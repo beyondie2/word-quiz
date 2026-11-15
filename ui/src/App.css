@@ -2118,6 +2118,7 @@
   flex-shrink: 0;
   font-weight: 600;
   color: #A0C4D8;
+  white-space: nowrap;
 }
 
 .new-exam-school-menu {

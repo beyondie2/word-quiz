@@ -232,6 +232,27 @@ function App() {
   const [supplementaryScopeList, setSupplementaryScopeList] = useState([])
   const [selectedSupplementaryScopes, setSelectedSupplementaryScopes] = useState([])
   const [isSupplementaryScopesLoading, setIsSupplementaryScopesLoading] = useState(false)
+  // 만들 시험지 범위. 기준 시험지 범위와 따로 고른다.
+  const [targetTextbookTitleList, setTargetTextbookTitleList] = useState([])
+  const [selectedTargetTextbookCategory, setSelectedTargetTextbookCategory] = useState('')
+  const [showTargetTextbookCategoryDropdown, setShowTargetTextbookCategoryDropdown] = useState(false)
+  const [isTargetTextbookTitlesLoading, setIsTargetTextbookTitlesLoading] = useState(false)
+  const [selectedTargetTextbookTitle, setSelectedTargetTextbookTitle] = useState('')
+  const [showTargetTextbookDropdown, setShowTargetTextbookDropdown] = useState(false)
+  const [targetTextbookUnitList, setTargetTextbookUnitList] = useState([])
+  const [selectedTargetTextbookUnits, setSelectedTargetTextbookUnits] = useState([])
+  const [isTargetTextbookUnitsLoading, setIsTargetTextbookUnitsLoading] = useState(false)
+  const [selectedTargetMockExamGrade, setSelectedTargetMockExamGrade] = useState('')
+  const [showTargetMockGradeDropdown, setShowTargetMockGradeDropdown] = useState(false)
+  const [targetMockExamList, setTargetMockExamList] = useState([])
+  const [showTargetMockExamDropdown, setShowTargetMockExamDropdown] = useState(false)
+  const [isTargetMockExamNamesLoading, setIsTargetMockExamNamesLoading] = useState(false)
+  const [selectedTargetMockExams, setSelectedTargetMockExams] = useState([])
+  const [selectedTargetSupplementaryBook, setSelectedTargetSupplementaryBook] = useState('')
+  const [showTargetSupplementaryDropdown, setShowTargetSupplementaryDropdown] = useState(false)
+  const [targetSupplementaryScopeList, setTargetSupplementaryScopeList] = useState([])
+  const [selectedTargetSupplementaryScopes, setSelectedTargetSupplementaryScopes] = useState([])
+  const [isTargetSupplementaryScopesLoading, setIsTargetSupplementaryScopesLoading] = useState(false)
   const [examSheets, setExamSheets] = useState([])
   const [selectedExamSheet, setSelectedExamSheet] = useState('')
   const [showExamSheetDropdown, setShowExamSheetDropdown] = useState(false)
@@ -2066,6 +2087,14 @@ function App() {
     }
   }
 
+  const closeTargetScopeMenus = () => {
+    setShowTargetTextbookCategoryDropdown(false)
+    setShowTargetTextbookDropdown(false)
+    setShowTargetMockGradeDropdown(false)
+    setShowTargetMockExamDropdown(false)
+    setShowTargetSupplementaryDropdown(false)
+  }
+
   const fetchTextbookCategories = async () => {
     try {
       const response = await fetch(`${API_BASE}/textbooks/categories`)
@@ -2106,6 +2135,7 @@ function App() {
                           setShowMockGradeDropdown(false)
                           setShowMockExamDropdown(false)
     setShowSupplementaryDropdown(false)
+    closeTargetScopeMenus()
     setSelectedTextbookUnits([])
     setTextbookUnitList([])
     setIsTextbookUnitsLoading(true)
@@ -2175,6 +2205,7 @@ function App() {
   const handleSupplementaryBookSelect = async (bookName) => {
     setSelectedSupplementaryBook(bookName)
     setShowSupplementaryDropdown(false)
+    closeTargetScopeMenus()
     setSelectedSupplementaryScopes([])
     setSupplementaryScopeList([])
     setIsSupplementaryScopesLoading(true)
@@ -2194,6 +2225,128 @@ function App() {
 
   const handleSupplementaryScopeToggle = (scope) => {
     setSelectedSupplementaryScopes((prev) => (
+      prev.includes(scope) ? prev.filter((item) => item !== scope) : [...prev, scope]
+    ))
+  }
+
+  const closeBaseScopeMenus = () => {
+    setShowTextbookCategoryDropdown(false)
+    setShowTextbookDropdown(false)
+    setShowMockGradeDropdown(false)
+    setShowMockExamDropdown(false)
+    setShowSupplementaryDropdown(false)
+  }
+
+  const handleTargetTextbookCategorySelect = async (category) => {
+    setSelectedTargetTextbookCategory(category)
+    setShowTargetTextbookCategoryDropdown(false)
+    setShowTargetMockGradeDropdown(false)
+    setShowTargetMockExamDropdown(false)
+    setShowTargetSupplementaryDropdown(false)
+    closeBaseScopeMenus()
+    setSelectedTargetTextbookTitle('')
+    setShowTargetTextbookDropdown(false)
+    setSelectedTargetTextbookUnits([])
+    setTargetTextbookUnitList([])
+    setTargetTextbookTitleList([])
+    setIsTargetTextbookTitlesLoading(true)
+
+    try {
+      const response = await fetch(`${API_BASE}/textbooks/titles?category=${encodeURIComponent(category)}`)
+      const data = await response.json()
+      setTargetTextbookTitleList(data.titles || [])
+    } catch (error) {
+      console.error('Error fetching textbook titles:', error)
+    } finally {
+      setIsTargetTextbookTitlesLoading(false)
+    }
+  }
+
+  const handleTargetTextbookTitleSelect = async (title) => {
+    setSelectedTargetTextbookTitle(title)
+    setShowTargetTextbookDropdown(false)
+    setShowTargetTextbookCategoryDropdown(false)
+    setShowTargetMockGradeDropdown(false)
+    setShowTargetMockExamDropdown(false)
+    setShowTargetSupplementaryDropdown(false)
+    closeBaseScopeMenus()
+    setSelectedTargetTextbookUnits([])
+    setTargetTextbookUnitList([])
+    setIsTargetTextbookUnitsLoading(true)
+
+    try {
+      const response = await fetch(`${API_BASE}/textbooks/units?title=${encodeURIComponent(title)}`)
+      const data = await response.json()
+      setTargetTextbookUnitList(data.units || [])
+    } catch (error) {
+      console.error('Error fetching textbook units:', error)
+    } finally {
+      setIsTargetTextbookUnitsLoading(false)
+    }
+  }
+
+  const handleTargetTextbookUnitToggle = (unit) => {
+    setSelectedTargetTextbookUnits((prev) => (
+      prev.includes(unit) ? prev.filter((item) => item !== unit) : [...prev, unit]
+    ))
+  }
+
+  const handleTargetMockExamGradeSelect = async (grade) => {
+    setSelectedTargetMockExamGrade(grade)
+    setShowTargetMockGradeDropdown(false)
+    setShowTargetMockExamDropdown(false)
+    setShowTargetTextbookCategoryDropdown(false)
+    setShowTargetTextbookDropdown(false)
+    setShowTargetSupplementaryDropdown(false)
+    closeBaseScopeMenus()
+    setSelectedTargetMockExams([])
+    setTargetMockExamList([])
+    setIsTargetMockExamNamesLoading(true)
+
+    try {
+      const response = await fetch(`${API_BASE}/mock-exams?grade=${encodeURIComponent(grade)}`)
+      const data = await response.json()
+      setTargetMockExamList(data.mockExams || [])
+    } catch (error) {
+      console.error('Error fetching mock exams:', error)
+    } finally {
+      setIsTargetMockExamNamesLoading(false)
+    }
+  }
+
+  const handleTargetMockExamToggle = (name) => {
+    setSelectedTargetMockExams((prev) => (
+      prev.includes(name) ? prev.filter((item) => item !== name) : [...prev, name]
+    ))
+  }
+
+  const handleTargetSupplementaryBookSelect = async (bookName) => {
+    setSelectedTargetSupplementaryBook(bookName)
+    setShowTargetSupplementaryDropdown(false)
+    setShowTargetTextbookCategoryDropdown(false)
+    setShowTargetTextbookDropdown(false)
+    setShowTargetMockGradeDropdown(false)
+    setShowTargetMockExamDropdown(false)
+    closeBaseScopeMenus()
+    setSelectedTargetSupplementaryScopes([])
+    setTargetSupplementaryScopeList([])
+    setIsTargetSupplementaryScopesLoading(true)
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/supplementary-books/scopes?bookName=${encodeURIComponent(bookName)}`
+      )
+      const data = await response.json()
+      setTargetSupplementaryScopeList(data.scopes || [])
+    } catch (error) {
+      console.error('Error fetching supplementary scopes:', error)
+    } finally {
+      setIsTargetSupplementaryScopesLoading(false)
+    }
+  }
+
+  const handleTargetSupplementaryScopeToggle = (scope) => {
+    setSelectedTargetSupplementaryScopes((prev) => (
       prev.includes(scope) ? prev.filter((item) => item !== scope) : [...prev, scope]
     ))
   }
@@ -4589,6 +4742,7 @@ function App() {
                           setShowMockGradeDropdown(false)
                           setShowMockExamDropdown(false)
                           setShowSupplementaryDropdown(false)
+    closeTargetScopeMenus()
                         }}
                       >
                         {selectedSchoolSido || '시도'}
@@ -4625,6 +4779,7 @@ function App() {
                           setShowMockGradeDropdown(false)
                           setShowMockExamDropdown(false)
                             setShowSupplementaryDropdown(false)
+    closeTargetScopeMenus()
                           }}
                         >
                           {selectedSchoolSigungu || '시군구'}
@@ -4664,6 +4819,7 @@ function App() {
                           setShowMockGradeDropdown(false)
                           setShowMockExamDropdown(false)
                             setShowSupplementaryDropdown(false)
+    closeTargetScopeMenus()
                           }}
                         >
                           {selectedSchoolName || '학교'}
@@ -4705,6 +4861,7 @@ function App() {
                           setShowMockGradeDropdown(false)
                           setShowMockExamDropdown(false)
                           setShowSupplementaryDropdown(false)
+    closeTargetScopeMenus()
                         }}
                       >
                         {selectedNewExamPeriod || '시기별'}
@@ -4728,7 +4885,7 @@ function App() {
                     </div>
                   </div>
                   <div className={`new-exam-book-select${showTextbookCategoryDropdown || showTextbookDropdown ? ' is-open' : ''}`}>
-                    <span className="new-exam-school-label">교과서</span>
+                    <span className="new-exam-school-label">기준시험지 교과서범위</span>
                     <div className="dropdown-container">
                       <button
                         type="button"
@@ -4743,6 +4900,7 @@ function App() {
                           setShowSchoolNameDropdown(false)
                           setShowNewExamPeriodDropdown(false)
                           setShowSupplementaryDropdown(false)
+    closeTargetScopeMenus()
                         }}
                       >
                         {selectedTextbookCategory || '분류'}
@@ -4780,6 +4938,7 @@ function App() {
                             setShowSchoolNameDropdown(false)
                             setShowNewExamPeriodDropdown(false)
                             setShowSupplementaryDropdown(false)
+    closeTargetScopeMenus()
                           }}
                         >
                           {isTextbookTitlesLoading ? '불러오는 중...' : (selectedTextbookTitle || '제목')}
@@ -4826,8 +4985,109 @@ function App() {
                       </div>
                     )}
                   </div>
+                  <div className={`new-exam-book-select${showTargetTextbookCategoryDropdown || showTargetTextbookDropdown ? ' is-open' : ''}`}>
+                    <span className="new-exam-school-label">만들시험지 교과서범위</span>
+                    <div className="dropdown-container">
+                      <button
+                        type="button"
+                        className="select-button"
+                        onClick={() => {
+                          setShowTargetTextbookCategoryDropdown(!showTargetTextbookCategoryDropdown)
+                          setShowTargetTextbookDropdown(false)
+                          setShowTargetMockGradeDropdown(false)
+                          setShowTargetMockExamDropdown(false)
+                          setShowTargetSupplementaryDropdown(false)
+                          closeBaseScopeMenus()
+                          setShowSchoolSidoDropdown(false)
+                          setShowSchoolSigunguDropdown(false)
+                          setShowSchoolNameDropdown(false)
+                          setShowNewExamPeriodDropdown(false)
+                        }}
+                      >
+                        {selectedTargetTextbookCategory || '분류'}
+                      </button>
+                      {showTargetTextbookCategoryDropdown && (
+                        <div className="dropdown-menu new-exam-period-menu">
+                          {textbookCategoryList.length === 0 ? (
+                            <div className="dropdown-item">등록된 분류가 없습니다</div>
+                          ) : (
+                            textbookCategoryList.map((category) => (
+                              <div
+                                key={category}
+                                className={`dropdown-item${selectedTargetTextbookCategory === category ? ' is-selected' : ''}`}
+                                onClick={() => handleTargetTextbookCategorySelect(category)}
+                              >
+                                {category}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    {selectedTargetTextbookCategory && (
+                      <div className="dropdown-container">
+                        <button
+                          type="button"
+                          className="select-button new-exam-textbook-button"
+                          onClick={() => {
+                            setShowTargetTextbookDropdown(!showTargetTextbookDropdown)
+                            setShowTargetTextbookCategoryDropdown(false)
+                            setShowTargetMockGradeDropdown(false)
+                            setShowTargetMockExamDropdown(false)
+                            setShowTargetSupplementaryDropdown(false)
+                            closeBaseScopeMenus()
+                            setShowSchoolSidoDropdown(false)
+                            setShowSchoolSigunguDropdown(false)
+                            setShowSchoolNameDropdown(false)
+                            setShowNewExamPeriodDropdown(false)
+                          }}
+                        >
+                          {isTargetTextbookTitlesLoading ? '불러오는 중...' : (selectedTargetTextbookTitle || '제목')}
+                        </button>
+                        {showTargetTextbookDropdown && (
+                          <div className="dropdown-menu new-exam-textbook-menu">
+                            {isTargetTextbookTitlesLoading ? (
+                              <div className="dropdown-item">불러오는 중...</div>
+                            ) : targetTextbookTitleList.length === 0 ? (
+                              <div className="dropdown-item">등록된 교과서가 없습니다</div>
+                            ) : (
+                              targetTextbookTitleList.map((title) => (
+                                <div
+                                  key={title}
+                                  className={`dropdown-item${selectedTargetTextbookTitle === title ? ' is-selected' : ''}`}
+                                  onClick={() => handleTargetTextbookTitleSelect(title)}
+                                >
+                                  {title}
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {selectedTargetTextbookTitle && (
+                      <div className="new-exam-unit-list new-exam-book-units">
+                        {isTargetTextbookUnitsLoading ? (
+                          <p>단원을 불러오는 중...</p>
+                        ) : targetTextbookUnitList.length === 0 ? (
+                          <p>등록된 단원이 없습니다</p>
+                        ) : (
+                          targetTextbookUnitList.map((unit) => (
+                            <label key={unit} className="checkbox-label">
+                              <input
+                                type="checkbox"
+                                checked={selectedTargetTextbookUnits.includes(unit)}
+                                onChange={() => handleTargetTextbookUnitToggle(unit)}
+                              />
+                              {unit}
+                            </label>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <div className={`new-exam-mock-select${showMockGradeDropdown || showMockExamDropdown ? ' is-open' : ''}`}>
-                    <span className="new-exam-school-label">모의고사</span>
+                    <span className="new-exam-school-label">기준시험지 모의고사범위</span>
                     <div className="dropdown-container">
                       <button
                         type="button"
@@ -4842,6 +5102,7 @@ function App() {
                           setShowSchoolNameDropdown(false)
                           setShowNewExamPeriodDropdown(false)
                           setShowSupplementaryDropdown(false)
+    closeTargetScopeMenus()
                         }}
                       >
                         {selectedMockExamGrade || '학년'}
@@ -4885,8 +5146,68 @@ function App() {
                       </div>
                     )}
                   </div>
+                  <div className={`new-exam-mock-select${showTargetMockGradeDropdown || showTargetMockExamDropdown ? ' is-open' : ''}`}>
+                    <span className="new-exam-school-label">만들시험지 모의고사범위</span>
+                    <div className="dropdown-container">
+                      <button
+                        type="button"
+                        className="select-button"
+                        onClick={() => {
+                          setShowTargetMockGradeDropdown(!showTargetMockGradeDropdown)
+                          setShowTargetMockExamDropdown(false)
+                          setShowTargetTextbookCategoryDropdown(false)
+                          setShowTargetTextbookDropdown(false)
+                          setShowTargetSupplementaryDropdown(false)
+                          closeBaseScopeMenus()
+                          setShowSchoolSidoDropdown(false)
+                          setShowSchoolSigunguDropdown(false)
+                          setShowSchoolNameDropdown(false)
+                          setShowNewExamPeriodDropdown(false)
+                        }}
+                      >
+                        {selectedTargetMockExamGrade || '학년'}
+                      </button>
+                      {showTargetMockGradeDropdown && (
+                        <div className="dropdown-menu new-exam-period-menu">
+                          {mockExamGradeList.length === 0 ? (
+                            <div className="dropdown-item">등록된 학년이 없습니다</div>
+                          ) : (
+                            mockExamGradeList.map((grade) => (
+                              <div
+                                key={grade}
+                                className={`dropdown-item${selectedTargetMockExamGrade === grade ? ' is-selected' : ''}`}
+                                onClick={() => handleTargetMockExamGradeSelect(grade)}
+                              >
+                                {grade}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    {selectedTargetMockExamGrade && (
+                      <div className="new-exam-unit-list new-exam-book-units new-exam-mock-list">
+                        {isTargetMockExamNamesLoading ? (
+                          <p>불러오는 중...</p>
+                        ) : targetMockExamList.length === 0 ? (
+                          <p>등록된 모의고사가 없습니다</p>
+                        ) : (
+                          targetMockExamList.map((name) => (
+                            <label key={name} className="checkbox-label">
+                              <input
+                                type="checkbox"
+                                checked={selectedTargetMockExams.includes(name)}
+                                onChange={() => handleTargetMockExamToggle(name)}
+                              />
+                              {name}
+                            </label>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <div className={`new-exam-supplementary-select${showSupplementaryDropdown ? ' is-open' : ''}`}>
-                    <span className="new-exam-school-label">부교재</span>
+                    <span className="new-exam-school-label">기준시험지 부교재범위</span>
                     <div className="dropdown-container">
                       <button
                         type="button"
@@ -4936,6 +5257,66 @@ function App() {
                                 type="checkbox"
                                 checked={selectedSupplementaryScopes.includes(scope)}
                                 onChange={() => handleSupplementaryScopeToggle(scope)}
+                              />
+                              {scope}
+                            </label>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className={`new-exam-supplementary-select${showTargetSupplementaryDropdown ? ' is-open' : ''}`}>
+                    <span className="new-exam-school-label">만들시험지 부교재범위</span>
+                    <div className="dropdown-container">
+                      <button
+                        type="button"
+                        className="select-button new-exam-textbook-button"
+                        onClick={() => {
+                          setShowTargetSupplementaryDropdown(!showTargetSupplementaryDropdown)
+                          setShowTargetTextbookDropdown(false)
+                          setShowTargetTextbookCategoryDropdown(false)
+                          setShowTargetMockGradeDropdown(false)
+                          setShowTargetMockExamDropdown(false)
+                          closeBaseScopeMenus()
+                          setShowSchoolSidoDropdown(false)
+                          setShowSchoolSigunguDropdown(false)
+                          setShowSchoolNameDropdown(false)
+                          setShowNewExamPeriodDropdown(false)
+                        }}
+                      >
+                        {selectedTargetSupplementaryBook || '책 이름'}
+                      </button>
+                      {showTargetSupplementaryDropdown && (
+                        <div className="dropdown-menu new-exam-textbook-menu">
+                          {supplementaryBookList.length === 0 ? (
+                            <div className="dropdown-item">등록된 부교재가 없습니다</div>
+                          ) : (
+                            supplementaryBookList.map((bookName) => (
+                              <div
+                                key={bookName}
+                                className={`dropdown-item${selectedTargetSupplementaryBook === bookName ? ' is-selected' : ''}`}
+                                onClick={() => handleTargetSupplementaryBookSelect(bookName)}
+                              >
+                                {bookName}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    {selectedTargetSupplementaryBook && (
+                      <div className="new-exam-unit-list new-exam-book-units new-exam-mock-list">
+                        {isTargetSupplementaryScopesLoading ? (
+                          <p>하위범위를 불러오는 중...</p>
+                        ) : targetSupplementaryScopeList.length === 0 ? (
+                          <p>등록된 하위범위가 없습니다</p>
+                        ) : (
+                          targetSupplementaryScopeList.map((scope) => (
+                            <label key={scope} className="checkbox-label">
+                              <input
+                                type="checkbox"
+                                checked={selectedTargetSupplementaryScopes.includes(scope)}
+                                onChange={() => handleTargetSupplementaryScopeToggle(scope)}
                               />
                               {scope}
                             </label>
