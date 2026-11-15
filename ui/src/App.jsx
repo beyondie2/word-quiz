@@ -2468,11 +2468,16 @@ function App() {
       return
     }
 
+    const targetSources = [
+      ...selectedTargetTextbookUnits,
+      ...selectedTargetMockExams,
+      ...selectedTargetSupplementaryScopes,
+    ].map((source) => String(source).trim()).filter(Boolean)
+
     const items = []
     for (let index = 0; index < newExamAnalysis.length; index++) {
       const item = newExamAnalysis[index]
       const sourceType = String(item.source_kind || '').trim()
-      const sourceDetail = String(item.source_detail || '').trim()
       if (!['교과서', '모의고사', '부교재', '기타'].includes(sourceType)) {
         setExamModelError(`${index + 1}번 문항의 출처를 알 수 없습니다`)
         return
@@ -2480,7 +2485,7 @@ function App() {
       items.push({
         compositionNo: String(item.number ?? index + 1).trim(),
         sourceType,
-        sources: sourceDetail ? [sourceDetail] : [],
+        sources: targetSources,
         question: item.question ?? '',
         answerFormat: item.answer_format ?? '',
         questionType: item.question_type ?? '',
