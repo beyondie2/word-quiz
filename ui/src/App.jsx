@@ -4691,7 +4691,7 @@ function App() {
                     )}
                   </div>
                   <div className={`new-exam-sheet-select${showNewExamPeriodDropdown ? ' is-open' : ''}`}>
-                    <span className="new-exam-school-label">시험지</span>
+                    <span className="new-exam-school-label">기준 시험지</span>
                     <div className="dropdown-container">
                       <button
                         className="select-button"
