@@ -4813,6 +4813,26 @@ function App() {
                         )}
                       </div>
                     )}
+                    {selectedTextbookTitle && (
+                      <div className="new-exam-unit-list new-exam-book-units">
+                        {isTextbookUnitsLoading ? (
+                          <p>단원을 불러오는 중...</p>
+                        ) : textbookUnitList.length === 0 ? (
+                          <p>등록된 단원이 없습니다</p>
+                        ) : (
+                          textbookUnitList.map((unit) => (
+                            <label key={unit} className="checkbox-label">
+                              <input
+                                type="checkbox"
+                                checked={selectedTextbookUnits.includes(unit)}
+                                onChange={() => handleTextbookUnitToggle(unit)}
+                              />
+                              {unit}
+                            </label>
+                          ))
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className={`new-exam-mock-select${showMockGradeDropdown || showMockExamDropdown ? ' is-open' : ''}`}>
                     <span className="new-exam-school-label">모의고사</span>
@@ -4897,30 +4917,6 @@ function App() {
                   </div>
                   <section className="new-exam-scope">
                     <h3>시험범위</h3>
-                    <div className="new-exam-scope-row">
-                      <span className="new-exam-school-label">교과서</span>
-                      {selectedTextbookTitle && <span>{selectedTextbookTitle}</span>}
-                    </div>
-                    {selectedTextbookTitle && (
-                      <div className="new-exam-unit-list">
-                        {isTextbookUnitsLoading ? (
-                          <p>단원을 불러오는 중...</p>
-                        ) : textbookUnitList.length === 0 ? (
-                          <p>등록된 단원이 없습니다</p>
-                        ) : (
-                          textbookUnitList.map((unit) => (
-                            <label key={unit} className="checkbox-label">
-                              <input
-                                type="checkbox"
-                                checked={selectedTextbookUnits.includes(unit)}
-                                onChange={() => handleTextbookUnitToggle(unit)}
-                              />
-                              {unit}
-                            </label>
-                          ))
-                        )}
-                      </div>
-                    )}
                     <div className="new-exam-scope-row">
                       <span className="new-exam-school-label">모의고사</span>
                       {selectedMockExamName && <span>{selectedMockExamName}</span>}

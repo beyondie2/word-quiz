@@ -2154,6 +2154,10 @@
   z-index: 8;
 }
 
+.new-exam-book-units {
+  flex: 1 0 100%;
+}
+
 .new-exam-mock-select {
   position: relative;
   z-index: 4;
