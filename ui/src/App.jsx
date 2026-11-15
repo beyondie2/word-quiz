@@ -4891,50 +4891,47 @@ function App() {
                       </div>
                     )}
                   </div>
-                  <section className="new-exam-scope">
-                    <h3>시험범위</h3>
-                    <div className="new-exam-scope-row">
-                      <span className="new-exam-school-label">부교재</span>
-                      <div className="dropdown-container">
-                        <button
-                          type="button"
-                          className="select-button new-exam-textbook-button"
-                          onClick={() => {
-                            setShowSupplementaryDropdown(!showSupplementaryDropdown)
-                            setShowTextbookDropdown(false)
+                  <div className={`new-exam-supplementary-select${showSupplementaryDropdown ? ' is-open' : ''}`}>
+                    <span className="new-exam-school-label">부교재</span>
+                    <div className="dropdown-container">
+                      <button
+                        type="button"
+                        className="select-button new-exam-textbook-button"
+                        onClick={() => {
+                          setShowSupplementaryDropdown(!showSupplementaryDropdown)
+                          setShowTextbookDropdown(false)
                           setShowTextbookCategoryDropdown(false)
                           setShowMockGradeDropdown(false)
                           setShowMockExamDropdown(false)
-                            setShowSchoolSidoDropdown(false)
-                            setShowSchoolSigunguDropdown(false)
-                            setShowSchoolNameDropdown(false)
-                            setShowNewExamPeriodDropdown(false)
-                            setOpenNewExamSourceIndex(null)
-                          }}
-                        >
-                          {selectedSupplementaryBook || '부교재 선택'}
-                        </button>
-                        {showSupplementaryDropdown && (
-                          <div className="dropdown-menu new-exam-textbook-menu new-exam-supplementary-menu">
-                            {supplementaryBookList.length === 0 ? (
-                              <div className="dropdown-item">등록된 부교재가 없습니다</div>
-                            ) : (
-                              supplementaryBookList.map((bookName) => (
-                                <div
-                                  key={bookName}
-                                  className={`dropdown-item${selectedSupplementaryBook === bookName ? ' is-selected' : ''}`}
-                                  onClick={() => handleSupplementaryBookSelect(bookName)}
-                                >
-                                  {bookName}
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        )}
-                      </div>
+                          setShowSchoolSidoDropdown(false)
+                          setShowSchoolSigunguDropdown(false)
+                          setShowSchoolNameDropdown(false)
+                          setShowNewExamPeriodDropdown(false)
+                          setOpenNewExamSourceIndex(null)
+                        }}
+                      >
+                        {selectedSupplementaryBook || '책 이름'}
+                      </button>
+                      {showSupplementaryDropdown && (
+                        <div className="dropdown-menu new-exam-textbook-menu">
+                          {supplementaryBookList.length === 0 ? (
+                            <div className="dropdown-item">등록된 부교재가 없습니다</div>
+                          ) : (
+                            supplementaryBookList.map((bookName) => (
+                              <div
+                                key={bookName}
+                                className={`dropdown-item${selectedSupplementaryBook === bookName ? ' is-selected' : ''}`}
+                                onClick={() => handleSupplementaryBookSelect(bookName)}
+                              >
+                                {bookName}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
                     </div>
                     {selectedSupplementaryBook && (
-                      <div className="new-exam-unit-list">
+                      <div className="new-exam-unit-list new-exam-book-units new-exam-mock-list">
                         {isSupplementaryScopesLoading ? (
                           <p>하위범위를 불러오는 중...</p>
                         ) : supplementaryScopeList.length === 0 ? (
@@ -4953,7 +4950,7 @@ function App() {
                         )}
                       </div>
                     )}
-                  </section>
+                  </div>
                   <p>문제지를 사진으로 찍어 올리거나 PDF 파일을 올려주세요.</p>
                   <div className="new-exam-upload">
                     <div className="new-exam-upload-panel">

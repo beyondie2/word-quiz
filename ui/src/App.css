@@ -2173,6 +2173,21 @@
   z-index: 9;
 }
 
+.new-exam-supplementary-select {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+}
+
+.new-exam-supplementary-select.is-open {
+  z-index: 10;
+}
+
 .new-exam-period-menu {
   min-width: 240px;
 }
