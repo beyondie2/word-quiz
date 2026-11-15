@@ -224,6 +224,7 @@ CREATE TABLE IF NOT EXISTS textbooks (
 CREATE TABLE IF NOT EXISTS mock_exams (
     id SERIAL PRIMARY KEY,
     name VARCHAR(200) NOT NULL UNIQUE,       -- 모의고사 이름
+    grade VARCHAR(10) NOT NULL,              -- 학년구분: 고1, 고2, 고3
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -295,6 +296,8 @@ CREATE INDEX IF NOT EXISTS idx_blocks_progress_created_at ON blocks_progress(cre
 CREATE INDEX IF NOT EXISTS idx_schools_sido ON schools(sido);
 CREATE INDEX IF NOT EXISTS idx_schools_school_name ON schools(school_name);
 CREATE INDEX IF NOT EXISTS idx_textbooks_title ON textbooks(title);
+ALTER TABLE mock_exams ADD COLUMN IF NOT EXISTS grade VARCHAR(10);
+COMMENT ON COLUMN mock_exams.grade IS '학년구분. 이름에 고1이 있으면 고1, 고2가 있으면 고2, 그 외는 고3';
 ALTER TABLE textbooks ADD COLUMN IF NOT EXISTS category VARCHAR(50);
 COMMENT ON COLUMN textbooks.category IS '공통영어, 심화영어 등. 제목에 공통영어가 있으면 공통영어, 없으면 심화영어';
 CREATE INDEX IF NOT EXISTS idx_supplementary_books_book_name ON supplementary_books(book_name);

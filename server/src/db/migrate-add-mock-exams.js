@@ -83,13 +83,24 @@ async function migrate() {
       CREATE TABLE IF NOT EXISTS mock_exams (
         id SERIAL PRIMARY KEY,
         name VARCHAR(200) NOT NULL UNIQUE,
+        grade VARCHAR(10),
         created_at TIMESTAMP DEFAULT NOW()
       )
     `);
 
+    await client.query(`
+      ALTER TABLE mock_exams
+      ADD COLUMN IF NOT EXISTS grade VARCHAR(10)
+    `);
+
     const result = await client.query(
-      `INSERT INTO mock_exams (name)
-       SELECT name
+      `INSERT INTO mock_exams (name, grade)
+       SELECT name,
+         CASE
+           WHEN name LIKE '%고1%' THEN '고1'
+           WHEN name LIKE '%고2%' THEN '고2'
+           ELSE '고3'
+         END
        FROM unnest($1::text[]) WITH ORDINALITY AS listed(name, ord)
        ORDER BY ord
        ON CONFLICT (name) DO NOTHING`,
