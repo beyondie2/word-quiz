@@ -4,18 +4,45 @@ import { trimStringFields } from '../utils/trimHelper.js';
 
 const router = express.Router();
 
-// GET /api/textbooks/titles - textbooks.title 고유 목록
+function sortKorean(values) {
+  return [...values].sort((a, b) => a.localeCompare(b, 'ko'));
+}
+
+// GET /api/textbooks/categories - textbooks.category 고유 목록 (자모순)
+router.get('/categories', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT DISTINCT category
+      FROM textbooks
+      WHERE category IS NOT NULL AND TRIM(category) != ''
+    `);
+    const rows = trimStringFields(result.rows);
+    res.json({ categories: sortKorean(rows.map(row => row.category)) });
+  } catch (error) {
+    console.error('Error fetching textbook categories:', error);
+    res.status(500).json({ error: '교과서 분류 조회에 실패했습니다' });
+  }
+});
+
+// GET /api/textbooks/titles?category= - textbooks.title 고유 목록 (자모순)
 router.get('/titles', async (req, res) => {
+  const category = String(req.query.category || '').trim();
+  const params = [];
+  let where = `title IS NOT NULL AND TRIM(title) != ''`;
+  if (category) {
+    params.push(category);
+    where += ` AND category = $${params.length}`;
+  }
+
   try {
     const result = await pool.query(`
       SELECT title
       FROM textbooks
-      WHERE title IS NOT NULL AND TRIM(title) != ''
+      WHERE ${where}
       GROUP BY title
-      ORDER BY MIN(id)
-    `);
+    `, params);
     const rows = trimStringFields(result.rows);
-    res.json({ titles: rows.map(row => row.title) });
+    res.json({ titles: sortKorean(rows.map(row => row.title)) });
   } catch (error) {
     console.error('Error fetching textbook titles:', error);
     res.status(500).json({ error: '교과서 목록 조회에 실패했습니다' });

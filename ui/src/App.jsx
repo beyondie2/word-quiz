@@ -215,6 +215,10 @@ function App() {
   const [isSchoolNameLoading, setIsSchoolNameLoading] = useState(false)
   // 문항 분석: 교과서 시험범위
   const [textbookTitleList, setTextbookTitleList] = useState([])
+  const [textbookCategoryList, setTextbookCategoryList] = useState([])
+  const [selectedTextbookCategory, setSelectedTextbookCategory] = useState('')
+  const [showTextbookCategoryDropdown, setShowTextbookCategoryDropdown] = useState(false)
+  const [isTextbookTitlesLoading, setIsTextbookTitlesLoading] = useState(false)
   const [selectedTextbookTitle, setSelectedTextbookTitle] = useState('')
   const [showTextbookDropdown, setShowTextbookDropdown] = useState(false)
   const [textbookUnitList, setTextbookUnitList] = useState([])
@@ -2036,7 +2040,7 @@ function App() {
   useEffect(() => {
     if (activeTab === 'createProblem' && isVerified && isNewExamMode) {
       fetchSchoolSido()
-      fetchTextbookTitles()
+      fetchTextbookCategories()
       fetchMockExams()
       fetchSupplementaryBooks()
     }
@@ -2062,19 +2066,41 @@ function App() {
     }
   }
 
-  const fetchTextbookTitles = async () => {
+  const fetchTextbookCategories = async () => {
     try {
-      const response = await fetch(`${API_BASE}/textbooks/titles`)
+      const response = await fetch(`${API_BASE}/textbooks/categories`)
+      const data = await response.json()
+      setTextbookCategoryList(data.categories || [])
+    } catch (error) {
+      console.error('Error fetching textbook categories:', error)
+    }
+  }
+
+  const handleTextbookCategorySelect = async (category) => {
+    setSelectedTextbookCategory(category)
+    setShowTextbookCategoryDropdown(false)
+    setSelectedTextbookTitle('')
+    setShowTextbookDropdown(false)
+    setSelectedTextbookUnits([])
+    setTextbookUnitList([])
+    setTextbookTitleList([])
+    setIsTextbookTitlesLoading(true)
+
+    try {
+      const response = await fetch(`${API_BASE}/textbooks/titles?category=${encodeURIComponent(category)}`)
       const data = await response.json()
       setTextbookTitleList(data.titles || [])
     } catch (error) {
       console.error('Error fetching textbook titles:', error)
+    } finally {
+      setIsTextbookTitlesLoading(false)
     }
   }
 
   const handleTextbookTitleSelect = async (title) => {
     setSelectedTextbookTitle(title)
     setShowTextbookDropdown(false)
+    setShowTextbookCategoryDropdown(false)
     setShowSupplementaryDropdown(false)
     setSelectedTextbookUnits([])
     setTextbookUnitList([])
@@ -4533,6 +4559,7 @@ function App() {
                           setShowSchoolNameDropdown(false)
                           setShowNewExamPeriodDropdown(false)
                           setShowTextbookDropdown(false)
+                          setShowTextbookCategoryDropdown(false)
                           setShowSupplementaryDropdown(false)
                         }}
                       >
@@ -4566,6 +4593,7 @@ function App() {
                             setShowSchoolNameDropdown(false)
                             setShowNewExamPeriodDropdown(false)
                             setShowTextbookDropdown(false)
+                          setShowTextbookCategoryDropdown(false)
                             setShowSupplementaryDropdown(false)
                           }}
                         >
@@ -4602,6 +4630,7 @@ function App() {
                             setShowSchoolSigunguDropdown(false)
                             setShowNewExamPeriodDropdown(false)
                             setShowTextbookDropdown(false)
+                          setShowTextbookCategoryDropdown(false)
                             setShowSupplementaryDropdown(false)
                           }}
                         >
@@ -4641,6 +4670,7 @@ function App() {
                           setShowSchoolNameDropdown(false)
                           setOpenNewExamSourceIndex(null)
                           setShowTextbookDropdown(false)
+                          setShowTextbookCategoryDropdown(false)
                           setShowSupplementaryDropdown(false)
                         }}
                       >
@@ -4664,16 +4694,51 @@ function App() {
                       )}
                     </div>
                   </div>
-                  <section className="new-exam-scope">
-                    <h3>시험범위</h3>
-                    <div className="new-exam-scope-row">
-                      <span className="new-exam-school-label">교과서</span>
+                  <div className={`new-exam-book-select${showTextbookCategoryDropdown || showTextbookDropdown ? ' is-open' : ''}`}>
+                    <span className="new-exam-school-label">교과서</span>
+                    <div className="dropdown-container">
+                      <button
+                        type="button"
+                        className="select-button"
+                        onClick={() => {
+                          setShowTextbookCategoryDropdown(!showTextbookCategoryDropdown)
+                          setShowTextbookDropdown(false)
+                          setShowSchoolSidoDropdown(false)
+                          setShowSchoolSigunguDropdown(false)
+                          setShowSchoolNameDropdown(false)
+                          setShowNewExamPeriodDropdown(false)
+                          setOpenNewExamSourceIndex(null)
+                          setShowSupplementaryDropdown(false)
+                        }}
+                      >
+                        {selectedTextbookCategory || '분류'}
+                      </button>
+                      {showTextbookCategoryDropdown && (
+                        <div className="dropdown-menu new-exam-period-menu">
+                          {textbookCategoryList.length === 0 ? (
+                            <div className="dropdown-item">등록된 분류가 없습니다</div>
+                          ) : (
+                            textbookCategoryList.map((category) => (
+                              <div
+                                key={category}
+                                className={`dropdown-item${selectedTextbookCategory === category ? ' is-selected' : ''}`}
+                                onClick={() => handleTextbookCategorySelect(category)}
+                              >
+                                {category}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    {selectedTextbookCategory && (
                       <div className="dropdown-container">
                         <button
                           type="button"
                           className="select-button new-exam-textbook-button"
                           onClick={() => {
                             setShowTextbookDropdown(!showTextbookDropdown)
+                            setShowTextbookCategoryDropdown(false)
                             setShowSchoolSidoDropdown(false)
                             setShowSchoolSigunguDropdown(false)
                             setShowSchoolNameDropdown(false)
@@ -4682,11 +4747,13 @@ function App() {
                             setShowSupplementaryDropdown(false)
                           }}
                         >
-                          {selectedTextbookTitle || '교과서 선택'}
+                          {isTextbookTitlesLoading ? '불러오는 중...' : (selectedTextbookTitle || '제목')}
                         </button>
                         {showTextbookDropdown && (
                           <div className="dropdown-menu new-exam-textbook-menu">
-                            {textbookTitleList.length === 0 ? (
+                            {isTextbookTitlesLoading ? (
+                              <div className="dropdown-item">불러오는 중...</div>
+                            ) : textbookTitleList.length === 0 ? (
                               <div className="dropdown-item">등록된 교과서가 없습니다</div>
                             ) : (
                               textbookTitleList.map((title) => (
@@ -4702,6 +4769,13 @@ function App() {
                           </div>
                         )}
                       </div>
+                    )}
+                  </div>
+                  <section className="new-exam-scope">
+                    <h3>시험범위</h3>
+                    <div className="new-exam-scope-row">
+                      <span className="new-exam-school-label">교과서</span>
+                      {selectedTextbookTitle && <span>{selectedTextbookTitle}</span>}
                     </div>
                     {selectedTextbookTitle && (
                       <div className="new-exam-unit-list">
@@ -4751,6 +4825,7 @@ function App() {
                           onClick={() => {
                             setShowSupplementaryDropdown(!showSupplementaryDropdown)
                             setShowTextbookDropdown(false)
+                          setShowTextbookCategoryDropdown(false)
                             setShowSchoolSidoDropdown(false)
                             setShowSchoolSigunguDropdown(false)
                             setShowSchoolNameDropdown(false)
@@ -4912,6 +4987,7 @@ function App() {
                               onClick={() => {
                                 setOpenNewExamSourceIndex(openNewExamSourceIndex === index ? null : index)
                                 setShowTextbookDropdown(false)
+                          setShowTextbookCategoryDropdown(false)
                                 setShowSupplementaryDropdown(false)
                               }}
                             >
