@@ -228,7 +228,6 @@ function App() {
   const [selectedMockExamGrade, setSelectedMockExamGrade] = useState('')
   const [showMockGradeDropdown, setShowMockGradeDropdown] = useState(false)
   const [mockExamList, setMockExamList] = useState([])
-  const [selectedMockExamName, setSelectedMockExamName] = useState('')
   const [showMockExamDropdown, setShowMockExamDropdown] = useState(false)
   const [isMockExamNamesLoading, setIsMockExamNamesLoading] = useState(false)
   const [selectedMockExams, setSelectedMockExams] = useState([])
@@ -2146,7 +2145,6 @@ function App() {
   const handleMockExamGradeSelect = async (grade) => {
     setSelectedMockExamGrade(grade)
     setShowMockGradeDropdown(false)
-    setSelectedMockExamName('')
     setShowMockExamDropdown(false)
     setSelectedMockExams([])
     setMockExamList([])
@@ -2163,11 +2161,10 @@ function App() {
     }
   }
 
-  const handleMockExamNameSelect = (name) => {
-    setSelectedMockExamName(name)
-    setShowMockExamDropdown(false)
-    setShowMockGradeDropdown(false)
-    setSelectedMockExams([name])
+  const handleMockExamToggle = (name) => {
+    setSelectedMockExams((prev) => (
+      prev.includes(name) ? prev.filter((item) => item !== name) : [...prev, name]
+    ))
   }
 
   const fetchSupplementaryBooks = async () => {
@@ -4874,53 +4871,28 @@ function App() {
                       )}
                     </div>
                     {selectedMockExamGrade && (
-                      <div className="dropdown-container">
-                        <button
-                          type="button"
-                          className="select-button new-exam-textbook-button"
-                          onClick={() => {
-                            setShowMockExamDropdown(!showMockExamDropdown)
-                            setShowMockGradeDropdown(false)
-                            setShowTextbookCategoryDropdown(false)
-                            setShowTextbookDropdown(false)
-                            setShowSchoolSidoDropdown(false)
-                            setShowSchoolSigunguDropdown(false)
-                            setShowSchoolNameDropdown(false)
-                            setShowNewExamPeriodDropdown(false)
-                            setOpenNewExamSourceIndex(null)
-                            setShowSupplementaryDropdown(false)
-                          }}
-                        >
-                          {isMockExamNamesLoading ? '불러오는 중...' : (selectedMockExamName || '이름')}
-                        </button>
-                        {showMockExamDropdown && (
-                          <div className="dropdown-menu new-exam-textbook-menu">
-                            {isMockExamNamesLoading ? (
-                              <div className="dropdown-item">불러오는 중...</div>
-                            ) : mockExamList.length === 0 ? (
-                              <div className="dropdown-item">등록된 모의고사가 없습니다</div>
-                            ) : (
-                              mockExamList.map((name) => (
-                                <div
-                                  key={name}
-                                  className={`dropdown-item${selectedMockExamName === name ? ' is-selected' : ''}`}
-                                  onClick={() => handleMockExamNameSelect(name)}
-                                >
-                                  {name}
-                                </div>
-                              ))
-                            )}
-                          </div>
+                      <div className="new-exam-unit-list new-exam-book-units new-exam-mock-list">
+                        {isMockExamNamesLoading ? (
+                          <p>불러오는 중...</p>
+                        ) : mockExamList.length === 0 ? (
+                          <p>등록된 모의고사가 없습니다</p>
+                        ) : (
+                          mockExamList.map((name) => (
+                            <label key={name} className="checkbox-label">
+                              <input
+                                type="checkbox"
+                                checked={selectedMockExams.includes(name)}
+                                onChange={() => handleMockExamToggle(name)}
+                              />
+                              {name}
+                            </label>
+                          ))
                         )}
                       </div>
                     )}
                   </div>
                   <section className="new-exam-scope">
                     <h3>시험범위</h3>
-                    <div className="new-exam-scope-row">
-                      <span className="new-exam-school-label">모의고사</span>
-                      {selectedMockExamName && <span>{selectedMockExamName}</span>}
-                    </div>
                     <div className="new-exam-scope-row">
                       <span className="new-exam-school-label">부교재</span>
                       <div className="dropdown-container">
