@@ -32,7 +32,8 @@ function loadRows() {
     const key = `${title}\t${unit}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    rows.push([title, unit]);
+    const category = title.includes('공통영어') ? '공통영어' : '심화영어';
+    rows.push([title, unit, category]);
   }
 
   return rows;
@@ -63,6 +64,10 @@ async function migrate() {
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_textbooks_title ON textbooks(title)
     `);
+    await client.query(`
+      ALTER TABLE textbooks
+      ADD COLUMN IF NOT EXISTS category VARCHAR(50)
+    `);
 
     await client.query('BEGIN');
 
@@ -72,13 +77,13 @@ async function migrate() {
       const batch = rows.slice(i, i + batchSize);
       const values = [];
       const placeholders = batch.map((row, idx) => {
-        const base = idx * 2;
-        values.push(row[0], row[1]);
-        return `($${base + 1}, $${base + 2})`;
+        const base = idx * 3;
+        values.push(row[0], row[1], row[2]);
+        return `($${base + 1}, $${base + 2}, $${base + 3})`;
       });
 
       const result = await client.query(
-        `INSERT INTO textbooks (title, unit)
+        `INSERT INTO textbooks (title, unit, category)
          VALUES ${placeholders.join(', ')}
          ON CONFLICT (title, unit) DO NOTHING`,
         values

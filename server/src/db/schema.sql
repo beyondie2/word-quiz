@@ -215,6 +215,7 @@ CREATE TABLE IF NOT EXISTS textbooks (
     id SERIAL PRIMARY KEY,
     title VARCHAR(200) NOT NULL,             -- 교과서 제목
     unit VARCHAR(100) NOT NULL,              -- 단원
+    category VARCHAR(50) NOT NULL,           -- 공통영어, 심화영어 등
     created_at TIMESTAMP DEFAULT NOW(),
     CONSTRAINT textbooks_title_unit_key UNIQUE (title, unit)
 );
@@ -294,6 +295,8 @@ CREATE INDEX IF NOT EXISTS idx_blocks_progress_created_at ON blocks_progress(cre
 CREATE INDEX IF NOT EXISTS idx_schools_sido ON schools(sido);
 CREATE INDEX IF NOT EXISTS idx_schools_school_name ON schools(school_name);
 CREATE INDEX IF NOT EXISTS idx_textbooks_title ON textbooks(title);
+ALTER TABLE textbooks ADD COLUMN IF NOT EXISTS category VARCHAR(50);
+COMMENT ON COLUMN textbooks.category IS '공통영어, 심화영어 등. 제목에 공통영어가 있으면 공통영어, 없으면 심화영어';
 CREATE INDEX IF NOT EXISTS idx_supplementary_books_book_name ON supplementary_books(book_name);
 
 -- 샘플 데이터 (테스트용)
