@@ -6723,11 +6723,12 @@ function App() {
                 )}
               </div>
               <div className="question-bank-upload">
-                <label className="upload-button">
+                <label className={`upload-button${bankUploadFile ? ' is-disabled' : ''}`}>
                   파일업로드
                   <input
                     type="file"
                     hidden
+                    disabled={Boolean(bankUploadFile)}
                     onChange={(e) => {
                       const file = e.target.files && e.target.files[0]
                       setBankUploadFile(file || null)
@@ -6737,6 +6738,11 @@ function App() {
                 </label>
                 {bankUploadFile && (
                   <p className="question-bank-file-name">{bankUploadFile.name}</p>
+                )}
+                {bankUploadFile && (
+                  <button type="button" className="upload-button">
+                    유형별 문제 만들기
+                  </button>
                 )}
               </div>
             </div>

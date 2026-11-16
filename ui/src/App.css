@@ -1041,6 +1041,12 @@
   display: inline-block;
 }
 
+.question-bank-upload .upload-button.is-disabled {
+  background-color: #6B7280;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .question-bank-file-name {
   margin: 0;
   color: #A0C4D8;
