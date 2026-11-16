@@ -273,6 +273,7 @@ function App() {
   const [bankSupplementaryScopeList, setBankSupplementaryScopeList] = useState([])
   const [selectedBankSupplementaryScopes, setSelectedBankSupplementaryScopes] = useState([])
   const [isBankSupplementaryScopesLoading, setIsBankSupplementaryScopesLoading] = useState(false)
+  const [bankUploadFile, setBankUploadFile] = useState(null)
   const [examSheets, setExamSheets] = useState([])
   const [selectedExamSheet, setSelectedExamSheet] = useState('')
   const [showExamSheetDropdown, setShowExamSheetDropdown] = useState(false)
@@ -6719,6 +6720,23 @@ function App() {
                       ))
                     )}
                   </div>
+                )}
+              </div>
+              <div className="question-bank-upload">
+                <label className="upload-button">
+                  파일업로드
+                  <input
+                    type="file"
+                    hidden
+                    onChange={(e) => {
+                      const file = e.target.files && e.target.files[0]
+                      setBankUploadFile(file || null)
+                      e.target.value = ''
+                    }}
+                  />
+                </label>
+                {bankUploadFile && (
+                  <p className="question-bank-file-name">{bankUploadFile.name}</p>
                 )}
               </div>
             </div>

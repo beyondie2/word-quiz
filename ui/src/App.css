@@ -1030,6 +1030,22 @@
   border-radius: 8px;
 }
 
+.question-bank-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.question-bank-upload .upload-button {
+  display: inline-block;
+}
+
+.question-bank-file-name {
+  margin: 0;
+  color: #A0C4D8;
+}
+
 .upload-section {
   background-color: #1B3A4B;
   padding: 20px;
