@@ -141,7 +141,7 @@ function App() {
   const [newUserIsAdmin, setNewUserIsAdmin] = useState(false)
   const [isLoadingAdmin, setIsLoadingAdmin] = useState(false)
   const [adminError, setAdminError] = useState('')
-  const [adminSubTab, setAdminSubTab] = useState('users') // 'users', 'stats', 'books', 'grammar', 'blockwriting', 'webbook', 'examQuestions', 'examPapers', 'questionTypeSamples'
+  const [adminSubTab, setAdminSubTab] = useState('users') // 'users', 'stats', 'books', 'grammar', 'blockwriting', 'webbook', 'examQuestions', 'examPapers', 'questionTypeSamples', 'questionBank'
 
   // 단어장 관리 관련 상태
   const [adminBooks, setAdminBooks] = useState([])
@@ -5596,6 +5596,12 @@ function App() {
               시험지유형 관리
             </button>
             <button
+              className={`sub-tab-button ${adminSubTab === 'questionBank' ? 'active' : ''}`}
+              onClick={() => setAdminSubTab('questionBank')}
+            >
+              문제은행
+            </button>
+            <button
               className={`sub-tab-button ${adminSubTab === 'stats' ? 'active' : ''}`}
               onClick={() => setAdminSubTab('stats')}
             >
@@ -6382,6 +6388,14 @@ function App() {
                     </table>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {adminSubTab === 'questionBank' && (
+            <div className="admin-books">
+              <div className="books-list">
+                <h3>문제은행</h3>
               </div>
             </div>
           )}
