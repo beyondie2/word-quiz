@@ -237,7 +237,21 @@ CREATE TABLE IF NOT EXISTS supplementary_books (
     CONSTRAINT supplementary_books_book_name_sub_scope_key UNIQUE (book_name, sub_scope)
 );
 
+-- QuestionBank 테이블: 나누어 둔 지문 (출처 구분, 책 제목, 단원명, 지문)
+CREATE TABLE IF NOT EXISTS question_bank (
+    id SERIAL PRIMARY KEY,
+    source_type VARCHAR(20) NOT NULL,        -- 출처 구분: 교과서 | 모의고사 | 부교재 | 자작 | 외부지문 | 기타
+    title VARCHAR(200) NOT NULL,             -- 책 제목, 모의고사 이름, 부교재 이름
+    unit_name VARCHAR(200) NOT NULL,         -- 단원명
+    passage TEXT NOT NULL,                   -- 나누어진 지문 (모의고사 한 문제 정도의 텍스트)
+    created_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT question_bank_source_type_check CHECK (
+        source_type IN ('교과서', '모의고사', '부교재', '자작', '외부지문', '기타')
+    )
+);
+
 -- 인덱스 생성
+CREATE INDEX IF NOT EXISTS idx_question_bank_source ON question_bank(source_type, title, unit_name);
 CREATE INDEX IF NOT EXISTS idx_exam_questions_exam_scope ON exam_questions(exam_scope);
 CREATE INDEX IF NOT EXISTS idx_exam_questions_question_type ON exam_questions(question_type);
 CREATE INDEX IF NOT EXISTS idx_exam_questions_answer_format ON exam_questions(answer_format);
