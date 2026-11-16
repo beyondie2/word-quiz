@@ -253,6 +253,26 @@ function App() {
   const [targetSupplementaryScopeList, setTargetSupplementaryScopeList] = useState([])
   const [selectedTargetSupplementaryScopes, setSelectedTargetSupplementaryScopes] = useState([])
   const [isTargetSupplementaryScopesLoading, setIsTargetSupplementaryScopesLoading] = useState(false)
+  // 문제은행 범위. 새로 만들기 화면의 선택과 따로 고른다.
+  const [bankTextbookTitleList, setBankTextbookTitleList] = useState([])
+  const [selectedBankTextbookCategory, setSelectedBankTextbookCategory] = useState('')
+  const [showBankTextbookCategoryDropdown, setShowBankTextbookCategoryDropdown] = useState(false)
+  const [isBankTextbookTitlesLoading, setIsBankTextbookTitlesLoading] = useState(false)
+  const [selectedBankTextbookTitle, setSelectedBankTextbookTitle] = useState('')
+  const [showBankTextbookDropdown, setShowBankTextbookDropdown] = useState(false)
+  const [bankTextbookUnitList, setBankTextbookUnitList] = useState([])
+  const [selectedBankTextbookUnits, setSelectedBankTextbookUnits] = useState([])
+  const [isBankTextbookUnitsLoading, setIsBankTextbookUnitsLoading] = useState(false)
+  const [selectedBankMockExamGrade, setSelectedBankMockExamGrade] = useState('')
+  const [showBankMockGradeDropdown, setShowBankMockGradeDropdown] = useState(false)
+  const [bankMockExamList, setBankMockExamList] = useState([])
+  const [isBankMockExamNamesLoading, setIsBankMockExamNamesLoading] = useState(false)
+  const [selectedBankMockExams, setSelectedBankMockExams] = useState([])
+  const [selectedBankSupplementaryBook, setSelectedBankSupplementaryBook] = useState('')
+  const [showBankSupplementaryDropdown, setShowBankSupplementaryDropdown] = useState(false)
+  const [bankSupplementaryScopeList, setBankSupplementaryScopeList] = useState([])
+  const [selectedBankSupplementaryScopes, setSelectedBankSupplementaryScopes] = useState([])
+  const [isBankSupplementaryScopesLoading, setIsBankSupplementaryScopesLoading] = useState(false)
   const [examSheets, setExamSheets] = useState([])
   const [selectedExamSheet, setSelectedExamSheet] = useState('')
   const [showExamSheetDropdown, setShowExamSheetDropdown] = useState(false)
@@ -2067,6 +2087,15 @@ function App() {
     }
   }, [activeTab, isVerified, isNewExamMode])
 
+  // 문제은행 화면이 열리면 교과서, 모의고사, 부교재 목록을 불러온다
+  useEffect(() => {
+    if (activeTab === 'admin' && isAdmin && adminSubTab === 'questionBank') {
+      fetchTextbookCategories()
+      fetchMockExamGrades()
+      fetchSupplementaryBooks()
+    }
+  }, [activeTab, isAdmin, adminSubTab])
+
   const fetchExamSchools = async () => {
     try {
       const response = await fetch(`${API_BASE}/exam-papers/schools`)
@@ -2225,6 +2254,107 @@ function App() {
 
   const handleSupplementaryScopeToggle = (scope) => {
     setSelectedSupplementaryScopes((prev) => (
+      prev.includes(scope) ? prev.filter((item) => item !== scope) : [...prev, scope]
+    ))
+  }
+
+  const closeBankScopeMenus = () => {
+    setShowBankTextbookCategoryDropdown(false)
+    setShowBankTextbookDropdown(false)
+    setShowBankMockGradeDropdown(false)
+    setShowBankSupplementaryDropdown(false)
+  }
+
+  const handleBankTextbookCategorySelect = async (category) => {
+    setSelectedBankTextbookCategory(category)
+    closeBankScopeMenus()
+    setSelectedBankTextbookTitle('')
+    setSelectedBankTextbookUnits([])
+    setBankTextbookUnitList([])
+    setBankTextbookTitleList([])
+    setIsBankTextbookTitlesLoading(true)
+
+    try {
+      const response = await fetch(`${API_BASE}/textbooks/titles?category=${encodeURIComponent(category)}`)
+      const data = await response.json()
+      setBankTextbookTitleList(data.titles || [])
+    } catch (error) {
+      console.error('Error fetching textbook titles:', error)
+    } finally {
+      setIsBankTextbookTitlesLoading(false)
+    }
+  }
+
+  const handleBankTextbookTitleSelect = async (title) => {
+    setSelectedBankTextbookTitle(title)
+    closeBankScopeMenus()
+    setSelectedBankTextbookUnits([])
+    setBankTextbookUnitList([])
+    setIsBankTextbookUnitsLoading(true)
+
+    try {
+      const response = await fetch(`${API_BASE}/textbooks/units?title=${encodeURIComponent(title)}`)
+      const data = await response.json()
+      setBankTextbookUnitList(data.units || [])
+    } catch (error) {
+      console.error('Error fetching textbook units:', error)
+    } finally {
+      setIsBankTextbookUnitsLoading(false)
+    }
+  }
+
+  const handleBankTextbookUnitToggle = (unit) => {
+    setSelectedBankTextbookUnits((prev) => (
+      prev.includes(unit) ? prev.filter((item) => item !== unit) : [...prev, unit]
+    ))
+  }
+
+  const handleBankMockExamGradeSelect = async (grade) => {
+    setSelectedBankMockExamGrade(grade)
+    closeBankScopeMenus()
+    setSelectedBankMockExams([])
+    setBankMockExamList([])
+    setIsBankMockExamNamesLoading(true)
+
+    try {
+      const response = await fetch(`${API_BASE}/mock-exams?grade=${encodeURIComponent(grade)}`)
+      const data = await response.json()
+      setBankMockExamList(data.mockExams || [])
+    } catch (error) {
+      console.error('Error fetching mock exams:', error)
+    } finally {
+      setIsBankMockExamNamesLoading(false)
+    }
+  }
+
+  const handleBankMockExamToggle = (name) => {
+    setSelectedBankMockExams((prev) => (
+      prev.includes(name) ? prev.filter((item) => item !== name) : [...prev, name]
+    ))
+  }
+
+  const handleBankSupplementaryBookSelect = async (bookName) => {
+    setSelectedBankSupplementaryBook(bookName)
+    closeBankScopeMenus()
+    setSelectedBankSupplementaryScopes([])
+    setBankSupplementaryScopeList([])
+    setIsBankSupplementaryScopesLoading(true)
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/supplementary-books/scopes?bookName=${encodeURIComponent(bookName)}`
+      )
+      const data = await response.json()
+      setBankSupplementaryScopeList(data.scopes || [])
+    } catch (error) {
+      console.error('Error fetching supplementary scopes:', error)
+    } finally {
+      setIsBankSupplementaryScopesLoading(false)
+    }
+  }
+
+  const handleBankSupplementaryScopeToggle = (scope) => {
+    setSelectedBankSupplementaryScopes((prev) => (
       prev.includes(scope) ? prev.filter((item) => item !== scope) : [...prev, scope]
     ))
   }
@@ -6393,9 +6523,203 @@ function App() {
           )}
 
           {adminSubTab === 'questionBank' && (
-            <div className="admin-books">
-              <div className="books-list">
-                <h3>문제은행</h3>
+            <div className="admin-books question-bank">
+              <div className={`new-exam-book-select${showBankTextbookCategoryDropdown || showBankTextbookDropdown ? ' is-open' : ''}`}>
+                <span className="new-exam-school-label">교과서</span>
+                <div className="dropdown-container">
+                  <button
+                    type="button"
+                    className="select-button"
+                    onClick={() => {
+                      setShowBankTextbookCategoryDropdown(!showBankTextbookCategoryDropdown)
+                      setShowBankTextbookDropdown(false)
+                      setShowBankMockGradeDropdown(false)
+                      setShowBankSupplementaryDropdown(false)
+                    }}
+                  >
+                    {selectedBankTextbookCategory || '분류'}
+                  </button>
+                  {showBankTextbookCategoryDropdown && (
+                    <div className="dropdown-menu new-exam-period-menu">
+                      {textbookCategoryList.length === 0 ? (
+                        <div className="dropdown-item">등록된 분류가 없습니다</div>
+                      ) : (
+                        textbookCategoryList.map((category) => (
+                          <div
+                            key={category}
+                            className={`dropdown-item${selectedBankTextbookCategory === category ? ' is-selected' : ''}`}
+                            onClick={() => handleBankTextbookCategorySelect(category)}
+                          >
+                            {category}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+                {selectedBankTextbookCategory && (
+                  <div className="dropdown-container">
+                    <button
+                      type="button"
+                      className="select-button new-exam-textbook-button"
+                      onClick={() => {
+                        setShowBankTextbookDropdown(!showBankTextbookDropdown)
+                        setShowBankTextbookCategoryDropdown(false)
+                        setShowBankMockGradeDropdown(false)
+                        setShowBankSupplementaryDropdown(false)
+                      }}
+                    >
+                      {isBankTextbookTitlesLoading ? '불러오는 중...' : (selectedBankTextbookTitle || '제목')}
+                    </button>
+                    {showBankTextbookDropdown && (
+                      <div className="dropdown-menu new-exam-textbook-menu">
+                        {isBankTextbookTitlesLoading ? (
+                          <div className="dropdown-item">불러오는 중...</div>
+                        ) : bankTextbookTitleList.length === 0 ? (
+                          <div className="dropdown-item">등록된 교과서가 없습니다</div>
+                        ) : (
+                          bankTextbookTitleList.map((title) => (
+                            <div
+                              key={title}
+                              className={`dropdown-item${selectedBankTextbookTitle === title ? ' is-selected' : ''}`}
+                              onClick={() => handleBankTextbookTitleSelect(title)}
+                            >
+                              {title}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {selectedBankTextbookTitle && (
+                  <div className="new-exam-unit-list new-exam-book-units">
+                    {isBankTextbookUnitsLoading ? (
+                      <p>단원을 불러오는 중...</p>
+                    ) : bankTextbookUnitList.length === 0 ? (
+                      <p>등록된 단원이 없습니다</p>
+                    ) : (
+                      bankTextbookUnitList.map((unit) => (
+                        <label key={unit} className="checkbox-label">
+                          <input
+                            type="checkbox"
+                            checked={selectedBankTextbookUnits.includes(unit)}
+                            onChange={() => handleBankTextbookUnitToggle(unit)}
+                          />
+                          {unit}
+                        </label>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className={`new-exam-mock-select${showBankMockGradeDropdown ? ' is-open' : ''}`}>
+                <span className="new-exam-school-label">모의고사</span>
+                <div className="dropdown-container">
+                  <button
+                    type="button"
+                    className="select-button"
+                    onClick={() => {
+                      setShowBankMockGradeDropdown(!showBankMockGradeDropdown)
+                      setShowBankTextbookCategoryDropdown(false)
+                      setShowBankTextbookDropdown(false)
+                      setShowBankSupplementaryDropdown(false)
+                    }}
+                  >
+                    {selectedBankMockExamGrade || '학년'}
+                  </button>
+                  {showBankMockGradeDropdown && (
+                    <div className="dropdown-menu new-exam-period-menu">
+                      {mockExamGradeList.length === 0 ? (
+                        <div className="dropdown-item">등록된 학년이 없습니다</div>
+                      ) : (
+                        mockExamGradeList.map((grade) => (
+                          <div
+                            key={grade}
+                            className={`dropdown-item${selectedBankMockExamGrade === grade ? ' is-selected' : ''}`}
+                            onClick={() => handleBankMockExamGradeSelect(grade)}
+                          >
+                            {grade}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+                {selectedBankMockExamGrade && (
+                  <div className="new-exam-unit-list new-exam-book-units new-exam-mock-list">
+                    {isBankMockExamNamesLoading ? (
+                      <p>불러오는 중...</p>
+                    ) : bankMockExamList.length === 0 ? (
+                      <p>등록된 모의고사가 없습니다</p>
+                    ) : (
+                      bankMockExamList.map((name) => (
+                        <label key={name} className="checkbox-label">
+                          <input
+                            type="checkbox"
+                            checked={selectedBankMockExams.includes(name)}
+                            onChange={() => handleBankMockExamToggle(name)}
+                          />
+                          {name}
+                        </label>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className={`new-exam-supplementary-select${showBankSupplementaryDropdown ? ' is-open' : ''}`}>
+                <span className="new-exam-school-label">부교재</span>
+                <div className="dropdown-container">
+                  <button
+                    type="button"
+                    className="select-button new-exam-textbook-button"
+                    onClick={() => {
+                      setShowBankSupplementaryDropdown(!showBankSupplementaryDropdown)
+                      setShowBankTextbookCategoryDropdown(false)
+                      setShowBankTextbookDropdown(false)
+                      setShowBankMockGradeDropdown(false)
+                    }}
+                  >
+                    {selectedBankSupplementaryBook || '책 이름'}
+                  </button>
+                  {showBankSupplementaryDropdown && (
+                    <div className="dropdown-menu new-exam-textbook-menu">
+                      {supplementaryBookList.length === 0 ? (
+                        <div className="dropdown-item">등록된 부교재가 없습니다</div>
+                      ) : (
+                        supplementaryBookList.map((bookName) => (
+                          <div
+                            key={bookName}
+                            className={`dropdown-item${selectedBankSupplementaryBook === bookName ? ' is-selected' : ''}`}
+                            onClick={() => handleBankSupplementaryBookSelect(bookName)}
+                          >
+                            {bookName}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
+                {selectedBankSupplementaryBook && (
+                  <div className="new-exam-unit-list new-exam-book-units new-exam-mock-list">
+                    {isBankSupplementaryScopesLoading ? (
+                      <p>하위범위를 불러오는 중...</p>
+                    ) : bankSupplementaryScopeList.length === 0 ? (
+                      <p>등록된 하위범위가 없습니다</p>
+                    ) : (
+                      bankSupplementaryScopeList.map((scope) => (
+                        <label key={scope} className="checkbox-label">
+                          <input
+                            type="checkbox"
+                            checked={selectedBankSupplementaryScopes.includes(scope)}
+                            onChange={() => handleBankSupplementaryScopeToggle(scope)}
+                          />
+                          {scope}
+                        </label>
+                      ))
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}

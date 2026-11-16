@@ -1024,6 +1024,12 @@
   gap: 20px;
 }
 
+.question-bank {
+  padding: 20px;
+  background-color: #1B3A4B;
+  border-radius: 8px;
+}
+
 .upload-section {
   background-color: #1B3A4B;
   padding: 20px;
