@@ -2468,11 +2468,15 @@ function App() {
       return
     }
 
-    const targetSources = [
-      ...selectedTargetTextbookUnits,
-      ...selectedTargetMockExams,
-      ...selectedTargetSupplementaryScopes,
-    ].map((source) => String(source).trim()).filter(Boolean)
+    const toSourceList = (values) => values
+      .map((source) => String(source).trim())
+      .filter(Boolean)
+    const sourcesByType = {
+      교과서: toSourceList(selectedTargetTextbookUnits),
+      모의고사: toSourceList(selectedTargetMockExams),
+      부교재: toSourceList(selectedTargetSupplementaryScopes),
+      기타: [],
+    }
 
     const items = []
     for (let index = 0; index < newExamAnalysis.length; index++) {
@@ -2485,7 +2489,7 @@ function App() {
       items.push({
         compositionNo: String(item.number ?? index + 1).trim(),
         sourceType,
-        sources: targetSources,
+        sources: sourcesByType[sourceType],
         question: item.question ?? '',
         answerFormat: item.answer_format ?? '',
         questionType: item.question_type ?? '',
