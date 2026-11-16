@@ -114,10 +114,9 @@ router.get('/build', async (req, res) => {
 
     for (const paper of papers) {
       const sources = parseSources(paper.sources);
-      const storedQuestion = String(paper.question || '').trim();
       let picked = null;
 
-      if (!storedQuestion && sources.length > 0) {
+      if (sources.length > 0) {
         const questionsResult = await pool.query(`
           SELECT id, exam_scope, question
           FROM exam_questions
@@ -143,9 +142,9 @@ router.get('/build', async (req, res) => {
         sourceType: paper.source_type || null,
         questionType: paper.question_type,
         answerFormat: paper.answer_format,
-        questionId: storedQuestion ? null : (picked ? picked.id : null),
-        examScope: storedQuestion ? null : (picked ? picked.exam_scope : null),
-        question: storedQuestion || (picked ? picked.question : null)
+        questionId: picked ? picked.id : null,
+        examScope: picked ? picked.exam_scope : null,
+        question: picked ? picked.question : null
       });
     }
 

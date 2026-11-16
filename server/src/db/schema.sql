@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS exam_papers (
     composition_no VARCHAR(50) NOT NULL,     -- 구성번호 (숫자, 서답형, 단답형)
     sources TEXT NOT NULL,                   -- 출처들 (시험범위 이름, 쉼표로 구분)
     source_type VARCHAR(20),                 -- 출처 구분: 교과서 | 모의고사 | 부교재 | 자작 | 외부지문 | 기타
-    question TEXT,                           -- 문제 본문. 있으면 시험지를 만들 때 이 문제를 쓴다
+    question TEXT,                           -- 저장된 문제 본문. 시기별 시험지를 만들 때는 쓰지 않는다
     answer_format VARCHAR(20) NOT NULL,      -- 객주: 객관식 | 주관식
     question_type VARCHAR(100) NOT NULL,     -- 유형
     paper_id INTEGER,                        -- 사용자가 제작한 시험지 id. 같은 시험지의 문항은 같은 값을 가진다

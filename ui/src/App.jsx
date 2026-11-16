@@ -6245,7 +6245,7 @@ function App() {
                   <p><strong>선택 컬럼:</strong> 출처구분, 문제, 시험지id, 사용자id</p>
                   <p><strong>객주</strong> 값은 <strong>객관식</strong> 또는 <strong>주관식</strong>만 가능합니다.</p>
                   <p><strong>출처구분</strong> 값은 <strong>교과서</strong>, <strong>모의고사</strong>, <strong>부교재</strong>, <strong>자작</strong>, <strong>외부지문</strong>, <strong>기타</strong>만 가능합니다. 비우면 구분하지 않습니다.</p>
-                  <p><strong>문제</strong>에 본문을 넣으면 시험지를 만들 때 그 문제를 그대로 씁니다. 비우면 출처·유형·객주에 맞는 문제를 고릅니다.</p>
+                  <p><strong>문제</strong> 칸은 저장용입니다. 시기별 시험지를 고르면 출처·유형·객주에 맞는 문제를 문제 은행에서 불러옵니다.</p>
                   <p><strong>시험지id</strong>는 사용자가 만든 시험지를 구분하는 1 이상의 정수입니다. 같은 시험지의 문항은 같은 번호를 씁니다. 비우면 기준 시험지입니다.</p>
                   <p><strong>사용자id</strong>는 시험지를 만든 사용자의 번호입니다. 등록된 사용자만 넣을 수 있고, 비우면 기준 시험지입니다.</p>
                   <p>같은 학교, 시험별시험지, 순서번호, 시험지id가 이미 있으면 해당 행을 수정합니다.</p>
