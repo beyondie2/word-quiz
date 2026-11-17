@@ -79,8 +79,8 @@ function App() {
   const [userEmail, setUserEmail] = useState('')
   const [userPassword, setUserPassword] = useState('')
   const [userId, setUserId] = useState(null)
-  const [isVerified, setIsVerified] = useState(true)
-  const [isAdmin, setIsAdmin] = useState(true)
+  const [isVerified, setIsVerified] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [userRole, setUserRole] = useState('') // 'teacher' | 'student'
   const [verifyError, setVerifyError] = useState('')
   const [authMode, setAuthMode] = useState('login') // 'login' or 'register'

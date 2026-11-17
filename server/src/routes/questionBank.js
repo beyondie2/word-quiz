@@ -518,10 +518,13 @@ router.post('/generate', authenticateToken, requireAdmin, (req, res, next) => {
       for (const passage of passages) {
         await client.query(
           `INSERT INTO question_bank (source_type, title, unit_name, passage)
-           SELECT $1, $2, $3, $4
+           SELECT $1::varchar, $2::varchar, $3::varchar, $4::text
            WHERE NOT EXISTS (
              SELECT 1 FROM question_bank
-             WHERE source_type = $1 AND title = $2 AND unit_name = $3 AND passage = $4
+             WHERE source_type = $1::varchar
+               AND title = $2::varchar
+               AND unit_name = $3::varchar
+               AND passage = $4::text
            )`,
           [passage.source_type, passage.title, passage.unit_name, passage.passage]
         );
