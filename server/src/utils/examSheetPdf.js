@@ -74,6 +74,8 @@ const BUNDLED_FONT_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '../../fonts'
 );
+const SYMBOL_FONT_PATH = path.join(BUNDLED_FONT_DIR, 'NotoSansSymbols-Regular.ttf');
+const SYMBOL_FONT_NAME = 'SymbolFallback';
 
 const FONT_PAIRS = [
   ['malgun.ttf', 'malgunbd.ttf'],
@@ -533,6 +535,105 @@ function drawPageFurniture(doc, school, examSheet, answerPageStart) {
   }
 }
 
+function fontFace(embedded) {
+  return embedded?.font;
+}
+
+function fontSupports(embedded, codePoint) {
+  const face = fontFace(embedded);
+  if (!face || typeof face.hasGlyphForCodePoint !== 'function') return true;
+  return face.hasGlyphForCodePoint(codePoint);
+}
+
+function splitGlyphRuns(text, mainFont, symbolFont) {
+  const runs = [];
+  let buffer = '';
+  let useSymbol = false;
+  let started = false;
+
+  for (const ch of String(text ?? '')) {
+    const symbol = !fontSupports(mainFont, ch.codePointAt(0))
+      && fontSupports(symbolFont, ch.codePointAt(0));
+    if (!started) {
+      useSymbol = symbol;
+      started = true;
+    }
+    if (symbol !== useSymbol) {
+      runs.push({ symbol: useSymbol, text: buffer });
+      buffer = ch;
+      useSymbol = symbol;
+    } else {
+      buffer += ch;
+    }
+  }
+  if (buffer) runs.push({ symbol: useSymbol, text: buffer });
+  return runs;
+}
+
+function installGlyphFallback(doc) {
+  if (!fs.existsSync(SYMBOL_FONT_PATH)) return;
+  doc.registerFont(SYMBOL_FONT_NAME, SYMBOL_FONT_PATH);
+  const previousFont = doc._font;
+  doc.font(SYMBOL_FONT_NAME);
+  const symbolFont = doc._font;
+  if (previousFont) doc._font = previousFont;
+
+  const originalWidth = doc.widthOfString.bind(doc);
+  const originalFragment = doc._fragment.bind(doc);
+
+  doc.widthOfString = function widthOfString(string, options) {
+    const text = string == null ? '' : `${string}`;
+    const mainFont = this._font;
+    const runs = splitGlyphRuns(text, mainFont, symbolFont);
+    if (runs.length === 0 || (runs.length === 1 && !runs[0].symbol)) {
+      return originalWidth(text, options);
+    }
+    let total = 0;
+    for (const run of runs) {
+      this._font = run.symbol ? symbolFont : mainFont;
+      total += originalWidth(run.text, options);
+    }
+    this._font = mainFont;
+    return total;
+  };
+
+  doc._fragment = function fragment(text, x, y, options = {}) {
+    const mainFont = this._font;
+    const runs = splitGlyphRuns(text, mainFont, symbolFont);
+    if (runs.length === 0 || runs.every((run) => !run.symbol)) {
+      return originalFragment(text, x, y, options);
+    }
+
+    let startX = x;
+    if (options.align === 'center' && options.lineWidth) {
+      const textWidth = options.textWidth ?? this.widthOfString(text, options);
+      startX += options.lineWidth / 2 - textWidth / 2;
+    } else if (options.align === 'right' && options.lineWidth) {
+      const textWidth = this.widthOfString(String(text).replace(/\s+$/, ''), options);
+      startX += options.lineWidth - textWidth;
+    }
+
+    const plainOptions = {
+      ...options,
+      align: 'left',
+      width: undefined,
+      link: undefined,
+      goTo: undefined,
+      destination: undefined,
+      underline: false,
+      strike: false
+    };
+    let cursor = startX;
+    const baselineShift = ((symbolFont.ascender || 0) - (mainFont.ascender || 0)) / 1000 * this._fontSize;
+    for (const run of runs) {
+      this._font = run.symbol ? symbolFont : mainFont;
+      originalFragment(run.text, cursor, run.symbol ? y - baselineShift : y, plainOptions);
+      cursor += originalWidth(run.text, options);
+    }
+    this._font = mainFont;
+  };
+}
+
 function applyFonts(doc, fonts) {
   FONT.regular = 'Regular';
   FONT.bold = 'Bold';
@@ -555,6 +656,7 @@ function applyFonts(doc, fonts) {
   }
   doc.registerFont('Regular', fonts.regular);
   doc.registerFont('Bold', fonts.bold || fonts.regular);
+  installGlyphFallback(doc);
 }
 
 export function buildExamSheetPdf({ school, examSheet, items, fontDirs } = {}) {
