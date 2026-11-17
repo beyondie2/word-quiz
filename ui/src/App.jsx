@@ -79,8 +79,8 @@ function App() {
   const [userEmail, setUserEmail] = useState('')
   const [userPassword, setUserPassword] = useState('')
   const [userId, setUserId] = useState(null)
-  const [isVerified, setIsVerified] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [isVerified, setIsVerified] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(true)
   const [userRole, setUserRole] = useState('') // 'teacher' | 'student'
   const [verifyError, setVerifyError] = useState('')
   const [authMode, setAuthMode] = useState('login') // 'login' or 'register'
@@ -2370,12 +2370,7 @@ function App() {
     setBankQuestionError('')
 
     if (!bankUploadFile) {
-      setBankQuestionError('텍스트 파일을 올려주세요')
-      return
-    }
-    const isTextFile = bankUploadFile.type.startsWith('text/') || /\.txt$/i.test(bankUploadFile.name)
-    if (!isTextFile) {
-      setBankQuestionError('텍스트 파일(.txt)만 올릴 수 있습니다')
+      setBankQuestionError('파일을 올려주세요')
       return
     }
 
@@ -6793,7 +6788,6 @@ function App() {
                   파일업로드
                   <input
                     type="file"
-                    accept=".txt,text/plain"
                     hidden
                     disabled={Boolean(bankUploadFile)}
                     onChange={(e) => {

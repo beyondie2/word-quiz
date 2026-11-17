@@ -18,15 +18,18 @@
   "license": "ISC",
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
+    "@ssabrojs/hwpxjs": "^0.4.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "csv-parser": "^3.2.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "jsonwebtoken": "^9.0.3",
+    "jszip": "^3.10.2",
     "multer": "^2.0.2",
     "pdfkit": "^0.20.2",
     "pg": "^8.13.0",
+    "word-extractor": "^1.0.4",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

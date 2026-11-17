@@ -1,6 +1,10 @@
 import express from 'express';
 import multer from 'multer';
 import Anthropic from '@anthropic-ai/sdk';
+import JSZip from 'jszip';
+import XLSX from 'xlsx';
+import WordExtractor from 'word-extractor';
+import { HwpxReader, hwpToText } from '@ssabrojs/hwpxjs';
 import pool from '../config/database.js';
 import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 
@@ -12,9 +16,17 @@ const SHORT_ANSWER_TYPES = new Set(['국어낱말', '국어영작', '추론영�
 const TEXTBOOK_PASSAGE_LIMIT = 10;
 const OTHER_PASSAGE_LIMIT = 40;
 
+const IMAGE_TYPES = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  gif: 'image/gif',
+  webp: 'image/webp',
+};
+
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  limits: { fileSize: 25 * 1024 * 1024, files: 1 },
 });
 
 let client = null;
@@ -98,17 +110,137 @@ function scopePrompt(scope) {
   return lines.join('\n');
 }
 
-function readTextFile(file) {
-  if (!file) return { error: '텍스트 파일을 올려주세요' };
-  const name = String(file.originalname || '');
-  const type = String(file.mimetype || '');
-  const isText = type.startsWith('text/') || /\.txt$/i.test(name);
-  if (!isText) return { error: '텍스트 파일(.txt)만 읽을 수 있습니다' };
-  if (file.buffer.includes(0)) return { error: '텍스트 파일(.txt)만 읽을 수 있습니다' };
-  const text = file.buffer.toString('utf8').replace(/^\uFEFF/, '').trim();
-  if (!text) return { error: '파일에 읽을 내용이 없습니다' };
+function fileExtension(name) {
+  const match = String(name || '').toLowerCase().match(/\.([a-z0-9]+)$/);
+  return match ? match[1] : '';
+}
+
+function textResult(value) {
+  const text = String(value || '').replace(/^\uFEFF/, '').trim();
+  if (!text) return { error: '파일에서 글자를 찾지 못했습니다' };
   if (text.length > 500000) return { error: '파일이 너무 깁니다. 나눠서 올려주세요' };
   return { text };
+}
+
+function decodeXmlText(xml) {
+  return String(xml || '')
+    .replace(/<w:tab\/>|<w:br\/>|<w:cr\/>/g, '\n')
+    .replace(/<\/w:p>|<\/a:p>|<\/text:p>/g, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+async function textFromZip(buffer, pattern) {
+  const zip = await JSZip.loadAsync(buffer);
+  const names = Object.keys(zip.files)
+    .filter((name) => pattern.test(name) && !zip.files[name].dir)
+    .sort();
+  const parts = [];
+  for (const name of names) {
+    const xml = await zip.files[name].async('string');
+    const text = decodeXmlText(xml);
+    if (text) parts.push(text);
+  }
+  return parts.join('\n\n');
+}
+
+function spreadsheetText(buffer) {
+  const book = XLSX.read(buffer, { type: 'buffer' });
+  return book.SheetNames
+    .map((name) => XLSX.utils.sheet_to_csv(book.Sheets[name]))
+    .filter(Boolean)
+    .join('\n\n');
+}
+
+function rtfToText(rtf) {
+  return String(rtf || '')
+    .replace(/\\par[d]?/g, '\n')
+    .replace(/\\u(-?\d+)\??/g, (_, code) => {
+      const value = Number(code);
+      return String.fromCharCode(value < 0 ? value + 65536 : value);
+    })
+    .replace(/\\'[0-9a-f]{2}/gi, '')
+    .replace(/\\[a-z]+-?\d* ?/gi, '')
+    .replace(/[{}]/g, '');
+}
+
+function arrayBufferOf(buffer) {
+  return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+}
+
+async function readSourceFile(file) {
+  if (!file) return { error: '파일을 올려주세요' };
+  const ext = fileExtension(file.originalname);
+  const type = String(file.mimetype || '').toLowerCase();
+  const buffer = file.buffer;
+
+  if (ext === 'gdoc' || type === 'application/vnd.google-apps.document') {
+    return { error: '구글 문서 바로가기에는 본문이 없습니다. PDF, DOCX, TXT로 내려받아 올려주세요' };
+  }
+
+  const imageType = IMAGE_TYPES[ext] || (Object.values(IMAGE_TYPES).includes(type) ? type : '');
+  if (imageType || type.startsWith('image/')) {
+    if (!imageType) return { error: '이 이미지는 읽지 못합니다. jpg, png, gif, webp로 올려주세요' };
+    return {
+      blocks: [{
+        type: 'image',
+        source: { type: 'base64', media_type: imageType, data: buffer.toString('base64') },
+      }],
+    };
+  }
+
+  if (ext === 'pdf' || type === 'application/pdf') {
+    return {
+      blocks: [{
+        type: 'document',
+        source: { type: 'base64', media_type: 'application/pdf', data: buffer.toString('base64') },
+      }],
+    };
+  }
+
+  try {
+    if (ext === 'hwp') return textResult(await hwpToText(new Uint8Array(buffer)));
+    if (ext === 'hwpx') {
+      const reader = new HwpxReader();
+      await reader.loadFromArrayBuffer(arrayBufferOf(buffer));
+      return textResult(await reader.extractText());
+    }
+    if (ext === 'doc' || ext === 'docx' || ext === 'docm') {
+      try {
+        const extracted = await new WordExtractor().extract(buffer);
+        const body = extracted.getBody();
+        if (String(body || '').trim()) return textResult(body);
+      } catch (error) {
+        if (ext === 'doc') throw error;
+      }
+      return textResult(await textFromZip(buffer, /^word\/document\.xml$/i));
+    }
+    if (ext === 'odt') return textResult(await textFromZip(buffer, /^content\.xml$/i));
+    if (ext === 'pptx' || ext === 'pptm') return textResult(await textFromZip(buffer, /^ppt\/slides\/slide\d+\.xml$/i));
+    if (ext === 'xlsx' || ext === 'xls' || ext === 'xlsm' || ext === 'csv') {
+      if (ext === 'csv') return textResult(buffer.toString('utf8'));
+      return textResult(spreadsheetText(buffer));
+    }
+  } catch (error) {
+    console.error('Source file read error:', error);
+    return { error: '이 파일에서 글자를 읽지 못했습니다' };
+  }
+
+  const textLike = type.startsWith('text/')
+    || ['txt', 'md', 'csv', 'tsv', 'html', 'htm', 'xml', 'json', 'rtf', 'log'].includes(ext);
+  if (textLike) {
+    const raw = buffer.toString('utf8');
+    return textResult(ext === 'rtf' ? rtfToText(raw) : raw);
+  }
+  if (!buffer.includes(0)) return textResult(buffer.toString('utf8'));
+  return { error: '이 파일에서 글자를 읽지 못했습니다. PDF, 한글, 워드, 이미지, 텍스트 파일로 올려주세요' };
 }
 
 function targetKey(item) {
@@ -188,7 +320,7 @@ function questionSchema(types) {
 function splitPrompt() {
   return [
     '당신은 한국 고등학교 영어 시험의 지문을 나누는 도우미입니다.',
-    '사용자가 준 텍스트를, 고등학교 영어 시험 한 문제에 들어갈 지문 분량으로 나눕니다.',
+    '사용자가 글자가 들어 있는 파일(텍스트, PDF, 워드, 한글, 사진)을 주면, 그 안의 글자를 읽어 고등학교 영어 시험 한 문제에 들어갈 지문 분량으로 나눕니다.',
     '지문은 영어 본문만 담습니다. 발문, 문항 번호, 선택지, 정답, 해설은 넣지 않습니다.',
     '한 지문은 대략 120~180 영어 단어입니다. 원문에 없는 문장을 지어내지 않습니다.',
     '',
@@ -347,7 +479,7 @@ router.post('/generate', authenticateToken, requireAdmin, (req, res, next) => {
 }, async (req, res) => {
   req.setTimeout(30 * 60 * 1000);
 
-  const file = readTextFile(req.file);
+  const file = await readSourceFile(req.file);
   if (file.error) return res.status(400).json({ error: file.error });
 
   const scope = readScope(req.body);
@@ -366,9 +498,12 @@ router.post('/generate', authenticateToken, requireAdmin, (req, res, next) => {
       return res.status(400).json({ error: '등록된 시험지유형이 없습니다. 시험지유형 관리에서 먼저 추가해주세요' });
     }
 
+    const instruction = `${scopePrompt(scope)}\n\n이 파일의 글자를 읽어 지문으로 나누세요.`;
     const split = await callModel({
       system: splitPrompt(),
-      user: `${scopePrompt(scope)}\n\n아래 텍스트를 지문으로 나누세요.\n\n${file.text}`,
+      user: file.blocks
+        ? [...file.blocks, { type: 'text', text: instruction }]
+        : `${instruction}\n\n${file.text}`,
       schema: passageSchema,
       maxTokens: 32000,
     });
