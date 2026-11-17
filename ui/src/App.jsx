@@ -274,6 +274,9 @@ function App() {
   const [selectedBankSupplementaryScopes, setSelectedBankSupplementaryScopes] = useState([])
   const [isBankSupplementaryScopesLoading, setIsBankSupplementaryScopesLoading] = useState(false)
   const [bankUploadFile, setBankUploadFile] = useState(null)
+  const [isMakingBankQuestions, setIsMakingBankQuestions] = useState(false)
+  const [bankQuestionMessage, setBankQuestionMessage] = useState('')
+  const [bankQuestionError, setBankQuestionError] = useState('')
   const [examSheets, setExamSheets] = useState([])
   const [selectedExamSheet, setSelectedExamSheet] = useState('')
   const [showExamSheetDropdown, setShowExamSheetDropdown] = useState(false)
@@ -286,6 +289,7 @@ function App() {
   const [examModelMessage, setExamModelMessage] = useState('')
   const [examModelError, setExamModelError] = useState('')
   const examBuildRequestRef = useRef(0)
+  const bankMakeLockRef = useRef(false)
 
   // 블럭 영작 학습 관련 상태
   const [blockwritingBooks, setBlockwritingBooks] = useState([])
@@ -2358,6 +2362,68 @@ function App() {
     setSelectedBankSupplementaryScopes((prev) => (
       prev.includes(scope) ? prev.filter((item) => item !== scope) : [...prev, scope]
     ))
+  }
+
+  const handleMakeBankQuestions = async () => {
+    if (bankMakeLockRef.current || isMakingBankQuestions) return
+    setBankQuestionMessage('')
+    setBankQuestionError('')
+
+    if (!bankUploadFile) {
+      setBankQuestionError('텍스트 파일을 올려주세요')
+      return
+    }
+    const isTextFile = bankUploadFile.type.startsWith('text/') || /\.txt$/i.test(bankUploadFile.name)
+    if (!isTextFile) {
+      setBankQuestionError('텍스트 파일(.txt)만 올릴 수 있습니다')
+      return
+    }
+
+    const hasTextbook = selectedBankTextbookTitle && selectedBankTextbookUnits.length > 0
+    const hasMock = selectedBankMockExams.length > 0
+    const hasSupplementary = selectedBankSupplementaryBook && selectedBankSupplementaryScopes.length > 0
+    if (!hasTextbook && !hasMock && !hasSupplementary) {
+      setBankQuestionError('교과서 단원, 모의고사, 부교재 범위 중 하나를 선택해주세요')
+      return
+    }
+
+    const formData = new FormData()
+    formData.append('file', bankUploadFile)
+    formData.append('scope', JSON.stringify({
+      textbook: {
+        title: selectedBankTextbookTitle,
+        units: selectedBankTextbookUnits,
+      },
+      mockExams: selectedBankMockExams,
+      supplementary: {
+        bookName: selectedBankSupplementaryBook,
+        scopes: selectedBankSupplementaryScopes,
+      },
+    }))
+
+    bankMakeLockRef.current = true
+    setIsMakingBankQuestions(true)
+    try {
+      const response = await fetch(`${API_BASE}/question-bank/generate`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('accessToken') || ''}`,
+        },
+        body: formData,
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setBankQuestionError(data.error || '문제를 만들지 못했습니다')
+        return
+      }
+      setBankQuestionMessage(data.message || '문제를 만들었습니다')
+    } catch (error) {
+      console.error('Make bank questions error:', error)
+      setBankQuestionError('서버 연결에 실패했습니다')
+    } finally {
+      bankMakeLockRef.current = false
+      setIsMakingBankQuestions(false)
+    }
   }
 
   const closeBaseScopeMenus = () => {
@@ -6727,6 +6793,7 @@ function App() {
                   파일업로드
                   <input
                     type="file"
+                    accept=".txt,text/plain"
                     hidden
                     disabled={Boolean(bankUploadFile)}
                     onChange={(e) => {
@@ -6740,10 +6807,20 @@ function App() {
                   <p className="question-bank-file-name">{bankUploadFile.name}</p>
                 )}
                 {bankUploadFile && (
-                  <button type="button" className="upload-button">
-                    유형별 문제 만들기
+                  <button
+                    type="button"
+                    className="upload-button"
+                    onClick={handleMakeBankQuestions}
+                    disabled={isMakingBankQuestions}
+                  >
+                    {isMakingBankQuestions ? '만드는 중...' : '유형별 문제 만들기'}
                   </button>
                 )}
+                {isMakingBankQuestions && (
+                  <p className="question-bank-message">지문을 나누고 문제를 만들고 있습니다. 몇 분 걸릴 수 있습니다.</p>
+                )}
+                {bankQuestionError && <p className="question-bank-error">{bankQuestionError}</p>}
+                {bankQuestionMessage && <p className="question-bank-message">{bankQuestionMessage}</p>}
               </div>
             </div>
           )}

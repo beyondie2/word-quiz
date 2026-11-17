@@ -17,6 +17,7 @@ import schoolsRouter from './routes/schools.js';
 import textbooksRouter from './routes/textbooks.js';
 import mockExamsRouter from './routes/mockExams.js';
 import supplementaryBooksRouter from './routes/supplementaryBooks.js';
+import questionBankRouter from './routes/questionBank.js';
 
 // 환경 변수 로드
 dotenv.config();
@@ -44,6 +45,7 @@ app.use('/api/schools', schoolsRouter);
 app.use('/api/textbooks', textbooksRouter);
 app.use('/api/mock-exams', mockExamsRouter);
 app.use('/api/supplementary-books', supplementaryBooksRouter);
+app.use('/api/question-bank', questionBankRouter);
 
 // 헬스 체크
 app.get('/api/health', (req, res) => {
@@ -61,6 +63,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
+server.requestTimeout = 30 * 60 * 1000;

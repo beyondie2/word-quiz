@@ -1047,9 +1047,15 @@
   pointer-events: none;
 }
 
-.question-bank-file-name {
+.question-bank-file-name,
+.question-bank-message {
   margin: 0;
   color: #A0C4D8;
+}
+
+.question-bank-error {
+  margin: 0;
+  color: #F0A8A8;
 }
 
 .upload-section {
