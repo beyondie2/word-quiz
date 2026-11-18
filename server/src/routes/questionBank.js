@@ -12,7 +12,12 @@ import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 
 const MODEL = 'claude-opus-5-5';
 const SOURCE_TYPES = ['교과서', '모의고사', '부교재'];
-const SHORT_ANSWER_TYPES = new Set(['국어낱말', '국어영작', '추론영작', '주관식요약']);
+const CHOICE_MARK = /[①②③④⑤]/;
+
+// 유형 이름을 적지 않는다. 예시 문제에 선택지 ①~⑤가 있으면 객관식, 없으면 주관식이다.
+function answerFormatOf(samples) {
+  return samples.some((sample) => CHOICE_MARK.test(sample)) ? '객관식' : '주관식';
+}
 const TEXTBOOK_PASSAGE_LIMIT = 10;
 const OTHER_PASSAGE_LIMIT = 40;
 
@@ -334,7 +339,7 @@ function splitPrompt() {
 
 function buildQuestionPrompt(byType) {
   const sections = [...byType.entries()].map(([type, samples]) => {
-    const format = SHORT_ANSWER_TYPES.has(type) ? '주관식' : '객관식';
+    const format = answerFormatOf(samples);
     const body = samples
       .map((sample, index) => `<example index="${index + 1}">\n${sample}\n</example>`)
       .join('\n');
@@ -417,22 +422,23 @@ async function loadTypeSamples() {
   return byType;
 }
 
-function normalizeQuestions(rawQuestions, types) {
-  const byType = new Map();
+function normalizeQuestions(rawQuestions, byType) {
+  const saved = new Map();
   for (const raw of Array.isArray(rawQuestions) ? rawQuestions : []) {
     const type = String(raw?.question_type ?? '').trim();
     const question = String(raw?.question ?? '').trim();
     const answer = String(raw?.answer ?? '').trim();
     const explanation = String(raw?.explanation ?? '').trim();
-    if (!types.includes(type) || !question || !answer || byType.has(type)) continue;
-    byType.set(type, {
+    const samples = byType.get(type);
+    if (!samples || !question || !answer || saved.has(type)) continue;
+    saved.set(type, {
       question_type: type,
-      answer_format: SHORT_ANSWER_TYPES.has(type) ? '주관식' : '객관식',
+      answer_format: answerFormatOf(samples),
       question,
       answer: explanation ? `정답: ${answer}\n해설: ${explanation}` : answer,
     });
   }
-  return types.map((type) => byType.get(type)).filter(Boolean);
+  return [...byType.keys()].map((type) => saved.get(type)).filter(Boolean);
 }
 
 function examScopeOf(passage) {
@@ -560,7 +566,7 @@ router.post('/generate', authenticateToken, requireAdmin, (req, res, next) => {
             schema: questionSchema(types),
             maxTokens: 32000,
           });
-          questions = normalizeQuestions(result.questions, types);
+          questions = normalizeQuestions(result.questions, byType);
         }
         return { passage, questions, failed: false };
       } catch (error) {
