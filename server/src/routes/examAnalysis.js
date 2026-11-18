@@ -175,6 +175,72 @@ function longestMatch(detail, names) {
   return best;
 }
 
+const compositionKey = (value) => String(value || '').trim().replace(/[.。]\s*$/, '');
+
+// 같은 학교·시험지·사용자의 미분류 문항을, 이번 분석에서 샘플 유형으로 판정된 값으로 바꾼다.
+async function reclassifyUnclassified({ userId, school, examSheet, questions, knownTypes }) {
+  if (!school || !examSheet || !Number.isInteger(userId) || userId <= 0) return 0;
+  const classified = [];
+  for (const question of questions) {
+    const compositionNo = compositionKey(question?.number);
+    const questionType = String(question?.question_type || '').trim();
+    if (!compositionNo || questionType === UNCLASSIFIED || !knownTypes.has(questionType)) continue;
+    classified.push({ compositionNo, questionType });
+  }
+  if (classified.length === 0) return 0;
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const existing = await client.query(
+      `SELECT paper_id
+       FROM exam_papers
+       WHERE school = $1 AND exam_sheet = $2 AND user_id = $3
+         AND paper_id IS NOT NULL
+       ORDER BY paper_id
+       LIMIT 1`,
+      [school, examSheet, userId]
+    );
+    const paperId = existing.rows[0]?.paper_id ?? null;
+    if (paperId == null) {
+      await client.query('COMMIT');
+      return 0;
+    }
+
+    const current = await client.query(
+      `SELECT id, composition_no
+       FROM exam_papers
+       WHERE paper_id = $1 AND school = $2 AND exam_sheet = $3 AND user_id = $4
+         AND question_type = $5
+       ORDER BY order_no, id`,
+      [paperId, school, examSheet, userId, UNCLASSIFIED]
+    );
+    const usedIds = new Set();
+    let updated = 0;
+    for (const row of classified) {
+      const match = current.rows.find((item) =>
+        !usedIds.has(item.id) && compositionKey(item.composition_no) === row.compositionNo
+      );
+      if (!match) continue;
+      usedIds.add(match.id);
+      const result = await client.query(
+        `UPDATE exam_papers
+         SET question_type = $1
+         WHERE id = $2 AND question_type = $3`,
+        [row.questionType, match.id, UNCLASSIFIED]
+      );
+      updated += result.rowCount;
+    }
+    await client.query('COMMIT');
+    return updated;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 function scopePrompt(scope) {
   const lines = ['사용자가 지정한 시험범위입니다. 이 범위에 없는 지문은 기타로 분류합니다.'];
   if (scope.textbook.title && scope.textbook.units.length > 0) {
@@ -303,13 +369,24 @@ router.post('/analyze', authenticateToken, (req, res, next) => {
       return res.status(502).json({ error: 'AI 응답에 분석 결과가 없습니다' });
     }
 
-    const { questions } = JSON.parse(textBlock.text);
-    res.json({
-      questions: (Array.isArray(questions) ? questions : []).map((question) => ({
-        ...question,
-        ...normalizeSource(question, scope),
-      })),
-    });
+    const { questions: rawQuestions } = JSON.parse(textBlock.text);
+    const questions = (Array.isArray(rawQuestions) ? rawQuestions : []).map((question) => ({
+      ...question,
+      ...normalizeSource(question, scope),
+    }));
+    let typeUpdated = 0;
+    try {
+      typeUpdated = await reclassifyUnclassified({
+        userId: Number(req.user?.id),
+        school: cleanScopeText(req.body?.school, 100),
+        examSheet: cleanScopeText(req.body?.examSheet, 200),
+        questions,
+        knownTypes: new Set(byType.keys()),
+      });
+    } catch (error) {
+      console.error('Reclassify unclassified error:', error);
+    }
+    res.json({ questions, typeUpdated });
   } catch (error) {
     console.error('Exam analysis error:', error);
     if (error instanceof Anthropic.AuthenticationError) {

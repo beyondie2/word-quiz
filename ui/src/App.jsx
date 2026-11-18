@@ -194,6 +194,7 @@ function App() {
   const [isAnalyzingNewExam, setIsAnalyzingNewExam] = useState(false)
   const [newExamAnalysis, setNewExamAnalysis] = useState([]) // 문항별 유형 분석 결과
   const [newExamAnalysisError, setNewExamAnalysisError] = useState('')
+  const [newExamTypeMessage, setNewExamTypeMessage] = useState('')
   // 문항 분석: schools 테이블의 시도 → 시군구 → 학교명
   const [schoolSidoList, setSchoolSidoList] = useState([])
   const [schoolSigunguList, setSchoolSigunguList] = useState([])
@@ -2597,6 +2598,7 @@ function App() {
     setIsAnalyzingNewExam(true)
     setNewExamAnalysis([])
     setNewExamAnalysisError('')
+    setNewExamTypeMessage('')
 
     try {
       const formData = new FormData()
@@ -2605,6 +2607,8 @@ function App() {
         formData.append('images', resized, resized.name)
       }
       if (newExamPdfFile) formData.append('pdf', newExamPdfFile)
+      if (selectedSchoolName) formData.append('school', selectedSchoolName)
+      if (selectedNewExamPeriod) formData.append('examSheet', selectedNewExamPeriod)
       formData.append('scope', JSON.stringify({
         textbook: {
           title: selectedTextbookTitle,
@@ -2632,6 +2636,8 @@ function App() {
         setNewExamAnalysis(questions)
         if (questions.length === 0) {
           setNewExamAnalysisError('시험지에서 문항을 찾지 못했습니다')
+        } else if (data.typeUpdated > 0) {
+          setNewExamTypeMessage(`미분류 ${data.typeUpdated}개를 분석한 유형으로 바꿨습니다.`)
         }
       } else if (response.status === 401 || response.status === 403) {
         setNewExamAnalysisError(data.error || '로그인이 만료되었습니다. 다시 로그인해주세요')
@@ -5609,6 +5615,7 @@ function App() {
                         : '분석하기'}
                   </button>
                   {newExamAnalysisError && <p className="exam-generate-error">{newExamAnalysisError}</p>}
+                  {newExamTypeMessage && <p className="new-exam-model-message">{newExamTypeMessage}</p>}
                   {newExamAnalysis.length > 0 && (
                     <>
                     <ul className="new-exam-analysis-list">
