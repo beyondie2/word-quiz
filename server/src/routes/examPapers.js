@@ -230,8 +230,12 @@ function modelSourceList(value) {
   return sources;
 }
 
+const compositionKey = (value) => String(value || '').trim().replace(/[.。]\s*$/, '');
+
 // POST /api/exam-papers/model
-// 학교, 시험지, 사용자가 같으면 그 시험지 문항을 고치고, 없으면 새 시험지id로 넣는다.
+// 학교, 시험지, 사용자가 같으면 그 행의 id를 유지한 채 question_type만 고친다.
+// 새 유형이 question_type_samples에 있을 때만 바꾸고, 미분류는 기존 값을 덮지 않는다.
+// 같은 시험지가 없으면 새 시험지id로 넣는다.
 router.post('/model', authenticateToken, async (req, res) => {
   const school = String(req.body?.school || '').trim();
   const examSheet = String(req.body?.examSheet || '').trim();
@@ -308,14 +312,50 @@ router.post('/model', authenticateToken, async (req, res) => {
     const existingPaperId = existing.rows[0]?.paper_id ?? null;
 
     if (existingPaperId != null) {
-      await client.query(
-        `DELETE FROM exam_papers
-         WHERE school = $1 AND exam_sheet = $2 AND user_id = $3`,
-        [school, examSheet, userId]
+      const samples = await client.query(
+        `SELECT DISTINCT question_type FROM question_type_samples`
       );
+      const knownTypes = new Set(
+        samples.rows.map((row) => String(row.question_type || '').trim()).filter(Boolean)
+      );
+      const current = await client.query(
+        `SELECT id, composition_no, question_type
+         FROM exam_papers
+         WHERE paper_id = $1 AND school = $2 AND exam_sheet = $3 AND user_id = $4
+         ORDER BY order_no, id`,
+        [existingPaperId, school, examSheet, userId]
+      );
+      const usedIds = new Set();
+      let typeUpdated = 0;
+
+      for (const row of rows) {
+        const key = compositionKey(row.compositionNo);
+        const match = current.rows.find((item) =>
+          !usedIds.has(item.id) && compositionKey(item.composition_no) === key
+        );
+        if (!match) continue;
+        usedIds.add(match.id);
+        if (!knownTypes.has(row.questionType) || row.questionType === '미분류') continue;
+        if (match.question_type === row.questionType) continue;
+        await client.query(
+          `UPDATE exam_papers SET question_type = $1 WHERE id = $2`,
+          [row.questionType, match.id]
+        );
+        typeUpdated += 1;
+      }
+
+      await client.query('COMMIT');
+      res.json({
+        success: true,
+        paperId: existingPaperId,
+        updated: true,
+        itemCount: rows.length,
+        typeUpdated,
+      });
+      return;
     }
 
-    const paperId = existingPaperId ?? (await client.query(
+    const paperId = (await client.query(
       `SELECT COALESCE(MAX(paper_id), 0) + 1 AS paper_id FROM exam_papers`
     )).rows[0].paper_id;
 
@@ -344,8 +384,9 @@ router.post('/model', authenticateToken, async (req, res) => {
     res.json({
       success: true,
       paperId,
-      updated: existingPaperId != null,
+      updated: false,
       itemCount: rows.length,
+      typeUpdated: 0,
     });
   } catch (error) {
     await client.query('ROLLBACK');

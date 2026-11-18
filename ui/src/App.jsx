@@ -2709,7 +2709,7 @@ function App() {
       }
       setExamModelMessage(
         data.updated
-          ? `시험지모델을 수정했습니다. 시험지id ${data.paperId}`
+          ? `시험지모델을 수정했습니다. 시험지id ${data.paperId}, 유형 ${data.typeUpdated ?? 0}개 반영`
           : `시험지모델을 저장했습니다. 시험지id ${data.paperId}`
       )
     } catch (error) {
