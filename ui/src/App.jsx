@@ -2637,7 +2637,7 @@ function App() {
         if (questions.length === 0) {
           setNewExamAnalysisError('시험지에서 문항을 찾지 못했습니다')
         } else if (data.typeUpdated > 0) {
-          setNewExamTypeMessage(`미분류 ${data.typeUpdated}개를 분석한 유형으로 바꿨습니다.`)
+          setNewExamTypeMessage(`유형 ${data.typeUpdated}개를 분석한 유형으로 바꿨습니다.`)
         }
       } else if (response.status === 401 || response.status === 403) {
         setNewExamAnalysisError(data.error || '로그인이 만료되었습니다. 다시 로그인해주세요')

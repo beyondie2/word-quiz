@@ -233,8 +233,8 @@ function modelSourceList(value) {
 const compositionKey = (value) => String(value || '').trim().replace(/[.。]\s*$/, '');
 
 // POST /api/exam-papers/model
-// 학교, 시험지, 사용자가 같으면 그 행의 id를 유지한 채 미분류만 question_type으로 고친다.
-// 새 유형이 question_type_samples에 있을 때만 바꾼다.
+// 학교, 시험지, 사용자가 같으면 그 행의 id를 유지한 채 question_type을 분석 결과로 고친다.
+// 새 유형이 question_type_samples에 있을 때만 바꾼다. 미분류는 기존 유형을 덮지 않는다.
 // 같은 시험지가 없으면 새 시험지id로 넣는다.
 router.post('/model', authenticateToken, async (req, res) => {
   const school = String(req.body?.school || '').trim();
@@ -335,7 +335,6 @@ router.post('/model', authenticateToken, async (req, res) => {
         );
         if (!match) continue;
         usedIds.add(match.id);
-        if (match.question_type !== '미분류') continue;
         if (!knownTypes.has(row.questionType) || row.questionType === '미분류') continue;
         if (match.question_type === row.questionType) continue;
         await client.query(

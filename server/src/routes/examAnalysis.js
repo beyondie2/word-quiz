@@ -177,7 +177,8 @@ function longestMatch(detail, names) {
 
 const compositionKey = (value) => String(value || '').trim().replace(/[.。]\s*$/, '');
 
-// 같은 학교·시험지·사용자의 미분류 문항을, 이번 분석에서 샘플 유형으로 판정된 값으로 바꾼다.
+// 같은 학교·시험지·사용자의 문항을, 이번 분석에서 샘플 유형으로 판정된 값으로 바꾼다.
+// 미분류만 고치지 않는다. 어법처럼 이미 적힌 유형도 분석 결과가 다르면 샘플 유형으로 바꾼다.
 async function reclassifyUnclassified({ userId, school, examSheet, questions, knownTypes }) {
   if (!school || !examSheet || !Number.isInteger(userId) || userId <= 0) return 0;
   const classified = [];
@@ -208,12 +209,11 @@ async function reclassifyUnclassified({ userId, school, examSheet, questions, kn
     }
 
     const current = await client.query(
-      `SELECT id, composition_no
+      `SELECT id, composition_no, question_type
        FROM exam_papers
        WHERE paper_id = $1 AND school = $2 AND exam_sheet = $3 AND user_id = $4
-         AND question_type = $5
        ORDER BY order_no, id`,
-      [paperId, school, examSheet, userId, UNCLASSIFIED]
+      [paperId, school, examSheet, userId]
     );
     const usedIds = new Set();
     let updated = 0;
@@ -221,13 +221,13 @@ async function reclassifyUnclassified({ userId, school, examSheet, questions, kn
       const match = current.rows.find((item) =>
         !usedIds.has(item.id) && compositionKey(item.composition_no) === row.compositionNo
       );
-      if (!match) continue;
+      if (!match || match.question_type === row.questionType) continue;
       usedIds.add(match.id);
       const result = await client.query(
         `UPDATE exam_papers
          SET question_type = $1
-         WHERE id = $2 AND question_type = $3`,
-        [row.questionType, match.id, UNCLASSIFIED]
+         WHERE id = $2 AND question_type IS DISTINCT FROM $1`,
+        [row.questionType, match.id]
       );
       updated += result.rowCount;
     }
