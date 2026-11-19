@@ -71,6 +71,22 @@ function splitExamQuestion(question) {
   return { first: body.slice(0, newline), rest: body.slice(newline + 1) }
 }
 
+function examRichText(text) {
+  const source = String(text ?? '')
+  const nodes = []
+  const pattern = /<u>([\s\S]*?)<\/u>/gi
+  let cursor = 0
+  let index = 0
+  for (const match of source.matchAll(pattern)) {
+    if (match.index > cursor) nodes.push(source.slice(cursor, match.index))
+    nodes.push(<u key={index}>{match[1]}</u>)
+    index += 1
+    cursor = match.index + match[0].length
+  }
+  if (cursor < source.length) nodes.push(source.slice(cursor))
+  return nodes
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState('quiz')
   
@@ -5704,11 +5720,11 @@ function App() {
                             <div className="exam-sheet-body">
                               <span className="exam-sheet-no">{examCompositionLabel(item.compositionNo)}</span>
                               <span className={item.question ? 'exam-sheet-text' : 'exam-sheet-text is-missing'}>
-                                {questionParts.first}
+                                {examRichText(questionParts.first)}
                               </span>
                             </div>
                             {questionParts.rest && (
-                              <p className="exam-sheet-rest">{questionParts.rest}</p>
+                              <p className="exam-sheet-rest">{examRichText(questionParts.rest)}</p>
                             )}
                           </section>
                         )

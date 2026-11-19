@@ -1975,6 +1975,12 @@
   white-space: pre-wrap;
 }
 
+.exam-sheet-text u,
+.exam-sheet-rest u {
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
 .exam-sheet-text.is-missing {
   color: #8a3a3a;
 }
