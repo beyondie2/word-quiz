@@ -49,6 +49,69 @@ function questionBody(question) {
   return text || '조건에 맞는 문제가 없습니다.';
 }
 
+const UNDERLINE_TAG = /<u>([\s\S]*?)<\/u>/gi;
+
+function examTextRuns(text) {
+  const source = String(text ?? '');
+  const runs = [];
+  let cursor = 0;
+  UNDERLINE_TAG.lastIndex = 0;
+  for (const match of source.matchAll(UNDERLINE_TAG)) {
+    if (match.index > cursor) {
+      runs.push({ text: source.slice(cursor, match.index), underline: false });
+    }
+    if (match[1]) runs.push({ text: match[1], underline: true });
+    cursor = match.index + match[0].length;
+  }
+  if (cursor < source.length || runs.length === 0) {
+    runs.push({ text: source.slice(cursor), underline: false });
+  }
+  return runs;
+}
+
+function runsToText(runs) {
+  return runs.map((run) => run.text).join('');
+}
+
+function splitExamRuns(text) {
+  const first = [];
+  const rest = [];
+  let seenBreak = false;
+  for (const run of examTextRuns(text)) {
+    if (seenBreak) {
+      rest.push(run);
+      continue;
+    }
+    const newline = run.text.indexOf('\n');
+    if (newline === -1) {
+      first.push(run);
+      continue;
+    }
+    if (newline > 0) first.push({ text: run.text.slice(0, newline), underline: run.underline });
+    const after = run.text.slice(newline + 1);
+    if (after) rest.push({ text: after, underline: run.underline });
+    seenBreak = true;
+  }
+  return { first, rest };
+}
+
+function drawExamRuns(doc, runs, x, y, options) {
+  const parts = runs.filter((run) => run.text.length > 0);
+  if (parts.length === 0 || (parts.length === 1 && !parts[0].underline)) {
+    doc.text(parts[0]?.text || ' ', x, y, options);
+    return;
+  }
+  parts.forEach((run, index) => {
+    const drawOptions = {
+      ...options,
+      underline: run.underline,
+      continued: index < parts.length - 1
+    };
+    if (index === 0) doc.text(run.text, x, y, drawOptions);
+    else doc.text(run.text, drawOptions);
+  });
+}
+
 function answerBody(answer) {
   const text = cleanText(answer).trim().slice(0, 20000);
   return text || '—';
@@ -59,15 +122,6 @@ function answerLabel(item) {
   if (label) return label;
   const orderNo = cleanText(item.orderNo).trim();
   return orderNo ? `${orderNo}. ` : '';
-}
-
-function splitQuestion(body) {
-  const newline = body.indexOf('\n');
-  if (newline === -1) return { first: body, rest: '' };
-  return {
-    first: body.slice(0, newline),
-    rest: body.slice(newline + 1)
-  };
 }
 
 const BUNDLED_FONT_DIR = path.resolve(
@@ -305,7 +359,7 @@ function drawTitle(doc, school, examSheet) {
 
 function measureItem(doc, item, width) {
   const body = questionBody(item.question);
-  const { first, rest } = splitQuestion(body);
+  const { first, rest } = splitExamRuns(body);
   doc.font(FONT.regular).fontSize(10.5);
   const metaHeight = doc.heightOfString(examMetaLine(item), { width, lineGap: 2 });
   const label = examCompositionLabel(item.compositionNo);
@@ -319,17 +373,17 @@ function measureItem(doc, item, width) {
     if (label) {
       bodyHeight += doc.font(FONT.bold).fontSize(QUESTION_SIZE).heightOfString(label.trim(), { width });
     }
-    bodyHeight += doc.font(FONT.regular).fontSize(QUESTION_SIZE).heightOfString(body, {
+    bodyHeight += doc.font(FONT.regular).fontSize(QUESTION_SIZE).heightOfString(runsToText(examTextRuns(body)) || ' ', {
       width,
       lineGap: QUESTION_LINE_GAP
     });
   } else {
-    bodyHeight += doc.heightOfString(first || ' ', {
+    bodyHeight += doc.heightOfString(runsToText(first) || ' ', {
       width: width - labelWidth,
       lineGap: QUESTION_LINE_GAP
     });
-    if (rest) {
-      bodyHeight += doc.heightOfString(rest, { width, lineGap: QUESTION_LINE_GAP });
+    if (runsToText(rest)) {
+      bodyHeight += doc.heightOfString(runsToText(rest), { width, lineGap: QUESTION_LINE_GAP });
     }
   }
 
@@ -360,24 +414,24 @@ function drawItem(doc, item) {
   const labelWidth = label ? doc.widthOfString(label) : 0;
   const stacked = !label || labelWidth > width * 0.45;
   const y = doc.y;
-  const { first, rest } = splitQuestion(body);
+  const { first, rest } = splitExamRuns(body);
 
   if (!stacked) {
     doc.fillColor('#000000').text(label, x, y, { lineBreak: false });
     doc.font(FONT.regular).fontSize(QUESTION_SIZE).fillColor('#000000');
-    doc.text(first || ' ', x + labelWidth, y, {
+    drawExamRuns(doc, first, x + labelWidth, y, {
       width: width - labelWidth,
       lineGap: QUESTION_LINE_GAP
     });
-    if (rest) {
-      doc.text(rest, x, doc.y, { width, lineGap: QUESTION_LINE_GAP });
+    if (runsToText(rest)) {
+      drawExamRuns(doc, rest, x, doc.y, { width, lineGap: QUESTION_LINE_GAP });
     }
   } else {
     if (label) {
       doc.fillColor('#000000').text(label.trim(), x, y, { width });
     }
     doc.font(FONT.regular).fontSize(QUESTION_SIZE).fillColor('#000000');
-    doc.text(body, x, doc.y, { width, lineGap: QUESTION_LINE_GAP });
+    drawExamRuns(doc, examTextRuns(body), x, doc.y, { width, lineGap: QUESTION_LINE_GAP });
   }
 
   doc.x = x;
@@ -385,7 +439,7 @@ function drawItem(doc, item) {
 }
 
 function measureLabeledBody(doc, label, body, width, gapAfter) {
-  const { first, rest } = splitQuestion(body);
+  const { first, rest } = splitExamRuns(body);
   doc.font(FONT.bold).fontSize(QUESTION_SIZE);
   const labelWidth = label ? doc.widthOfString(label) : 0;
   const stacked = !label || labelWidth > width * 0.45;
@@ -395,18 +449,18 @@ function measureLabeledBody(doc, label, body, width, gapAfter) {
     if (label) {
       bodyHeight += doc.font(FONT.bold).fontSize(QUESTION_SIZE).heightOfString(label.trim(), { width });
     }
-    bodyHeight += doc.font(FONT.regular).fontSize(QUESTION_SIZE).heightOfString(body, {
+    bodyHeight += doc.font(FONT.regular).fontSize(QUESTION_SIZE).heightOfString(runsToText(examTextRuns(body)) || ' ', {
       width,
       lineGap: QUESTION_LINE_GAP
     });
   } else {
     doc.font(FONT.regular).fontSize(QUESTION_SIZE);
-    bodyHeight += doc.heightOfString(first || ' ', {
+    bodyHeight += doc.heightOfString(runsToText(first) || ' ', {
       width: width - labelWidth,
       lineGap: QUESTION_LINE_GAP
     });
-    if (rest) {
-      bodyHeight += doc.heightOfString(rest, { width, lineGap: QUESTION_LINE_GAP });
+    if (runsToText(rest)) {
+      bodyHeight += doc.heightOfString(runsToText(rest), { width, lineGap: QUESTION_LINE_GAP });
     }
   }
 
@@ -420,24 +474,24 @@ function drawLabeledBody(doc, label, body) {
   const labelWidth = label ? doc.widthOfString(label) : 0;
   const stacked = !label || labelWidth > width * 0.45;
   const y = doc.y;
-  const { first, rest } = splitQuestion(body);
+  const { first, rest } = splitExamRuns(body);
 
   if (!stacked) {
     doc.fillColor('#000000').text(label, x, y, { lineBreak: false });
     doc.font(FONT.regular).fontSize(QUESTION_SIZE).fillColor('#000000');
-    doc.text(first || ' ', x + labelWidth, y, {
+    drawExamRuns(doc, first, x + labelWidth, y, {
       width: width - labelWidth,
       lineGap: QUESTION_LINE_GAP
     });
-    if (rest) {
-      doc.text(rest, x, doc.y, { width, lineGap: QUESTION_LINE_GAP });
+    if (runsToText(rest)) {
+      drawExamRuns(doc, rest, x, doc.y, { width, lineGap: QUESTION_LINE_GAP });
     }
   } else {
     if (label) {
       doc.fillColor('#000000').text(label.trim(), x, y, { width });
     }
     doc.font(FONT.regular).fontSize(QUESTION_SIZE).fillColor('#000000');
-    doc.text(body, x, doc.y, { width, lineGap: QUESTION_LINE_GAP });
+    drawExamRuns(doc, examTextRuns(body), x, doc.y, { width, lineGap: QUESTION_LINE_GAP });
   }
 
   doc.x = x;
@@ -631,6 +685,21 @@ function installGlyphFallback(doc) {
       cursor += originalWidth(run.text, options);
     }
     this._font = mainFont;
+    if (options.underline || options.strike) {
+      const lineWidth = this._fontSize < 10 ? 0.5 : Math.floor(this._fontSize / 10);
+      this.save();
+      if (!options.stroke && this._fillColor?.length) this.strokeColor(...this._fillColor);
+      this.lineWidth(lineWidth);
+      if (options.underline) {
+        const lineY = y + this.currentLineHeight() - lineWidth;
+        this.moveTo(startX, lineY).lineTo(cursor, lineY).stroke();
+      }
+      if (options.strike) {
+        const lineY = y + this.currentLineHeight() / 2;
+        this.moveTo(startX, lineY).lineTo(cursor, lineY).stroke();
+      }
+      this.restore();
+    }
   };
 }
 
