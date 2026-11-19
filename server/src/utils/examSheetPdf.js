@@ -73,6 +73,107 @@ function runsToText(runs) {
   return runs.map((run) => run.text).join('');
 }
 
+function hasUnderline(runs) {
+  return runs.some((run) => run.underline);
+}
+
+function fitCount(doc, text, maxWidth) {
+  if (doc.widthOfString(text) <= maxWidth) return text.length;
+  let best = 1;
+  let low = 1;
+  let high = text.length;
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    if (doc.widthOfString(text.slice(0, mid)) <= maxWidth) {
+      best = mid;
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+  return best;
+}
+
+function wrapExamRuns(doc, runs, width) {
+  const atoms = [];
+  for (const run of runs) {
+    const pieces = run.text.split(/(\n)/);
+    for (const piece of pieces) {
+      if (piece === '\n') {
+        atoms.push({ newline: true });
+        continue;
+      }
+      for (const bit of piece.split(/([ \t]+)/)) {
+        if (bit) atoms.push({ text: bit, underline: run.underline });
+      }
+    }
+  }
+
+  const lines = [];
+  let line = [];
+  let lineWidth = 0;
+  const pushLine = () => {
+    lines.push(line);
+    line = [];
+    lineWidth = 0;
+  };
+
+  for (const atom of atoms) {
+    if (atom.newline) {
+      pushLine();
+      continue;
+    }
+    const space = /^[ \t]+$/.test(atom.text);
+    if (space) {
+      if (line.length === 0) continue;
+      const spaceWidth = doc.widthOfString(atom.text);
+      if (lineWidth + spaceWidth > width) {
+        pushLine();
+        continue;
+      }
+      line.push(atom);
+      lineWidth += spaceWidth;
+      continue;
+    }
+
+    let rest = atom.text;
+    while (rest) {
+      const room = width - lineWidth;
+      if (line.length > 0 && doc.widthOfString(rest) > room) {
+        pushLine();
+        continue;
+      }
+      const count = fitCount(doc, rest, width - lineWidth);
+      const taken = rest.slice(0, count);
+      line.push({ text: taken, underline: atom.underline });
+      lineWidth += doc.widthOfString(taken);
+      rest = rest.slice(count);
+      if (rest) pushLine();
+    }
+  }
+  if (line.length > 0 || lines.length === 0) lines.push(line);
+  return lines;
+}
+
+function coalesceLine(line) {
+  const merged = [];
+  for (const seg of line) {
+    const prev = merged[merged.length - 1];
+    if (prev && prev.underline === seg.underline) prev.text += seg.text;
+    else merged.push({ text: seg.text, underline: seg.underline });
+  }
+  return merged;
+}
+
+function examRunsHeight(doc, runs, width, lineGap) {
+  const parts = runs.filter((run) => run.text.length > 0);
+  const gap = lineGap || 0;
+  if (!hasUnderline(parts)) {
+    return doc.heightOfString(runsToText(parts) || ' ', { width, lineGap: gap });
+  }
+  return wrapExamRuns(doc, parts, width).length * (doc.currentLineHeight(true) + gap);
+}
+
 function splitExamRuns(text) {
   const first = [];
   const rest = [];
@@ -97,19 +198,38 @@ function splitExamRuns(text) {
 
 function drawExamRuns(doc, runs, x, y, options) {
   const parts = runs.filter((run) => run.text.length > 0);
-  if (parts.length === 0 || (parts.length === 1 && !parts[0].underline)) {
-    doc.text(parts[0]?.text || ' ', x, y, options);
+  if (!hasUnderline(parts)) {
+    doc.text(runsToText(parts) || ' ', x, y, options);
     return;
   }
-  parts.forEach((run, index) => {
-    const drawOptions = {
-      ...options,
-      underline: run.underline,
-      continued: index < parts.length - 1
-    };
-    if (index === 0) doc.text(run.text, x, y, drawOptions);
-    else doc.text(run.text, drawOptions);
-  });
+
+  const width = options.width;
+  const lineGap = options.lineGap || 0;
+  const lines = wrapExamRuns(doc, parts, width);
+  const lineHeight = doc.currentLineHeight(true) + lineGap;
+  const stroke = doc._fontSize < 10 ? 0.5 : Math.floor(doc._fontSize / 10);
+  let cursorY = y;
+
+  doc.fillColor('#000000');
+  for (const rawLine of lines) {
+    let cursorX = x;
+    for (const seg of coalesceLine(rawLine)) {
+      const segWidth = doc.widthOfString(seg.text);
+      doc.text(seg.text, cursorX, cursorY, { lineBreak: false });
+      if (seg.underline && seg.text.trim()) {
+        const lineY = cursorY + doc.currentLineHeight() - stroke;
+        doc.save();
+        doc.strokeColor('#000000').lineWidth(stroke);
+        doc.moveTo(cursorX, lineY).lineTo(cursorX + segWidth, lineY).stroke();
+        doc.restore();
+      }
+      cursorX += segWidth;
+    }
+    cursorY += lineHeight;
+  }
+
+  doc.x = x;
+  doc.y = cursorY;
 }
 
 function answerBody(answer) {
@@ -373,17 +493,12 @@ function measureItem(doc, item, width) {
     if (label) {
       bodyHeight += doc.font(FONT.bold).fontSize(QUESTION_SIZE).heightOfString(label.trim(), { width });
     }
-    bodyHeight += doc.font(FONT.regular).fontSize(QUESTION_SIZE).heightOfString(runsToText(examTextRuns(body)) || ' ', {
-      width,
-      lineGap: QUESTION_LINE_GAP
-    });
+    doc.font(FONT.regular).fontSize(QUESTION_SIZE);
+    bodyHeight += examRunsHeight(doc, examTextRuns(body), width, QUESTION_LINE_GAP);
   } else {
-    bodyHeight += doc.heightOfString(runsToText(first) || ' ', {
-      width: width - labelWidth,
-      lineGap: QUESTION_LINE_GAP
-    });
+    bodyHeight += examRunsHeight(doc, first, width - labelWidth, QUESTION_LINE_GAP);
     if (runsToText(rest)) {
-      bodyHeight += doc.heightOfString(runsToText(rest), { width, lineGap: QUESTION_LINE_GAP });
+      bodyHeight += examRunsHeight(doc, rest, width, QUESTION_LINE_GAP);
     }
   }
 
@@ -449,18 +564,13 @@ function measureLabeledBody(doc, label, body, width, gapAfter) {
     if (label) {
       bodyHeight += doc.font(FONT.bold).fontSize(QUESTION_SIZE).heightOfString(label.trim(), { width });
     }
-    bodyHeight += doc.font(FONT.regular).fontSize(QUESTION_SIZE).heightOfString(runsToText(examTextRuns(body)) || ' ', {
-      width,
-      lineGap: QUESTION_LINE_GAP
-    });
+    doc.font(FONT.regular).fontSize(QUESTION_SIZE);
+    bodyHeight += examRunsHeight(doc, examTextRuns(body), width, QUESTION_LINE_GAP);
   } else {
     doc.font(FONT.regular).fontSize(QUESTION_SIZE);
-    bodyHeight += doc.heightOfString(runsToText(first) || ' ', {
-      width: width - labelWidth,
-      lineGap: QUESTION_LINE_GAP
-    });
+    bodyHeight += examRunsHeight(doc, first, width - labelWidth, QUESTION_LINE_GAP);
     if (runsToText(rest)) {
-      bodyHeight += doc.heightOfString(runsToText(rest), { width, lineGap: QUESTION_LINE_GAP });
+      bodyHeight += examRunsHeight(doc, rest, width, QUESTION_LINE_GAP);
     }
   }
 
