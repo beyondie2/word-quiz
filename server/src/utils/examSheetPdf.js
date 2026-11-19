@@ -472,7 +472,7 @@ function drawTitle(doc, school, examSheet) {
   doc.text(`학교 : ${school}`, x, doc.y, { width });
   doc.moveDown(0.35);
   doc.font(FONT.regular).fontSize(12.5).fillColor('#000000');
-  doc.text(`기출 시험지 : ${examSheet}`, x, doc.y, { width });
+  doc.text(`기준이 되는 기출 시험지 : ${examSheet}`, x, doc.y, { width });
   doc.moveDown(0.55);
   drawDoubleRule(doc);
 }
@@ -617,7 +617,7 @@ function drawAnswerTitle(doc, school, examSheet) {
   doc.font(FONT.regular).fontSize(12.5).fillColor('#000000');
   doc.text(`학교 : ${school}`, x, doc.y, { width });
   doc.moveDown(0.2);
-  doc.text(`기출 시험지 : ${examSheet}`, x, doc.y, { width });
+  doc.text(`기준이 되는 기출 시험지 : ${examSheet}`, x, doc.y, { width });
   doc.moveDown(0.55);
   drawDoubleRule(doc);
 }
@@ -662,8 +662,8 @@ function drawPageFurniture(doc, school, examSheet, answerPageStart) {
 
     if (pageNo > 1 && i !== answerPageStart) {
       const header = isLaterAnswerPage
-        ? `학교 : ${school}    기출 시험지 : ${examSheet}    답지`
-        : `학교 : ${school}    기출 시험지 : ${examSheet}`;
+        ? `학교 : ${school}    기준이 되는 기출 시험지 : ${examSheet}    답지`
+        : `학교 : ${school}    기준이 되는 기출 시험지 : ${examSheet}`;
       doc.font(FONT.regular).fontSize(9).fillColor('#222222');
       doc.text(header, PAGE_MARGIN.left, 30, {
         width: width - PAGE_MARGIN.left - PAGE_MARGIN.right,

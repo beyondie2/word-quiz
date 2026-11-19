@@ -5710,7 +5710,7 @@ function App() {
                     <article className="exam-sheet">
                       <header className="exam-sheet-head">
                         <p className="exam-sheet-school">학교 : {selectedExamSchool}</p>
-                        <p className="exam-sheet-base">기출 시험지 : {selectedExamSheet}</p>
+                        <p className="exam-sheet-base">기준이 되는 기출 시험지 : {selectedExamSheet}</p>
                       </header>
                       {generatedExamItems.map((item) => {
                         const questionParts = splitExamQuestion(item.question)
