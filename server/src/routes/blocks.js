@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../config/database.js';
 import { trimStringFields } from '../utils/trimHelper.js';
+import { toKeyboardText } from '../utils/keyboardText.js';
 import { resolveProgressScope, appendProgressUserFilter } from '../utils/progressViewer.js';
 
 const router = express.Router();
@@ -220,9 +221,13 @@ router.post('/upload', async (req, res) => {
     let skippedCount = 0;
 
     for (const row of data) {
-      const { book, lesson, sentence_number, english, korean_blocks, korean_full } = row;
-      
-      // 필수 필드 확인
+      const book = toKeyboardText(typeof row.book === 'string' ? row.book : (row.book ?? ''));
+      const lesson = toKeyboardText(typeof row.lesson === 'string' ? row.lesson : (row.lesson ?? ''));
+      const english = toKeyboardText(typeof row.english === 'string' ? row.english : (row.english ?? ''));
+      const korean_blocks = toKeyboardText(typeof row.korean_blocks === 'string' ? row.korean_blocks : (row.korean_blocks ?? ''));
+      const korean_full = toKeyboardText(typeof row.korean_full === 'string' ? row.korean_full : (row.korean_full ?? ''));
+      const sentence_number = row.sentence_number;
+
       if (!english || !korean_blocks || !korean_full) {
         skippedCount++;
         continue;
