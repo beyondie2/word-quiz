@@ -232,9 +232,32 @@ function modelSourceList(value) {
 
 const compositionKey = (value) => String(value || '').trim().replace(/[.。]\s*$/, '');
 
+function sameSourceList(stored, incomingJson) {
+  const normalize = (value) => {
+    if (Array.isArray(value)) {
+      return value.map((item) => String(item ?? '').trim()).filter(Boolean);
+    }
+    const text = String(value ?? '').trim();
+    if (!text) return [];
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => String(item ?? '').trim()).filter(Boolean);
+      }
+    } catch {
+      // 예전 행은 출처를 쉼표로 이어 저장했다.
+    }
+    return text.split(',').map((item) => item.trim()).filter(Boolean);
+  };
+  const left = normalize(stored);
+  const right = normalize(incomingJson);
+  return left.length === right.length && left.every((item, index) => item === right[index]);
+}
+
 // POST /api/exam-papers/model
-// 학교, 시험지, 사용자가 같으면 그 행의 id를 유지한 채 question_type을 분석 결과로 고친다.
-// 새 유형이 question_type_samples에 있을 때만 바꾼다. 미분류는 기존 유형을 덮지 않는다.
+// 학교, 시험지, 사용자가 같으면 그 행의 id를 유지한 채 유형과 출처를 분석 결과로 고친다.
+// 새 유형이 question_type_samples에 있을 때만 question_type을 바꾼다. 미분류는 기존 유형을 덮지 않는다.
+// sources와 source_type은 분석 결과가 다르면 항상 고친다.
 // 같은 시험지가 없으면 새 시험지id로 넣는다.
 router.post('/model', authenticateToken, async (req, res) => {
   const school = String(req.body?.school || '').trim();
@@ -319,7 +342,7 @@ router.post('/model', authenticateToken, async (req, res) => {
         samples.rows.map((row) => String(row.question_type || '').trim()).filter(Boolean)
       );
       const current = await client.query(
-        `SELECT id, composition_no, question_type
+        `SELECT id, composition_no, question_type, source_type, sources
          FROM exam_papers
          WHERE paper_id = $1 AND school = $2 AND exam_sheet = $3 AND user_id = $4
          ORDER BY order_no, id`,
@@ -327,6 +350,7 @@ router.post('/model', authenticateToken, async (req, res) => {
       );
       const usedIds = new Set();
       let typeUpdated = 0;
+      let sourceUpdated = 0;
 
       for (const row of rows) {
         const key = compositionKey(row.compositionNo);
@@ -335,13 +359,35 @@ router.post('/model', authenticateToken, async (req, res) => {
         );
         if (!match) continue;
         usedIds.add(match.id);
-        if (!knownTypes.has(row.questionType) || row.questionType === '미분류') continue;
-        if (match.question_type === row.questionType) continue;
+
+        const sets = [];
+        const params = [];
+        const canUpdateType = knownTypes.has(row.questionType)
+          && row.questionType !== '미분류'
+          && match.question_type !== row.questionType;
+        if (canUpdateType) {
+          params.push(row.questionType);
+          sets.push(`question_type = $${params.length}`);
+          typeUpdated += 1;
+        }
+        const sourceTypeChanged = (match.source_type || '') !== row.sourceType;
+        const sourcesChanged = !sameSourceList(match.sources, row.sources);
+        if (sourceTypeChanged) {
+          params.push(row.sourceType);
+          sets.push(`source_type = $${params.length}`);
+        }
+        if (sourcesChanged) {
+          params.push(row.sources);
+          sets.push(`sources = $${params.length}`);
+        }
+        if (sourceTypeChanged || sourcesChanged) sourceUpdated += 1;
+        if (sets.length === 0) continue;
+
+        params.push(match.id);
         await client.query(
-          `UPDATE exam_papers SET question_type = $1 WHERE id = $2`,
-          [row.questionType, match.id]
+          `UPDATE exam_papers SET ${sets.join(', ')} WHERE id = $${params.length}`,
+          params
         );
-        typeUpdated += 1;
       }
 
       await client.query('COMMIT');
@@ -351,6 +397,7 @@ router.post('/model', authenticateToken, async (req, res) => {
         updated: true,
         itemCount: rows.length,
         typeUpdated,
+        sourceUpdated,
       });
       return;
     }
