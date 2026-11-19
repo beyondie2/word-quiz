@@ -4,8 +4,9 @@ import Anthropic from '@anthropic-ai/sdk';
 import JSZip from 'jszip';
 import XLSX from 'xlsx';
 import WordExtractor from 'word-extractor';
-import { HwpxReader, hwpToText } from '@ssabrojs/hwpxjs';
+import { HwpxReader, hwpToHwpx, hwpToText } from '@ssabrojs/hwpxjs';
 import pool from '../config/database.js';
+import { htmlToUnderlineText, rtfToText, wordXmlToText } from '../utils/documentText.js';
 import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 
 // 문제은행: 텍스트를 지문으로 나누고, 유형별 문제와 해설을 만든다.
@@ -142,7 +143,7 @@ function decodeXmlText(xml) {
     .trim();
 }
 
-async function textFromZip(buffer, pattern) {
+async function textFromZip(buffer, pattern, decode = decodeXmlText) {
   const zip = await JSZip.loadAsync(buffer);
   const names = Object.keys(zip.files)
     .filter((name) => pattern.test(name) && !zip.files[name].dir)
@@ -150,10 +151,22 @@ async function textFromZip(buffer, pattern) {
   const parts = [];
   for (const name of names) {
     const xml = await zip.files[name].async('string');
-    const text = decodeXmlText(xml);
+    const text = decode(xml);
     if (text) parts.push(text);
   }
   return parts.join('\n\n');
+}
+
+async function textFromHwpxBytes(data) {
+  const reader = new HwpxReader();
+  const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
+  await reader.loadFromArrayBuffer(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength));
+  const html = await reader.extractHtml({
+    renderImages: false,
+    renderStyles: true,
+    renderTables: true,
+  });
+  return htmlToUnderlineText(html);
 }
 
 function spreadsheetText(buffer) {
@@ -162,18 +175,6 @@ function spreadsheetText(buffer) {
     .map((name) => XLSX.utils.sheet_to_csv(book.Sheets[name]))
     .filter(Boolean)
     .join('\n\n');
-}
-
-function rtfToText(rtf) {
-  return String(rtf || '')
-    .replace(/\\par[d]?/g, '\n')
-    .replace(/\\u(-?\d+)\??/g, (_, code) => {
-      const value = Number(code);
-      return String.fromCharCode(value < 0 ? value + 65536 : value);
-    })
-    .replace(/\\'[0-9a-f]{2}/gi, '')
-    .replace(/\\[a-z]+-?\d* ?/gi, '')
-    .replace(/[{}]/g, '');
 }
 
 function arrayBufferOf(buffer) {
@@ -211,21 +212,35 @@ async function readSourceFile(file) {
   }
 
   try {
-    if (ext === 'hwp') return textResult(await hwpToText(new Uint8Array(buffer)));
+    if (ext === 'hwp') {
+      try {
+        const underlined = await textFromHwpxBytes(await hwpToHwpx(new Uint8Array(buffer)));
+        if (underlined.trim()) return textResult(underlined);
+      } catch (error) {
+        console.error('HWP underline read error:', error);
+      }
+      return textResult(await hwpToText(new Uint8Array(buffer)));
+    }
     if (ext === 'hwpx') {
+      try {
+        const underlined = await textFromHwpxBytes(buffer);
+        if (underlined.trim()) return textResult(underlined);
+      } catch (error) {
+        console.error('HWPX underline read error:', error);
+      }
       const reader = new HwpxReader();
       await reader.loadFromArrayBuffer(arrayBufferOf(buffer));
       return textResult(await reader.extractText());
     }
-    if (ext === 'doc' || ext === 'docx' || ext === 'docm') {
-      try {
-        const extracted = await new WordExtractor().extract(buffer);
-        const body = extracted.getBody();
-        if (String(body || '').trim()) return textResult(body);
-      } catch (error) {
-        if (ext === 'doc') throw error;
-      }
-      return textResult(await textFromZip(buffer, /^word\/document\.xml$/i));
+    if (ext === 'docx' || ext === 'docm') {
+      const underlined = await textFromZip(buffer, /^word\/document\.xml$/i, wordXmlToText);
+      if (String(underlined).trim()) return textResult(underlined);
+      const extracted = await new WordExtractor().extract(buffer);
+      return textResult(extracted.getBody());
+    }
+    if (ext === 'doc') {
+      const extracted = await new WordExtractor().extract(buffer);
+      return textResult(extracted.getBody());
     }
     if (ext === 'odt') return textResult(await textFromZip(buffer, /^content\.xml$/i));
     if (ext === 'pptx' || ext === 'pptm') return textResult(await textFromZip(buffer, /^ppt\/slides\/slide\d+\.xml$/i));
@@ -327,6 +342,7 @@ function splitPrompt() {
     '당신은 한국 고등학교 영어 시험의 지문을 나누는 도우미입니다.',
     '사용자가 글자가 들어 있는 파일(텍스트, PDF, 워드, 한글, 사진)을 주면, 그 안의 글자를 읽어 고등학교 영어 시험 한 문제에 들어갈 지문 분량으로 나눕니다.',
     '지문은 영어 본문만 담습니다. 발문, 문항 번호, 선택지, 정답, 해설은 넣지 않습니다.',
+    '원문에서 밑줄이 그어진 글자는 <u>와 </u>로 감쌉니다. 밑줄이 없는 글자에는 태그를 넣지 않고, 다른 HTML 태그는 쓰지 않습니다.',
     '한 지문은 대략 120~180 영어 단어입니다. 원문에 없는 문장을 지어내지 않습니다.',
     '',
     '출처는 사용자가 지정한 목록 안에서만 고릅니다. 제목과 단원 이름은 지정한 글자를 그대로 씁니다.',
@@ -351,6 +367,8 @@ function buildQuestionPrompt(byType) {
     '아래 유형마다 문제를 하나씩 만듭니다. 발문, 지문 배치, 선택지 형식은 그 유형의 예시를 따릅니다.',
     '객관식은 선택지를 ①부터 ⑤까지 다섯 개 둡니다. 주관식은 선택지를 두지 않습니다.',
     'question에는 발문, 지문, 선택지를 학생이 푸는 문제 형태로 모두 넣습니다.',
+    '지문에 <u>...</u>로 표시된 밑줄이 있고 그 글자를 question에 넣으면, 같은 태그를 그대로 유지합니다. 예: <u>이것은 주민들이 밤에 안전하게 산책하는 것을 가능하게 만들어 줄 것이다.</u>',
+    '지문에 없는 밑줄을 새로 만들지 않습니다. "밑줄 친"이라는 발문만으로 <u>를 넣지 않습니다.',
     'answer에는 정답만 적습니다. 객관식은 정답 선택지 번호와 글자, 주관식은 정답 문장이나 단어입니다.',
     'explanation에는 왜 그 답이 맞는지 한국어로 짧게 적습니다.',
     '',
