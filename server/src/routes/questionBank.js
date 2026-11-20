@@ -440,13 +440,25 @@ async function loadTypeSamples() {
   return byType;
 }
 
+function questionTypeOf(rawType, question, answer, byType) {
+  const type = String(rawType ?? '').trim();
+  const text = `${question}\n${answer}`;
+  if (
+    byType.has('삽입')
+    && (text.includes('주어진 문장이 들어가기에 가장 적절한 곳') || text.includes('[문장 삽입]'))
+  ) {
+    return '삽입';
+  }
+  return type;
+}
+
 function normalizeQuestions(rawQuestions, byType) {
   const saved = new Map();
   for (const raw of Array.isArray(rawQuestions) ? rawQuestions : []) {
-    const type = String(raw?.question_type ?? '').trim();
     const question = String(raw?.question ?? '').trim();
     const answer = String(raw?.answer ?? '').trim();
     const explanation = String(raw?.explanation ?? '').trim();
+    const type = questionTypeOf(raw?.question_type, question, answer, byType);
     const samples = byType.get(type);
     if (!samples || !question || !answer || saved.has(type)) continue;
     saved.set(type, {

@@ -74,6 +74,28 @@ function pickRandom(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
 
+// 문장 삽입 문제가 빈칸 유형으로 저장된 경우에도 삽입 칸에서 그 답을 찾는다.
+const INSERTION_QUESTION = '%주어진 문장이 들어가기에 가장 적절한 곳%';
+const INSERTION_ANSWER = '%[문장 삽입]%';
+
+function questionTypeSql(questionType) {
+  if (questionType === '삽입') {
+    return `(
+      question_type = $2
+      OR (
+        question_type = '빈칸'
+        AND (question LIKE '${INSERTION_QUESTION}' OR answer LIKE '${INSERTION_ANSWER}')
+      )
+    )`;
+  }
+  if (questionType === '빈칸') {
+    return `question_type = $2
+      AND question NOT LIKE '${INSERTION_QUESTION}'
+      AND answer NOT LIKE '${INSERTION_ANSWER}'`;
+  }
+  return 'question_type = $2';
+}
+
 // GET /api/exam-papers/build?school=&examSheet=
 // order_no 1번부터 끝까지, 출처·유형·객주에 맞는 문제 중 하나를 무작위로 고른다.
 router.get('/build', async (req, res) => {
@@ -121,7 +143,7 @@ router.get('/build', async (req, res) => {
           SELECT id, exam_scope, question
           FROM exam_questions
           WHERE exam_scope = ANY($1::text[])
-            AND question_type = $2
+            AND ${questionTypeSql(paper.question_type)}
             AND answer_format = $3
         `, [sources, paper.question_type, paper.answer_format]);
 
