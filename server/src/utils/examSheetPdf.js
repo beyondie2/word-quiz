@@ -838,6 +838,173 @@ function applyFonts(doc, fonts) {
   installGlyphFallback(doc);
 }
 
+const ANALYSIS_ITEM_GAP = 14;
+
+function analysisHeading(item) {
+  const number = cleanText(item.number).trim();
+  const type = cleanText(item.questionType).trim();
+  if (number && type) return `${number}. ${type}`;
+  return number || type || '문항';
+}
+
+function analysisQuestion(question) {
+  return cleanText(question).trim().slice(0, 20000);
+}
+
+function measureAnalysisItem(doc, item, width) {
+  doc.font(FONT.bold).fontSize(QUESTION_SIZE);
+  let height = doc.heightOfString(analysisHeading(item), { width, lineGap: 2 });
+  const question = analysisQuestion(item.question);
+  doc.font(FONT.regular).fontSize(QUESTION_SIZE);
+  height += 4 + examRunsHeight(doc, examTextRuns(question), width, QUESTION_LINE_GAP);
+  const source = cleanText(item.sourceLabel).trim();
+  if (source) {
+    doc.font(FONT.regular).fontSize(10);
+    height += 4 + doc.heightOfString(source, { width, lineGap: 1 });
+  }
+  return height + ANALYSIS_ITEM_GAP;
+}
+
+function drawAnalysisItem(doc, item) {
+  const x = doc.page.margins.left;
+  const width = contentWidth(doc);
+  const question = analysisQuestion(item.question);
+  const source = cleanText(item.sourceLabel).trim();
+
+  doc.x = x;
+  doc.font(FONT.bold).fontSize(QUESTION_SIZE).fillColor('#000000');
+  doc.text(analysisHeading(item), x, doc.y, { width, lineGap: 2 });
+  doc.y += 4;
+  doc.font(FONT.regular).fontSize(QUESTION_SIZE).fillColor('#000000');
+  drawExamRuns(doc, examTextRuns(question), x, doc.y, {
+    width,
+    lineGap: QUESTION_LINE_GAP
+  });
+  if (source) {
+    doc.y += 4;
+    doc.font(FONT.regular).fontSize(10).fillColor('#333333');
+    doc.text(source, x, doc.y, { width, lineGap: 1 });
+    doc.fillColor('#000000');
+  }
+  doc.x = x;
+  doc.y += ANALYSIS_ITEM_GAP;
+}
+
+function drawAnalysisTitle(doc, school, examSheet) {
+  const x = doc.page.margins.left;
+  const width = contentWidth(doc);
+
+  doc.font(FONT.bold).fontSize(16).fillColor('#000000');
+  doc.text('문항 분석', x, doc.y, { width });
+  doc.moveDown(0.35);
+  doc.font(FONT.regular).fontSize(12.5).fillColor('#000000');
+  if (school) doc.text(`학교 : ${school}`, x, doc.y, { width });
+  if (examSheet) {
+    if (school) doc.moveDown(0.2);
+    doc.text(`기준이 되는 기출 시험지 : ${examSheet}`, x, doc.y, { width });
+  }
+  doc.moveDown(0.55);
+  drawDoubleRule(doc);
+}
+
+function drawAnalysisFurniture(doc, school, examSheet) {
+  const range = doc.bufferedPageRange();
+  const titleBits = ['문항 분석', school && `학교 : ${school}`, examSheet && `기준이 되는 기출 시험지 : ${examSheet}`]
+    .filter(Boolean);
+
+  for (let i = range.start; i < range.start + range.count; i += 1) {
+    doc.switchToPage(i);
+    const savedTop = doc.page.margins.top;
+    const savedBottom = doc.page.margins.bottom;
+    doc.page.margins.top = 0;
+    doc.page.margins.bottom = 0;
+
+    const { width, height } = doc.page;
+    const pageNo = i - range.start + 1;
+    if (pageNo > 1) {
+      doc.font(FONT.regular).fontSize(9).fillColor('#222222');
+      doc.text(titleBits.join('    '), PAGE_MARGIN.left, 30, {
+        width: width - PAGE_MARGIN.left - PAGE_MARGIN.right,
+        lineBreak: false,
+        ellipsis: true
+      });
+      doc.save();
+      doc.strokeColor('#222222')
+        .lineWidth(0.6)
+        .moveTo(PAGE_MARGIN.left, 46)
+        .lineTo(width - PAGE_MARGIN.right, 46)
+        .stroke();
+      doc.restore();
+    }
+
+    doc.save();
+    doc.strokeColor('#222222')
+      .lineWidth(0.4)
+      .moveTo(PAGE_MARGIN.left, height - 42)
+      .lineTo(width - PAGE_MARGIN.right, height - 42)
+      .stroke();
+    doc.restore();
+
+    doc.font(FONT.regular).fontSize(10).fillColor('#111111');
+    doc.text(`- ${pageNo} -`, 0, height - 34, {
+      width,
+      align: 'center',
+      lineBreak: false
+    });
+
+    doc.page.margins.top = savedTop;
+    doc.page.margins.bottom = savedBottom;
+  }
+}
+
+export function buildExamAnalysisPdf({ school, examSheet, items, fontDirs } = {}) {
+  const fonts = resolveExamPdfFonts(fontDirs ? { dirs: fontDirs } : {});
+  embedUnicode = fonts.embedUnicode !== false && Boolean(fonts.regular);
+  const normalized = (Array.isArray(items) ? items : []).slice(0, 300).map((item) => ({
+    number: item?.number ?? '',
+    questionType: item?.questionType ?? '',
+    question: item?.question ?? '',
+    sourceLabel: item?.sourceLabel ?? ''
+  }));
+
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({
+      size: 'A4',
+      margins: PAGE_MARGIN,
+      bufferPages: true,
+      info: {
+        Title: cleanText(`문항 분석 ${school} ${examSheet}`) || '문항 분석',
+        Author: cleanText(school) || 'exam'
+      }
+    });
+    const chunks = [];
+
+    doc.on('data', (chunk) => chunks.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
+
+    try {
+      applyFonts(doc, fonts);
+      const safeSchool = cleanText(school);
+      const safeSheet = cleanText(examSheet);
+      drawAnalysisTitle(doc, safeSchool, safeSheet);
+      normalized.forEach((item) => {
+        const needed = measureAnalysisItem(doc, item, contentWidth(doc));
+        ensureItemFits(doc, needed);
+        drawAnalysisItem(doc, item);
+      });
+      drawAnalysisFurniture(doc, safeSchool, safeSheet);
+      doc.end();
+    } catch (error) {
+      reject(error);
+    } finally {
+      embedUnicode = true;
+      FONT.regular = 'Regular';
+      FONT.bold = 'Bold';
+    }
+  });
+}
+
 export function buildExamSheetPdf({ school, examSheet, items, fontDirs } = {}) {
   const fonts = resolveExamPdfFonts(fontDirs ? { dirs: fontDirs } : {});
   embedUnicode = fonts.embedUnicode !== false && Boolean(fonts.regular);

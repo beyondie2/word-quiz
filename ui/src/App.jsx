@@ -208,6 +208,8 @@ function App() {
   const [newExamImageFiles, setNewExamImageFiles] = useState([]) // 새로 만들기: 문제지 사진들
   const [newExamPdfFile, setNewExamPdfFile] = useState(null) // 새로 만들기: 문제지 PDF
   const [isAnalyzingNewExam, setIsAnalyzingNewExam] = useState(false)
+  const [isDownloadingAnalysis, setIsDownloadingAnalysis] = useState(false)
+  const [analysisPdfError, setAnalysisPdfError] = useState('')
   const [newExamAnalysis, setNewExamAnalysis] = useState([]) // 문항별 유형 분석 결과
   const [newExamAnalysisError, setNewExamAnalysisError] = useState('')
   const [newExamTypeMessage, setNewExamTypeMessage] = useState('')
@@ -2665,6 +2667,52 @@ function App() {
       setNewExamAnalysisError('서버 연결에 실패했습니다')
     } finally {
       setIsAnalyzingNewExam(false)
+    }
+  }
+
+  const handleDownloadAnalysisPdf = async () => {
+    if (isDownloadingAnalysis || newExamAnalysis.length === 0) return
+    setAnalysisPdfError('')
+    setIsDownloadingAnalysis(true)
+
+    try {
+      const response = await fetch(`${API_BASE}/exam-analysis/pdf`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          school: selectedSchoolName,
+          examSheet: selectedNewExamPeriod,
+          items: newExamAnalysis.map((item) => ({
+            number: item.number ?? '',
+            questionType: item.question_type ?? '',
+            question: item.question ?? '',
+            sourceLabel: item.source_label ?? ''
+          }))
+        })
+      })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        setAnalysisPdfError(data.error || 'PDF를 만들지 못했습니다')
+        return
+      }
+
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      const safeName = `문항분석_${selectedSchoolName || '학교'}_${selectedNewExamPeriod || '시험지'}`
+        .replace(/[\\/:*?"<>|]/g, '_')
+      link.href = url
+      link.download = `${safeName}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error downloading analysis PDF:', error)
+      setAnalysisPdfError('PDF를 만들지 못했습니다')
+    } finally {
+      setIsDownloadingAnalysis(false)
     }
   }
 
@@ -5660,14 +5708,25 @@ function App() {
                         </li>
                       ))}
                     </ul>
-                    <button
-                      type="button"
-                      className="select-button primary new-exam-model-button"
-                      onClick={handleCreateExamModel}
-                      disabled={isSavingExamModel}
-                    >
-                      {isSavingExamModel ? '저장 중...' : '시험지모델 만들기'}
-                    </button>
+                    <div className="new-exam-analysis-actions">
+                      <button
+                        type="button"
+                        className="select-button"
+                        onClick={handleDownloadAnalysisPdf}
+                        disabled={isDownloadingAnalysis}
+                      >
+                        {isDownloadingAnalysis ? 'PDF 만드는 중...' : 'PDF로 받기'}
+                      </button>
+                      <button
+                        type="button"
+                        className="select-button primary new-exam-model-button"
+                        onClick={handleCreateExamModel}
+                        disabled={isSavingExamModel}
+                      >
+                        {isSavingExamModel ? '저장 중...' : '시험지모델 만들기'}
+                      </button>
+                    </div>
+                    {analysisPdfError && <p className="exam-generate-error">{analysisPdfError}</p>}
                     {examModelError && <p className="exam-generate-error">{examModelError}</p>}
                     {examModelMessage && <p className="new-exam-model-message">{examModelMessage}</p>}
                     </>

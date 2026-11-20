@@ -3,6 +3,7 @@ import multer from 'multer';
 import Anthropic from '@anthropic-ai/sdk';
 import pool from '../config/database.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { buildExamAnalysisPdf } from '../utils/examSheetPdf.js';
 
 // 문제 만들기 > 새로 만들기: 업로드한 시험지(사진/PDF)를 Claude로 읽어 문항별 유형을 매칭한다.
 
@@ -404,6 +405,47 @@ router.post('/analyze', authenticateToken, (req, res, next) => {
       return res.status(502).json({ error: 'AI 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요' });
     }
     res.status(500).json({ error: '시험지 분석에 실패했습니다' });
+  }
+});
+
+// POST /api/exam-analysis/pdf
+// 화면에 보이는 문항 분석 결과를 PDF로 만든다.
+router.post('/pdf', async (req, res) => {
+  const school = String(req.body?.school || '').trim();
+  const examSheet = String(req.body?.examSheet || '').trim();
+  const items = req.body?.items;
+
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: '받을 문항이 없습니다' });
+  }
+  if (items.length > 300) {
+    return res.status(400).json({ error: '문항이 너무 많습니다' });
+  }
+
+  try {
+    const pdf = await buildExamAnalysisPdf({
+      school,
+      examSheet,
+      items: items.map((item) => ({
+        number: item?.number ?? '',
+        questionType: item?.questionType ?? item?.question_type ?? '',
+        question: item?.question ?? '',
+        sourceLabel: item?.sourceLabel ?? item?.source_label ?? ''
+      }))
+    });
+    const filename = `문항분석_${school || '학교'}_${examSheet || '시험지'}.pdf`
+      .replace(/[\\/:*?"<>|]/g, '_');
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="exam-analysis.pdf"; filename*=UTF-8''${encodeURIComponent(filename)}`
+    );
+    res.send(pdf);
+  } catch (error) {
+    console.error('Error creating exam analysis PDF:', error);
+    const message = String(error?.message || '');
+    const clientError = message.includes('글꼴') ? message : 'PDF를 만들지 못했습니다';
+    res.status(500).json({ error: clientError });
   }
 });
 

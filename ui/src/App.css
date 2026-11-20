@@ -2303,8 +2303,15 @@
   white-space: pre-wrap;
 }
 
-.new-exam-model-button {
+.new-exam-analysis-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-top: 8px;
+}
+
+.new-exam-model-button {
+  margin-top: 0;
 }
 
 .new-exam-model-message {
