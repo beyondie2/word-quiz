@@ -96,8 +96,40 @@ function questionTypeSql(questionType) {
   return 'question_type = $2';
 }
 
+function collectPaperScopes(papers) {
+  const scopes = new Set();
+  for (const paper of papers) {
+    for (const source of parseSources(paper.sources)) scopes.add(source);
+  }
+  return [...scopes];
+}
+
+function chooseQuestion(candidates, usedQuestionIds) {
+  const unused = candidates.filter((question) => !usedQuestionIds.has(question.id));
+  const poolToPick = unused.length > 0 ? unused : candidates;
+  if (poolToPick.length === 0) return null;
+  const picked = pickRandom(poolToPick);
+  usedQuestionIds.add(picked.id);
+  return picked;
+}
+
+async function questionsForSlot(paper, scopeList, { outside }) {
+  const scopeSql = outside
+    ? `btrim(exam_scope) <> '' AND NOT (btrim(exam_scope) = ANY($1::text[]))`
+    : 'exam_scope = ANY($1::text[])';
+  const result = await pool.query(`
+    SELECT id, exam_scope, question
+    FROM exam_questions
+    WHERE ${scopeSql}
+      AND ${questionTypeSql(paper.question_type)}
+      AND answer_format = $3
+  `, [scopeList, paper.question_type, paper.answer_format]);
+  return trimStringFields(result.rows);
+}
+
 // GET /api/exam-papers/build?school=&examSheet=
-// order_no 1번부터 끝까지, 출처·유형·객주에 맞는 문제 중 하나를 무작위로 고른다.
+// order_no 1번부터 끝까지 문제를 고른다.
+// 범위가 있으면 그 범위에서, 기타이면서 범위가 비어 있으면 이 시험지 범위 밖의 같은 유형에서 고른다.
 router.get('/build', async (req, res) => {
   const school = String(req.query.school || '').trim();
   const examSheet = String(req.query.examSheet || '').trim();
@@ -131,30 +163,22 @@ router.get('/build', async (req, res) => {
     }
 
     const papers = trimStringFields(papersResult.rows);
+    const outsideScopes = collectPaperScopes(papers);
     const usedQuestionIds = new Set();
     const items = [];
 
     for (const paper of papers) {
       const sources = parseSources(paper.sources);
+      const outside = paper.source_type === '기타' && sources.length === 0;
       let picked = null;
 
-      if (sources.length > 0) {
-        const questionsResult = await pool.query(`
-          SELECT id, exam_scope, question
-          FROM exam_questions
-          WHERE exam_scope = ANY($1::text[])
-            AND ${questionTypeSql(paper.question_type)}
-            AND answer_format = $3
-        `, [sources, paper.question_type, paper.answer_format]);
-
-        const candidates = trimStringFields(questionsResult.rows);
-        const unused = candidates.filter((question) => !usedQuestionIds.has(question.id));
-        const poolToPick = unused.length > 0 ? unused : candidates;
-
-        if (poolToPick.length > 0) {
-          picked = pickRandom(poolToPick);
-          usedQuestionIds.add(picked.id);
-        }
+      if (sources.length > 0 || outside) {
+        const candidates = await questionsForSlot(
+          paper,
+          outside ? outsideScopes : sources,
+          { outside }
+        );
+        picked = chooseQuestion(candidates, usedQuestionIds);
       }
 
       items.push({
