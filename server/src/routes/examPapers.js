@@ -104,6 +104,37 @@ function collectPaperScopes(papers) {
   return [...scopes];
 }
 
+// 기타 문항이 피해야 할 범위.
+// 시험지에 있는 교과서는 그 책의 모든 단원을 뺀다.
+// 시험지에 있는 부교재는 그 책만 뺀다. 시험범위에 부교재가 없으면 부교재 문항은 모두 연결할 수 있다.
+// 모의고사는 시험지에 적힌 회차만 뺀다.
+async function blockedScopesForOutside(papers) {
+  const listed = collectPaperScopes(papers);
+  const blocked = new Set(listed);
+  if (listed.length === 0) return [];
+
+  const textbookUnits = await pool.query(`
+    SELECT DISTINCT btrim(t2.unit) AS scope
+    FROM textbooks t1
+    JOIN textbooks t2 ON t2.title = t1.title
+    WHERE btrim(t1.unit) = ANY($1::text[])
+       OR btrim(t1.title) = ANY($1::text[])
+  `, [listed]);
+  const supplementaryScopes = await pool.query(`
+    SELECT DISTINCT btrim(s2.sub_scope) AS scope
+    FROM supplementary_books s1
+    JOIN supplementary_books s2 ON s2.book_name = s1.book_name
+    WHERE btrim(s1.sub_scope) = ANY($1::text[])
+       OR btrim(s1.book_name) = ANY($1::text[])
+  `, [listed]);
+
+  for (const row of [...textbookUnits.rows, ...supplementaryScopes.rows]) {
+    const scope = String(row.scope || '').trim();
+    if (scope) blocked.add(scope);
+  }
+  return [...blocked];
+}
+
 function chooseQuestion(candidates, usedQuestionIds) {
   const unused = candidates.filter((question) => !usedQuestionIds.has(question.id));
   const poolToPick = unused.length > 0 ? unused : candidates;
@@ -129,7 +160,9 @@ async function questionsForSlot(paper, scopeList, { outside }) {
 
 // GET /api/exam-papers/build?school=&examSheet=
 // order_no 1번부터 끝까지 문제를 고른다.
-// 범위가 있으면 그 범위에서, 기타이면서 범위가 비어 있으면 이 시험지 범위 밖의 같은 유형에서 고른다.
+// 범위가 있으면 그 범위에서 고른다.
+// 기타이면서 범위가 비어 있으면, 이 시험지의 교과서 책 전체와 지정된 모의고사 회차를 빼고 고른다.
+// 시험범위에 부교재가 없으면 부교재 문항도 같은 유형이면 연결한다.
 router.get('/build', async (req, res) => {
   const school = String(req.query.school || '').trim();
   const examSheet = String(req.query.examSheet || '').trim();
@@ -163,7 +196,7 @@ router.get('/build', async (req, res) => {
     }
 
     const papers = trimStringFields(papersResult.rows);
-    const outsideScopes = collectPaperScopes(papers);
+    const outsideScopes = await blockedScopesForOutside(papers);
     const usedQuestionIds = new Set();
     const items = [];
 
